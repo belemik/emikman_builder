@@ -1,0 +1,34 @@
+/* Editor chrome only. These are not WDeaf design tokens. */
+:root { --ui-bg: #f4f6f9; --ui-panel: #fff; --ui-text: #191f29; --ui-muted: #6e7889; --ui-border: #dfe4eb; --ui-subtle: #f0f3f8; --ui-hover: #f0f4fc; --ui-link: #0055ff; color-scheme: light; }
+:root[data-appearance=dark] { --ui-bg: #10141c; --ui-panel: #191f2b; --ui-text: #e6ebf4; --ui-muted: #a4afc0; --ui-border: #354052; --ui-subtle: #252e3e; --ui-hover: #2e3a50; --ui-link: #8db4ff; color-scheme: dark; }
+:root, body { background: var(--ui-bg); color: var(--ui-text); }
+.app-header,.panel,dialog,.platform { background: var(--ui-panel); color: var(--ui-text); border-color: var(--ui-border); }
+button:not(.preview-button):not(.primary):not(.ds-close):not(.avatar-trigger):not(.ds-select-trigger):not(.sample-button),select { background: var(--ui-panel); color: var(--ui-text); border-color: var(--ui-border); }
+button:not(.preview-button):not(.primary):not(.ds-close):not(.avatar-trigger):not(.ds-select-trigger):hover:not(:disabled) { background: var(--ui-hover); border-color: var(--ui-border); }
+.properties input:not([type=color]):not([type=range]):not([type=checkbox]),dialog textarea { background: var(--ui-bg); color: var(--ui-text); border-color: var(--ui-border); }
+.badge,.count,.catalog-sample { background: var(--ui-subtle); color: var(--ui-muted); }
+.muted,.brand small,.catalog-card small,.eyebrow,.canvas-meta,.canvas-footnote,label small,label code,h4 { color: var(--ui-muted); }
+a,.catalog-label > span,.text-button { color: var(--ui-link); }
+.theme-editor,.ai-note,.color-field { border-color: var(--ui-border); }.color-field code { color: var(--ui-text); }
+:root[data-appearance=dark] .canvas-area { background-image: radial-gradient(#354052 .7px, transparent .7px); }
+:root[data-appearance=dark] .notice { background: #253853; border-color: #40567a; }
+.canvas-paper { color: #191f29; color-scheme: light; }
+.canvas-paper .badge { background: #f0f3f8; color: #637086; }
+.canvas-paper button:not(.preview-button):not(.ds-close):not(.ds-select-trigger) { background: #fff; color: #191f29; }
+.canvas-paper button:not(.preview-button):not(.ds-close):not(.ds-select-trigger):hover:not(:disabled) { background: #f0f4fc; }
+.appearance-picker { margin: 0; display: flex; gap: 8px; align-items: center; color: var(--ui-muted); font-size: 10px; }
+.appearance-picker select { width: auto; margin: 0; padding: 8px; }
+.header-actions { flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+.app-header { flex-wrap: wrap; }
+.account-name { font-size: 11px; color: var(--ui-muted); }
+
+.profile-trigger { display:inline-flex; gap:8px; align-items:center; }
+.profile-dialog { width:min(480px,94vw); }
+.profile-identity { display:flex; align-items:center; gap:12px; padding:16px; background:var(--ui-subtle); border-radius:8px; }
+.profile-section { margin:24px 0; border-bottom:1px solid var(--ui-border); padding-bottom:20px; }
+.profile-section h3 { margin-bottom:14px; }
+.profile-section .appearance-picker { margin-bottom:10px; }
+.profile-section p + p { margin-top:8px; }
+.profile-logout { gap:8px; min-height:40px; }
+button.wdeaf-button.profile-logout { background:#0055ff; color:#fff; border:0; border-radius:4px; font-size:12px; font-weight:500; }
+button.wdeaf-button.profile-logout:hover:not(:disabled) { background:#0046d5; }

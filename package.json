@@ -1,0 +1,26 @@
+{
+  "name": "wdeaf-design-system-builder",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server/index.mjs --dev",
+    "build": "tsc -b && vite build",
+    "preview": "node server/index.mjs",
+    "test": "tsx --test tests/*.test.ts && node --test tests/*.test.mjs",
+    "start": "node server/index.mjs",
+    "user:add": "node server/add-user.mjs"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/node": "^22.0.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.0",
+    "tsx": "^4.20.0"
+  }
+}

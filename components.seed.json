@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "origin": {
+    "type": "figma",
+    "fileKey": "wiJYO9bWctpEiq2STFkNYU",
+    "fileName": "WDeaf PRO Design System 2.0",
+    "status": "verified-metadata-seed",
+    "note": "Манифест составлен из прочитанных метаданных Figma. Это не полный экспорт визуальных свойств и не готовая кодовая библиотека."
+  },
+  "components": [
+    {
+      "id": "button",
+      "label": "Button",
+      "figma": {
+        "pageNodeId": "0:1",
+        "exampleComponentNodeId": "15:17377"
+      },
+      "variantProps": {
+        "size": { "type": "enum", "values": ["s", "m", "l", "xl"], "default": "m" },
+        "variant": { "type": "enum", "values": ["primary", "secondary", "outline", "ghost"], "default": "primary" },
+        "colorScheme": { "type": "enum", "values": ["accent", "neutral"], "default": "accent" },
+        "state": { "type": "enum", "values": ["default", "hover", "pressed", "disabled"], "default": "default", "note": "Для финального кода hover и pressed — интерактивные состояния, disabled — логическое свойство." }
+      },
+      "editorProps": {
+        "label": { "type": "text", "default": "Продолжить", "note": "Редактируемый контент холста; не подтверждено как Figma component property." }
+      },
+      "verifiedTokenExamples": {
+        "surface/primary/default": "#0055ff",
+        "text/on-color/body": "#ffffff",
+        "Font family/primary": "Manrope"
+      }
+    },
+    {
+      "id": "input",
+      "label": "Input",
+      "figma": {
+        "pageNodeId": "112:2041",
+        "exampleComponentNodeId": "115:71"
+      },
+      "variantProps": {
+        "size": { "type": "enum", "values": ["s", "m", "l"], "default": "l" },
+        "state": { "type": "enum", "values": ["default", "hover", "pressed", "filled", "error", "disabled default", "disabled filled"], "default": "default" },
+        "placeholder": { "type": "boolean", "default": false, "note": "Это булев вариант, найденный в Figma, а не текст плейсхолдера." }
+      },
+      "editorProps": {
+        "placeholderText": { "type": "text", "default": "Введите email" },
+        "label": { "type": "text", "default": "Email", "note": "Редактируемый контент MVP; Figma component property не подтверждено." }
+      },
+      "verifiedTokenExamples": {
+        "text/default/body": "#191f29",
+        "surface/on-color/default": "#ffffff",
+        "Font family/primary": "Manrope"
+      }
+    }
+  ]
+}

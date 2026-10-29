@@ -1,0 +1,7 @@
+/* Confirmed Figma samples: Button 15:17377 (m/primary/accent/default), Input 115:71 (l/default).
+   Other variants and editor layout are not asserted to be exact exports. */
+.wdeaf-button { display:inline-flex; align-items:center; justify-content:center; min-height:35px; min-width:36px; padding:0 16px; border:0; border-radius:4px; background:#0055ff; color:#fff; font-family:Manrope,-apple-system,sans-serif; font-size:12px; font-weight:500; line-height:14px; cursor:pointer; }
+.wdeaf-button:hover:not(:disabled) { background:#0046d5; }
+.wdeaf-input { height:50px; width:100%; padding:0 12px; border:1px solid rgba(68,83,113,.2); border-radius:6px; background:#fff; color:#191f29; font-family:Manrope,-apple-system,sans-serif; font-size:14px; font-weight:400; line-height:18px; }
+.wdeaf-icon { display:block; width:24px; height:24px; flex:none; }
+.wdeaf-icon-slot { display:inline-flex; align-items:center; justify-content:center; background:#fff; border-radius:4px; padding:2px; flex:none; }

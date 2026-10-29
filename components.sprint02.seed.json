@@ -1,0 +1,334 @@
+{
+  "schemaVersion": 1,
+  "origin": {
+    "type": "figma",
+    "fileKey": "wiJYO9bWctpEiq2STFkNYU",
+    "fileName": "WDeaf PRO Design System 2.0",
+    "status": "verified-metadata-seed",
+    "note": "Реестр Button/Input из Sprint 01 дополнен Select/Checkbox/Table чтением Figma 29.10.2026. Варианты взяты из имён узлов; это не полный машинный экспорт Figma. Table — составной паттерн."
+  },
+  "components": [
+    {
+      "id": "button",
+      "label": "Button",
+      "figma": {
+        "pageNodeId": "0:1",
+        "exampleComponentNodeId": "15:17377"
+      },
+      "variantProps": {
+        "size": {
+          "type": "enum",
+          "values": [
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
+          "default": "m"
+        },
+        "variant": {
+          "type": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "outline",
+            "ghost"
+          ],
+          "default": "primary"
+        },
+        "colorScheme": {
+          "type": "enum",
+          "values": [
+            "accent",
+            "neutral"
+          ],
+          "default": "accent"
+        },
+        "state": {
+          "type": "enum",
+          "values": [
+            "default",
+            "hover",
+            "pressed",
+            "disabled"
+          ],
+          "default": "default",
+          "note": "Для финального кода hover и pressed — интерактивные состояния, disabled — логическое свойство."
+        }
+      },
+      "editorProps": {
+        "label": {
+          "type": "text",
+          "default": "Продолжить",
+          "note": "Редактируемый контент холста; не подтверждено как Figma component property."
+        }
+      },
+      "verifiedTokenExamples": {
+        "surface/primary/default": "#0055ff",
+        "text/on-color/body": "#ffffff",
+        "Font family/primary": "Manrope"
+      }
+    },
+    {
+      "id": "input",
+      "label": "Input",
+      "figma": {
+        "pageNodeId": "112:2041",
+        "exampleComponentNodeId": "115:71"
+      },
+      "variantProps": {
+        "size": {
+          "type": "enum",
+          "values": [
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "l"
+        },
+        "state": {
+          "type": "enum",
+          "values": [
+            "default",
+            "hover",
+            "pressed",
+            "filled",
+            "error",
+            "disabled default",
+            "disabled filled"
+          ],
+          "default": "default"
+        },
+        "placeholder": {
+          "type": "boolean",
+          "default": false,
+          "note": "Это булев вариант, найденный в Figma, а не текст плейсхолдера."
+        }
+      },
+      "editorProps": {
+        "placeholderText": {
+          "type": "text",
+          "default": "Введите email"
+        },
+        "label": {
+          "type": "text",
+          "default": "Email",
+          "note": "Редактируемый контент MVP; Figma component property не подтверждено."
+        }
+      },
+      "verifiedTokenExamples": {
+        "text/default/body": "#191f29",
+        "surface/on-color/default": "#ffffff",
+        "Font family/primary": "Manrope"
+      }
+    },
+    {
+      "id": "select",
+      "label": "Select",
+      "figma": {
+        "pageNodeId": "195:56257",
+        "exampleComponentNodeId": "195:56850"
+      },
+      "variantProps": {
+        "size": {
+          "type": "enum",
+          "values": [
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "l"
+        },
+        "state": {
+          "type": "enum",
+          "values": [
+            "default",
+            "hover",
+            "filled",
+            "pressed",
+            "error",
+            "disabled filled",
+            "disabled default"
+          ],
+          "default": "default"
+        },
+        "placeholder": {
+          "type": "boolean",
+          "default": true
+        },
+        "label": {
+          "type": "boolean",
+          "default": true
+        },
+        "foldDirection": {
+          "type": "enum",
+          "values": [
+            "down",
+            "up"
+          ],
+          "default": "down"
+        }
+      },
+      "editorProps": {
+        "labelText": {
+          "type": "text",
+          "default": "Страна",
+          "note": "Контент MVP; не выдавать за component property Figma."
+        },
+        "placeholderText": {
+          "type": "text",
+          "default": "Выберите страну",
+          "note": "Редактируемый контент, независимый от boolean placeholder."
+        },
+        "optionsText": {
+          "type": "text",
+          "default": "Россия\nБеларусь\nКазахстан",
+          "note": "Данные для preview; строки через перевод строки."
+        }
+      },
+      "verifiedTokenExamples": {
+        "text/default/caption": "#69758d",
+        "text/default/placeholder": "#b4bac6",
+        "icon/neutral/default": "#445371",
+        "surface/on-color/default": "#ffffff",
+        "Font family/primary": "Manrope"
+      }
+    },
+    {
+      "id": "checkbox",
+      "label": "Checkbox",
+      "figma": {
+        "pageNodeId": "50:320",
+        "exampleComponentNodeId": "44:355"
+      },
+      "variantProps": {
+        "size": {
+          "type": "enum",
+          "values": [
+            "s",
+            "xs"
+          ],
+          "default": "s"
+        },
+        "state": {
+          "type": "enum",
+          "values": [
+            "default",
+            "hover",
+            "pressed",
+            "disabled"
+          ],
+          "default": "default"
+        },
+        "checked": {
+          "type": "boolean",
+          "default": false
+        },
+        "indeterminate": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "editorProps": {
+        "label": {
+          "type": "text",
+          "default": "Согласен с условиями",
+          "note": "Контент редактора, не подтверждён как свойство компонента Figma."
+        }
+      },
+      "verifiedTokenExamples": {
+        "surface/on-color/default": "#ffffff",
+        "border/neutral/overlay-strong": "#44537133",
+        "text/default/body": "#191f29",
+        "Font family/primary": "Manrope"
+      }
+    },
+    {
+      "id": "table",
+      "label": "Table",
+      "figma": {
+        "pageNodeId": "2071:1101",
+        "exampleFrameNodeId": "2073:10861",
+        "cellComponentNodeId": "2071:3830"
+      },
+      "kind": "composite",
+      "variantProps": {},
+      "editorProps": {
+        "title": {
+          "type": "text",
+          "default": "Типы топлива",
+          "note": "Контент холста. Не Figma prop."
+        }
+      },
+      "previewData": {
+        "columns": [
+          "Код",
+          "Наименование",
+          "Действие"
+        ],
+        "rows": [
+          [
+            "PETROL",
+            "Бензин",
+            "Изменить"
+          ],
+          [
+            "DIESEL",
+            "Дизель",
+            "Изменить"
+          ],
+          [
+            "ELECTRIC",
+            "Электричество",
+            "Изменить"
+          ]
+        ]
+      },
+      "childComponentMetadata": {
+        "component": "table-cell",
+        "variantProps": {
+          "cell-type": {
+            "values": [
+              "cell-account",
+              "cell-tag",
+              "cell-price-up",
+              "cell-price-down",
+              "cell-users",
+              "cell-btn",
+              "cell-text",
+              "progress-bar",
+              "credit-card",
+              "cell-btn-borderless",
+              "cell-btn-icons",
+              "cell-time",
+              "cell-status",
+              "header-cell"
+            ]
+          },
+          "color": {
+            "values": [
+              "white",
+              "blue"
+            ]
+          },
+          "cell-divider": {
+            "values": [
+              "True",
+              "False"
+            ]
+          }
+        },
+        "note": "Эти варианты подтверждены у table-cell, НЕ у корневого Table. Table — составной preview-паттерн."
+      },
+      "verifiedTokenExamples": {
+        "surface/on-color/page": "#ffffff",
+        "text/default/body": "#191f29",
+        "surface/primary/subtle-medium": "#e6eeff",
+        "text/primary/default": "#0055ff",
+        "spacing/padding/spacing-16": 16,
+        "spacing/radius/radius-4": 4,
+        "Font family/primary": "Manrope"
+      }
+    }
+  ]
+}

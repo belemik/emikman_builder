@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "name": "WDeaf PRO Design System 2.0",
+    "fileKey": "wiJYO9bWctpEiq2STFkNYU",
+    "date": "2026-10-29",
+    "method": "Figma get_variable_defs for selected sample components",
+    "coverage": "partial",
+    "note": "Только обнаруженные значения, не полный дамп всех коллекций и modes."
+  },
+  "tokens": {
+    "surface/primary/default": {
+      "type": "color",
+      "value": "#0055ff",
+      "verifiedAtNode": "15:17377"
+    },
+    "text/on-color/body": {
+      "type": "color",
+      "value": "#ffffff",
+      "verifiedAtNode": "15:17377"
+    },
+    "text/default/body": {
+      "type": "color",
+      "value": "#191f29",
+      "verifiedAtNode": "115:71"
+    },
+    "surface/on-color/default": {
+      "type": "color",
+      "value": "#ffffff",
+      "verifiedAtNode": "115:71"
+    },
+    "text/default/caption": {
+      "type": "color",
+      "value": "#69758d",
+      "verifiedAtNode": "195:56850"
+    },
+    "text/default/placeholder": {
+      "type": "color",
+      "value": "#b4bac6",
+      "verifiedAtNode": "195:56850"
+    },
+    "icon/neutral/default": {
+      "type": "color",
+      "value": "#445371",
+      "verifiedAtNode": "195:56850"
+    },
+    "border/neutral/overlay-strong": {
+      "type": "color",
+      "value": "#44537133",
+      "verifiedAtNode": "195:56850"
+    },
+    "surface/on-color/page": {
+      "type": "color",
+      "value": "#ffffff",
+      "verifiedAtNode": "2071:3830"
+    },
+    "surface/primary/subtle-medium": {
+      "type": "color",
+      "value": "#e6eeff",
+      "verifiedAtNode": "2071:3830"
+    },
+    "text/primary/default": {
+      "type": "color",
+      "value": "#0055ff",
+      "verifiedAtNode": "2071:3830"
+    },
+    "Font family/primary": {
+      "type": "fontFamily",
+      "value": "Manrope",
+      "verifiedAtNode": "15:17377"
+    },
+    "Typography/Desktop/body/font-size/SM": {
+      "type": "dimension",
+      "value": 14,
+      "verifiedAtNode": "115:71"
+    },
+    "Typography/Desktop/body/line-height/SM": {
+      "type": "dimension",
+      "value": 18,
+      "verifiedAtNode": "115:71"
+    },
+    "Typography/Desktop/body/font-size/MD": {
+      "type": "dimension",
+      "value": 16,
+      "verifiedAtNode": "44:355"
+    },
+    "Typography/Desktop/body/line-height/MD": {
+      "type": "dimension",
+      "value": 20,
+      "verifiedAtNode": "44:355"
+    },
+    "spacing/padding/spacing-16": {
+      "type": "dimension",
+      "value": 16,
+      "verifiedAtNode": "2073:10861"
+    },
+    "spacing/padding/spacing-24": {
+      "type": "dimension",
+      "value": 24,
+      "verifiedAtNode": "2073:10861"
+    },
+    "spacing/gap/gap-8": {
+      "type": "dimension",
+      "value": 8,
+      "verifiedAtNode": "2073:10861"
+    },
+    "spacing/radius/radius-4": {
+      "type": "dimension",
+      "value": 4,
+      "verifiedAtNode": "2073:10861",
+      "note": "Подтвержден радиус 4, но не глобальный радиус всех компонентов."
+    }
+  },
+  "overridesExample": {
+    "primaryColor": "#0055ff",
+    "radiusPx": 12,
+    "fontFamily": "Manrope"
+  },
+  "overridesNote": "Пример пользовательских настроек Canvas, НЕ извлечённые из Figma глобальные значения. Исходные токены неизменны."
+}

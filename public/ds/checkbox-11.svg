@@ -1,0 +1,6 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="frame">
+<path d="M0 3C0 1.34315 1.34315 0 3 0H17C18.6569 0 20 1.34315 20 3V17C20 18.6569 18.6569 20 17 20H3C1.34315 20 0 18.6569 0 17V3Z" fill="#445371" fill-opacity="0.05"/>
+<path id="Icon" d="M5 10H15" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="#445371" stroke-opacity="0.2"/>
+</g>
+</svg>
