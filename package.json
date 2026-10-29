@@ -9,7 +9,11 @@
     "preview": "node server/index.mjs",
     "test": "tsx --test tests/*.test.ts && node --test tests/*.test.mjs",
     "start": "node server/index.mjs",
-    "user:add": "node server/add-user.mjs"
+    "user:add": "node server/add-user.mjs",
+    "build:pages": "npm run build",
+    "preview:pages": "vite preview --host 127.0.0.1",
+    "check:pages": "node scripts/check-pages.mjs",
+    "build:server": "tsc -b && vite build --mode server"
   },
   "dependencies": {
     "react": "^19.2.0",

@@ -8,3 +8,8 @@ dist/
 .env.*
 
 .backups/
+
+dist-pages/
+*.pem
+*.key
+dist-server/

@@ -1,3 +1,4 @@
+import { assetUrl } from './runtime';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AppearancePicker } from './appearance';
 import { Avatar, CloseButton } from './ui';
@@ -24,7 +25,7 @@ export function AccountGate({ children }: { children: (user: User) => ReactNode 
   return children(user);
 }
 function FigmaIcon({ name }: { name: 'user-circle' | 'log-out-01' }) {
-  return <span className="wdeaf-icon-slot"><img className="wdeaf-icon" src={`/icons/${name}.svg`} width="24" height="24" alt="" /></span>;
+  return <span className="wdeaf-icon-slot"><img className="wdeaf-icon" src={assetUrl(`/icons/${name}.svg`)} width="24" height="24" alt="" /></span>;
 }
 export function AccountButton({ user }: { user: User }) {
   const dialog = useRef<HTMLDialogElement>(null);

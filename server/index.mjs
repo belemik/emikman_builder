@@ -70,7 +70,7 @@ export async function createApp({ dev = false, origin = 'http://127.0.0.1:5173',
       if (path.startsWith('/api/')) return json(res, 404, { error: 'Не найдено.' });
       if (!['GET', 'HEAD'].includes(req.method)) return json(res, 405, { error: 'Метод недоступен.' });
       if (vite) return vite.middlewares(req, res);
-      const root = resolve('dist');
+      const root = resolve('dist-server');
       const file = resolve(root, `.${decodeURIComponent(path === '/' ? '/index.html' : path)}`);
       if (!file.startsWith(root + sep)) return json(res, 403, { error: 'Доступ запрещён.' });
       try {

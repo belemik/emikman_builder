@@ -1,3 +1,5 @@
+import { isDemo, DEMO_STORAGE_KEY } from './runtime';
+import { DemoAccountButton, DemoGate } from './demo';
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registry, definition, figmaUrl } from './registry';
@@ -15,9 +17,9 @@ import './styles.css';
 import './appearance/appearance.css';
 import { AccountGate, AccountButton, type User } from './account';
 
-function App({ user }: { user: User }) {
-  const storageKey = `wdeaf.canvas.v1.${user.id}`;
-  const [initial] = useState(() => loadDocument(storageKey, user.username === 'emikman'));
+function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
+  const storageKey = isDemo ? DEMO_STORAGE_KEY : `wdeaf.canvas.v1.${user.id}`;
+  const [initial] = useState(() => loadDocument(storageKey, !isDemo && user.username === 'emikman'));
   const [document, setDocument] = useState(initial.document);
   const [selected, setSelected] = useState<string>();
   const [paused, setPaused] = useState(Boolean(initial.error));
@@ -39,8 +41,9 @@ function App({ user }: { user: User }) {
   const canvasThemeStyle = themeStyle(document.themeOverrides);
   return <>
     <header className="app-header"><div className="brand"><span className="brand-mark">W</span><div><strong>WDeaf <span>Builder</span></strong><small>Конструктор дизайн-системы</small></div><span className="badge">Sprint 02</span></div>
-      <div className="header-actions"><AccountButton user={user} /><button onClick={() => importRef.current?.click()}><Icon name="upload-01" /> Импорт JSON</button><button onClick={() => exportDocument(document)}><Icon name="download-01" /> Экспорт JSON</button><button className="primary" onClick={() => { setCopied(false); setPromptOpen(true); }}>Сгенерировать промпт <Icon name="arrow-up-right" /></button></div>
+      <div className="header-actions"><button onClick={() => importRef.current?.click()}><Icon name="upload-01" /> Импорт JSON</button><button onClick={() => exportDocument(document)}><Icon name="download-01" /> Экспорт JSON</button><button className="primary" onClick={() => { setCopied(false); setPromptOpen(true); }}>Сгенерировать промпт <Icon name="arrow-up-right" /></button>{isDemo ? <DemoAccountButton onExit={onDemoExit!} /> : <AccountButton user={user} />}</div>
     </header>
+    {isDemo && <div className="notice" role="note">Демоверсия · Гостевой доступ без входа. Холст хранится только в этом браузере; общей базы проектов нет.</div>}
     <input ref={importRef} type="file" accept=".json,application/json" hidden onChange={async e => {
       const file = e.target.files?.[0]; e.target.value = ''; if (!file) return;
       try {
@@ -81,4 +84,4 @@ function App({ user }: { user: User }) {
     <dialog ref={dialogRef} onCancel={() => setPromptOpen(false)} onClose={() => setPromptOpen(false)}><div className="dialog-heading"><div><h2>Задание для AI-редактора</h2><p className="muted">Codex · Cursor · Claude Code</p></div><CloseButton label="Закрыть промпт" onClick={() => setPromptOpen(false)} /></div><textarea aria-label="Сгенерированный промпт" readOnly value={prompt} /><div className="dialog-footer"><span className="muted" role="status">{copied ? 'Текст скопирован' : 'Генерация локальная, без обращения к AI'}</span><button className="primary" onClick={async () => { try { await navigator.clipboard.writeText(prompt); setCopied(true); } catch { setCopied(false); setMessage('Буфер обмена недоступен. Выделите текст промпта и нажмите ⌘C.'); dialogRef.current?.querySelector('textarea')?.select(); } }}>Скопировать текст</button></div></dialog>
   </>;
 }
-createRoot(window.document.getElementById('root')!).render(<React.StrictMode><AccountGate>{user => <App key={user.id} user={user} />}</AccountGate></React.StrictMode>);
+createRoot(window.document.getElementById('root')!).render(<React.StrictMode>{isDemo ? <DemoGate>{exit => <App user={{ id: 'guest', username: 'Гость' }} onDemoExit={exit} />}</DemoGate> : <AccountGate>{user => <App key={user.id} user={user} />}</AccountGate>}</React.StrictMode>);

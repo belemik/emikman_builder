@@ -1,3 +1,31 @@
+# Публикация демоверсии на GitHub Pages
+
+Production-демо: https://belemik.github.io/emikman_builder/
+
+```sh
+npm ci
+npm run build
+npm run preview:pages
+```
+
+Откройте http://127.0.0.1:4173/emikman_builder/ . `npm run build` создаёт публичную гостевую сборку в `dist`, base `/emikman_builder/`. В ней нет входа по паролю и серверных API. Кнопка «Выйти из системы» возвращает на стартовый экран демо; локальный холст остаётся доступным в этом браузере. Это не граница безопасности.
+
+В GitHub откройте Settings → Pages → Build and deployment → Source: **GitHub Actions**. Workflow `.github/workflows/deploy.yml` запускается при push в main и вручную через Actions → Deploy demo to GitHub Pages → Run workflow. Публикуется только `dist`. Если первый deploy завершился ошибкой из-за выключенных Pages, включите Source и перезапустите workflow. Для workflow нужны разрешённые Actions и возможность deployment в environment `github-pages`.
+
+Проверки: `npm run build:server`, `npm test`, `npm run build`, `npm run check:pages`.
+
+Серверная версия: `npm run dev` для разработки; `npm run build:server && npm start` для production с настоящей авторизацией. Её файлы — `dist-server`, base `/`. На Pages она не публикуется.
+
+Данные демо локальны: отдельный ключ localStorage `wdeaf.demo.emikman_builder.canvas.v2`; старые документы владельца не подхватываются. Разные браузеры/профили изолированы. Пользователи одного профиля браузера разделяют его локальные данные. localStorage не шифруется; другие приложения на том же origin `belemik.github.io` технически имеют доступ к хранилищу origin. Для конфиденциальных проектов используйте отдельный домен и серверную авторизацию. Общей базы проектов и синхронизации нет.
+
+Шрифт Manrope по-прежнему загружается через Google Fonts; при блокировке сети используется системный fallback. SVG локальны. Роутера и вложенных страниц нет: единственная страница — `/emikman_builder/`, её обновление работает без SPA rewrite.
+
+Если Push недоступен: GitHub Desktop → File → Add Local Repository → выбрать `Desktop/wdeaf_builder` → ветка main → Push origin. Не включайте `.data`, `.env`, резервные копии или папки сборок в коммит.
+
+Подробный отчёт об изменениях: [PAGES.md](PAGES.md).
+
+---
+
 # WDeaf Builder · Sprint 02
 
 Существующий React + TypeScript + Vite проект с закрытым доступом и каталогом **Button, Input, Select, Checkbox, Table**. Рабочая область: каталог, Canvas, инспектор «Свойства» / «Тема».
@@ -16,7 +44,7 @@ npm run dev
 
 ```sh
 npm test
-npm run build
+npm run build:server
 npm start
 ```
 

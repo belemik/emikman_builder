@@ -1,3 +1,4 @@
+import { assetUrl } from '../runtime';
 import { useId, useRef, useState } from 'react';
 import type { CanvasElement } from './model';
 export function SelectPreview({ element, sample = false }: { element: CanvasElement; sample?: boolean }) {
@@ -7,7 +8,7 @@ export function SelectPreview({ element, sample = false }: { element: CanvasElem
   const [active, setActive] = useState(0);
   const id = useId(), trigger = useRef<HTMLButtonElement>(null);
   const disabled = String(v.state).startsWith('disabled');
-  const content = <><span className="ds-select-copy">{v.label && <span className="ds-select-label">{e.labelText}</span>}<span className={selected === undefined ? 'ds-placeholder' : ''}>{selected !== undefined ? options[selected] : v.placeholder ? e.placeholderText : '\u00a0'}</span></span><img src="/ds/select-chevron.svg" width="16" height="16" alt="" className={v.foldDirection === 'up' ? 'fold-up' : ''} /></>;
+  const content = <><span className="ds-select-copy">{v.label && <span className="ds-select-label">{e.labelText}</span>}<span className={selected === undefined ? 'ds-placeholder' : ''}>{selected !== undefined ? options[selected] : v.placeholder ? e.placeholderText : '\u00a0'}</span></span><img src={assetUrl("/ds/select-chevron.svg")} width="16" height="16" alt="" className={v.foldDirection === 'up' ? 'fold-up' : ''} /></>;
   if (sample) return <span className="ds-select" data-size={String(v.size)}><span className="ds-select-trigger">{content}</span></span>;
   return <div className="ds-select" data-size={String(v.size)} data-state={String(v.state)} data-direction={String(v.foldDirection)} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}>
     <button ref={trigger} type="button" className="ds-select-trigger" role="combobox" aria-label={String(e.labelText) || 'Select'} aria-haspopup="listbox" aria-expanded={open} aria-controls={`${id}-options`} aria-activedescendant={open && options.length ? `${id}-${active}` : undefined} aria-invalid={v.state === 'error'} disabled={disabled} onClick={() => setOpen(!open)} onKeyDown={event => {
