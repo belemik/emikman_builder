@@ -1,3 +1,5 @@
+import { DSRenderer } from './renderer/DSRenderer';
+import { acceptEditorDocument, importEditorDocument, screenFromCanvas, strictDocument } from './renderer/boundary';
 import { isDemo, DEMO_STORAGE_KEY } from './runtime';
 import { DemoAccountButton, DemoGate } from './demo';
 import React, { useEffect, useRef, useState } from 'react';
@@ -11,16 +13,20 @@ import { themeStyle } from './theme/model';
 import { Icon, CloseButton } from './ui';
 import { CatalogSample } from './ui/CatalogSample';
 import './ui/styles.css';
-import { exportDocument, loadDocument, parseDocument, saveDocument, migrationWarning } from './storage';
-import { generatePrompt } from './prompt';
+import { exportDocument, loadDocument, saveDocument, migrationWarning } from './storage';
+import { generatePrompt, generateRendererPrompt } from './prompt';
 import './styles.css';
 import './appearance/appearance.css';
+import '@fontsource/manrope/400.css';
+import '@fontsource/manrope/500.css';
+import './renderer/styles.css';
 import { AccountGate, AccountButton, type User } from './account';
 
 function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
   const storageKey = isDemo ? DEMO_STORAGE_KEY : `wdeaf.canvas.v1.${user.id}`;
   const [initial] = useState(() => loadDocument(storageKey, !isDemo && user.username === 'emikman'));
-  const [document, setDocument] = useState(initial.document);
+  const [document, setDocumentState] = useState(initial.document);
+  const [strict, setStrict] = useState(false);
   const [selected, setSelected] = useState<string>();
   const [paused, setPaused] = useState(Boolean(initial.error));
   const [saveStatus, setSaveStatus] = useState('');
@@ -30,6 +36,10 @@ function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
   const [inspectorMode, setInspectorMode] = useState<'properties' | 'theme'>('properties');
   const importRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const setDocument = (next: typeof document | ((current: typeof document) => typeof document)) => {
+    try { setDocumentState(acceptEditorDocument(typeof next === 'function' ? next(document) : next)); }
+    catch (error) { setMessage(`Изменение отклонено: ${error instanceof Error ? error.message : 'ошибка схемы'}`); }
+  };
   const selectedElement = document.elements.find(element => element.id === selected);
   useEffect(() => {
     if (paused) { setSaveStatus('Автосохранение приостановлено'); return; }
@@ -37,11 +47,12 @@ function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
     catch { setSaveStatus('Не удалось сохранить'); setMessage('localStorage недоступен или переполнен. Сохраните документ через JSON-экспорт.'); }
   }, [document, paused, storageKey]);
   useEffect(() => { if (promptOpen) dialogRef.current?.showModal(); else dialogRef.current?.close(); }, [promptOpen]);
-  const prompt = generatePrompt(document);
+  const prompt = (() => { try { return strict ? generateRendererPrompt(document) : generatePrompt(document); } catch (error) { return `Генерация заблокирована: ${error instanceof Error ? error.message : 'ошибка схемы'}`; } })();
+  const rendererScreen = screenFromCanvas(document);
   const canvasThemeStyle = themeStyle(document.themeOverrides);
   return <>
     <header className="app-header"><div className="brand"><span className="brand-mark">W</span><div><strong>WDeaf <span>Builder</span></strong><small>Конструктор дизайн-системы</small></div><span className="badge">Sprint 02</span></div>
-      <div className="header-actions"><button onClick={() => importRef.current?.click()}><Icon name="upload-01" /> Импорт JSON</button><button onClick={() => exportDocument(document)}><Icon name="download-01" /> Экспорт JSON</button><button className="primary" onClick={() => { setCopied(false); setPromptOpen(true); }}>Сгенерировать промпт <Icon name="arrow-up-right" /></button>{isDemo ? <DemoAccountButton onExit={onDemoExit!} /> : <AccountButton user={user} />}</div>
+      <div className="header-actions"><button onClick={() => importRef.current?.click()}><Icon name="upload-01" /> Импорт JSON</button><button onClick={() => { try { exportDocument(strict ? strictDocument(document) : acceptEditorDocument(document)); } catch (error) { setMessage(`Экспорт заблокирован: ${error instanceof Error ? error.message : 'ошибка схемы'}`); } }}><Icon name="download-01" /> Экспорт JSON</button><button className="primary" onClick={() => { setCopied(false); setPromptOpen(true); }}>Сгенерировать промпт <Icon name="arrow-up-right" /></button>{isDemo ? <DemoAccountButton onExit={onDemoExit!} /> : <AccountButton user={user} />}</div>
     </header>
     {isDemo && <div className="notice" role="note">Демоверсия · Гостевой доступ без входа. Холст хранится только в этом браузере; общей базы проектов нет.</div>}
     <input ref={importRef} type="file" accept=".json,application/json" hidden onChange={async e => {
@@ -49,9 +60,9 @@ function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
       try {
         if (file.size > 2_000_000) throw new Error('Файл превышает 2 МБ.');
         const raw = await file.text();
-        const imported = parseDocument(raw);
+        const imported = importEditorDocument(raw);
         if (document.elements.length && !window.confirm('Заменить текущий холст импортированным документом? При необходимости сначала экспортируйте текущий.')) return;
-        setDocument(imported); setSelected(undefined); setPaused(false); setMessage(migrationWarning(raw) ?? 'Документ импортирован.');
+        setDocument(imported.document); setSelected(undefined); setPaused(false); setMessage(migrationWarning(raw) ?? (imported.warnings.map(w => w.message).join(' ') || 'Документ импортирован.'));
       } catch (error) { setMessage(`Импорт отклонён: ${error instanceof Error ? error.message : 'неизвестная ошибка'}`); }
     }} />
     {message && <div className="notice" role="status"><span>{message}</span>{paused && <button onClick={() => { setPaused(false); setMessage(''); }}>Продолжить с текущим холстом</button>}<CloseButton label="Закрыть сообщение" size="s" onClick={() => setMessage('')} /></div>}
@@ -66,16 +77,17 @@ function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
       </aside>
       <section className="canvas-area"><div className="canvas-heading"><div><div className="eyebrow">РАБОЧАЯ ОБЛАСТЬ</div><h1>Ваш интерфейс</h1></div><span className="platform"><Icon name="globe-01" /> Web</span></div>
         <div className="canvas-meta"><span>{document.elements.length} элементов</span><span className="save-status">{saveStatus}</span></div>
+        <div className="renderer-mode"><button aria-pressed={!strict} onClick={() => setStrict(false)}>Редакторский preview</button><button aria-pressed={strict} onClick={() => setStrict(true)}>Строгий DS Renderer</button><small>{strict ? 'Оригинальная тема Figma · без overrides' : 'Пользовательские overrides · приближённый preview'}</small></div>
         <div className="canvas-paper" style={canvasThemeStyle} data-color-override={Boolean(document.themeOverrides.primaryColor)} data-radius-override={document.themeOverrides.radiusPx !== undefined}>
           <div className="paper-caption"><span>Холст</span><span>Предпросмотр</span></div>
-          {!document.elements.length ? <div className="empty-canvas"><div className="empty-icon"><Icon name="plus" /></div><h2>Начните с компонента</h2><p>Добавьте компонент из каталога слева.<br />Настройте варианты в инспекторе справа.</p><span className="badge">Пять компонентов из WDeaf.</span></div> : <div className="canvas-elements">{document.elements.map((element, index) => <article key={element.id} className={`canvas-item ${selected === element.id ? 'selected' : ''}`} onClick={() => setSelected(element.id)}>
+          {strict ? <DSRenderer screen={rendererScreen} onSelect={setSelected} onChange={updated => setDocument(current => ({ ...current, elements: current.elements.map(item => item.id === updated.id ? updated : item) }))} /> : !document.elements.length ? <div className="empty-canvas"><div className="empty-icon"><Icon name="plus" /></div><h2>Начните с компонента</h2><p>Добавьте компонент из каталога слева.<br />Настройте варианты в инспекторе справа.</p><span className="badge">Пять компонентов из WDeaf.</span></div> : <div className="canvas-elements">{document.elements.map((element, index) => <article key={element.id} className={`canvas-item ${selected === element.id ? 'selected' : ''}`} onClick={() => setSelected(element.id)}>
             <div className="element-toolbar"><button className="element-select" aria-pressed={selected === element.id} onClick={() => setSelected(element.id)}><span>{String(index + 1).padStart(2, '0')}</span> {definition(element.component).label}</button><div className="element-actions">
               <button aria-label={`Переместить ${definition(element.component).label} ${index + 1} вверх`} disabled={index === 0} onClick={e => { e.stopPropagation(); setDocument(current => ({ ...current, elements: moveElement(current.elements, element.id, -1) })); }}><Icon name="arrow-up" /></button>
               <button aria-label={`Переместить ${definition(element.component).label} ${index + 1} вниз`} disabled={index === document.elements.length - 1} onClick={e => { e.stopPropagation(); setDocument(current => ({ ...current, elements: moveElement(current.elements, element.id, 1) })); }}><Icon name="arrow-down" /></button>
               <button aria-label={`Удалить ${definition(element.component).label} ${index + 1}`} onClick={e => { e.stopPropagation(); setDocument(current => ({ ...current, elements: current.elements.filter(item => item.id !== element.id) })); if (selected === element.id) setSelected(undefined); }}><Icon name="trash-01" /></button>
             </div></div><div className="component-preview"><Preview element={element} onChange={updated => setDocument(current => ({ ...current, elements: current.elements.map(item => item.id === updated.id ? updated : item) }))} /></div>
           </article>)}</div>}
-        </div><p className="canvas-footnote">Приближённый предпросмотр · Геометрия компонентов не сверена с Figma</p>
+        </div><p className="canvas-footnote">{strict ? 'Проверенные образцы: Button m/primary/accent · Input l · Checkbox s' : 'Приближённый предпросмотр · пользовательские настройки не являются токенами Figma'}</p>
       </section>
       <aside className="properties panel"><div className="inspector-tabs" role="group" aria-label="Режим инспектора"><button aria-pressed={inspectorMode === 'properties'} onClick={() => setInspectorMode('properties')}>Свойства</button><button aria-pressed={inspectorMode === 'theme'} onClick={() => setInspectorMode('theme')}>Тема</button></div>
         {inspectorMode === 'properties' ? <Inspector element={selectedElement} onChange={updated => setDocument(current => ({ ...current, elements: current.elements.map(element => element.id === updated.id ? updated : element) }))} /> : <ThemeEditor overrides={document.themeOverrides} onChange={themeOverrides => setDocument(current => ({ ...current, themeOverrides }))} />}

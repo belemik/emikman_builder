@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/design-system",
+    "scripts/ds-validate.ts",
+    "tests/design-system.test.ts",
+    "tests/design-system.types.ts",
+    "src/renderer",
+    "tests/renderer.test.ts",
+    "src/vite-env.d.ts",
+    "playwright.config.ts",
+    "tests/visual"
+  ]
+}

@@ -1,0 +1,423 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WDeaf Screen Schema v3 (strict)",
+  "description": "Closed document grammar, not a pixel-perfect renderer certification. Runtime validator additionally checks unique IDs and known unverified combinations.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": 3
+    },
+    "platform": {
+      "const": "web"
+    },
+    "elements": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "component": {
+                "const": "button"
+              },
+              "variantProps": {
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "type": "string",
+                    "enum": [
+                      "s",
+                      "m",
+                      "l",
+                      "xl"
+                    ]
+                  },
+                  "variant": {
+                    "type": "string",
+                    "enum": [
+                      "primary",
+                      "secondary",
+                      "outline",
+                      "ghost"
+                    ]
+                  },
+                  "colorScheme": {
+                    "type": "string",
+                    "enum": [
+                      "accent",
+                      "neutral"
+                    ]
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "hover",
+                      "pressed",
+                      "disabled"
+                    ]
+                  }
+                },
+                "required": [
+                  "size",
+                  "variant",
+                  "colorScheme",
+                  "state"
+                ],
+                "additionalProperties": false
+              },
+              "editorProps": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "label"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "component",
+              "variantProps",
+              "editorProps"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "component": {
+                "const": "input"
+              },
+              "variantProps": {
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "type": "string",
+                    "enum": [
+                      "s",
+                      "m",
+                      "l"
+                    ]
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "hover",
+                      "pressed",
+                      "filled",
+                      "error",
+                      "disabled default",
+                      "disabled filled"
+                    ]
+                  },
+                  "placeholder": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "size",
+                  "state",
+                  "placeholder"
+                ],
+                "additionalProperties": false
+              },
+              "editorProps": {
+                "type": "object",
+                "properties": {
+                  "placeholderText": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "label": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "placeholderText",
+                  "label"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "component",
+              "variantProps",
+              "editorProps"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "component": {
+                "const": "select"
+              },
+              "variantProps": {
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "type": "string",
+                    "enum": [
+                      "s",
+                      "m",
+                      "l"
+                    ]
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "hover",
+                      "filled",
+                      "pressed",
+                      "error",
+                      "disabled filled",
+                      "disabled default"
+                    ]
+                  },
+                  "placeholder": {
+                    "type": "boolean"
+                  },
+                  "label": {
+                    "type": "boolean"
+                  },
+                  "foldDirection": {
+                    "type": "string",
+                    "enum": [
+                      "down",
+                      "up"
+                    ]
+                  }
+                },
+                "required": [
+                  "size",
+                  "state",
+                  "placeholder",
+                  "label",
+                  "foldDirection"
+                ],
+                "additionalProperties": false
+              },
+              "editorProps": {
+                "type": "object",
+                "properties": {
+                  "labelText": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "placeholderText": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "optionsText": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "labelText",
+                  "placeholderText",
+                  "optionsText"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "component",
+              "variantProps",
+              "editorProps"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "component": {
+                "const": "checkbox"
+              },
+              "variantProps": {
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "type": "string",
+                    "enum": [
+                      "s",
+                      "xs"
+                    ]
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "hover",
+                      "pressed",
+                      "disabled"
+                    ]
+                  },
+                  "checked": {
+                    "type": "boolean"
+                  },
+                  "indeterminate": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "size",
+                  "state",
+                  "checked",
+                  "indeterminate"
+                ],
+                "additionalProperties": false
+              },
+              "editorProps": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "label"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "component",
+              "variantProps",
+              "editorProps"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "component": {
+                "const": "table"
+              },
+              "variantProps": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              },
+              "editorProps": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "component",
+              "variantProps",
+              "editorProps"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "themeOverrides": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "tokenReferences": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 32,
+      "items": {
+        "enum": [
+          "surface/primary/default",
+          "text/on-color/body",
+          "text/default/body",
+          "surface/on-color/default",
+          "text/default/caption",
+          "text/default/placeholder",
+          "icon/neutral/default",
+          "border/neutral/overlay-strong",
+          "surface/on-color/page",
+          "surface/primary/subtle-medium",
+          "text/primary/default",
+          "Font family/primary",
+          "Typography/Desktop/body/font-size/SM",
+          "Typography/Desktop/body/line-height/SM",
+          "Typography/Desktop/body/font-size/MD",
+          "Typography/Desktop/body/line-height/MD",
+          "spacing/padding/spacing-16",
+          "spacing/padding/spacing-24",
+          "spacing/gap/gap-8",
+          "spacing/radius/radius-4",
+          "surface/primary/hover",
+          "surface/primary/pressed",
+          "surface/disabled/overlay-light",
+          "text/disabled/overlay-strong",
+          "surface/neutral/overlay-light",
+          "border/primary/hover",
+          "border/primary/pressed",
+          "border/error/default",
+          "text/error/default",
+          "Typography/Desktop/caption/font-size/2XS",
+          "Typography/Desktop/caption/line-height/2XS",
+          "icon/neutral/overlay-strong"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "platform",
+    "elements",
+    "themeOverrides",
+    "tokenReferences"
+  ],
+  "additionalProperties": false
+}

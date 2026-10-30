@@ -1,0 +1,58 @@
+[
+  {
+    "nodeId": "44:397",
+    "path": "public/ds-renderer/checkbox-0.svg",
+    "width": 20,
+    "height": 20,
+    "sha256": "d405609bdcb0103e602a150378912d98f0ac883b36d3c09494ecb176f01444b5"
+  },
+  {
+    "nodeId": "44:403",
+    "path": "public/ds-renderer/checkbox-1.svg",
+    "width": 20,
+    "height": 20,
+    "sha256": "0600b7a7311e85d6c6d6bd854365a4208f8e375ad5485c2b63d1cf368f5a4492"
+  },
+  {
+    "nodeId": "44:409",
+    "path": "public/ds-renderer/checkbox-2.svg",
+    "width": 20,
+    "height": 20,
+    "sha256": "f8cfd140544ccb3f8451422d865f3cd76d54c20ccecd9747094bb5841ed81826"
+  },
+  {
+    "nodeId": "44:416",
+    "path": "public/ds-renderer/checkbox-3.svg",
+    "width": 20,
+    "height": 20,
+    "sha256": "7587246daddb0e66a88686825de3fb37c25097328c1f3c7258aacdf744a00677"
+  },
+  {
+    "nodeId": "44:447",
+    "path": "public/ds-renderer/checkbox-4.svg",
+    "width": 20,
+    "height": 20,
+    "sha256": "b356547783d3370a92b30f8cb0c08c3da9cc5e040be1c0fee11d846f280e8883"
+  },
+  {
+    "nodeId": "44:453",
+    "path": "public/ds-renderer/checkbox-5.svg",
+    "width": 20,
+    "height": 20,
+    "sha256": "311a6af3c05dc05fe6c2659a619a49ce919f27e4353554102ab714332f0172c2"
+  },
+  {
+    "nodeId": "44:459",
+    "path": "public/ds-renderer/checkbox-6.svg",
+    "width": 20,
+    "height": 20,
+    "sha256": "913f244c4414d2152fea984cba92123a2dbcb1ccdb6ff0964ef859e9a54599bf"
+  },
+  {
+    "nodeId": "44:466",
+    "path": "public/ds-renderer/checkbox-7.svg",
+    "width": 20,
+    "height": 20,
+    "sha256": "90bb6eecf37d824e9bbac277ec021a2339c91cfe4de389f55075e4c0b191c087"
+  }
+]

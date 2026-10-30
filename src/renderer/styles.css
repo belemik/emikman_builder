@@ -1,0 +1,9 @@
+/* Host arrangement is editor chrome, not an invented Figma layout primitive. */
+.wdeaf-renderer :focus-visible { outline: auto; outline-offset: revert; }
+.wdr-host-slot { padding-block: 8px; }
+.wdeaf-renderer .wdr-input input::placeholder { color: var(--wdr-placeholder); opacity: 1; }
+.wdeaf-renderer .wdr-checkbox input:focus-visible + .wdr-check-container { outline: auto; }
+.renderer-errors { color: var(--ui-text); background: var(--ui-panel); padding: 16px; }
+.renderer-errors ul { padding-left: 20px; }
+.renderer-errors code { font-size: 11px; }
+.renderer-mode { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0; }

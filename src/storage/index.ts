@@ -57,7 +57,7 @@ export function saveDocument(document: CanvasDocument, key = STORAGE_KEY) {
   if (old && isLegacy && localStorage.getItem(key + '.sprint01-backup') === null) localStorage.setItem(key + '.sprint01-backup', old);
   localStorage.setItem(key, JSON.stringify(document));
 }
-export function exportDocument(document: CanvasDocument) {
+export function exportDocument(document: CanvasDocument | import('../design-system').ScreenSchema) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(document, null, 2)], { type: 'application/json' }));
   const link = window.document.createElement('a'); link.href = url; link.download = 'wdeaf-canvas.json'; link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);

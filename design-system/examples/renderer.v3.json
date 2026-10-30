@@ -1,0 +1,390 @@
+{
+  "schemaVersion": 3,
+  "platform": "web",
+  "elements": [
+    {
+      "id": "button-default",
+      "component": "button",
+      "variantProps": {
+        "size": "m",
+        "variant": "primary",
+        "colorScheme": "accent",
+        "state": "default"
+      },
+      "editorProps": {
+        "label": "Button label"
+      }
+    },
+    {
+      "id": "button-hover",
+      "component": "button",
+      "variantProps": {
+        "size": "m",
+        "variant": "primary",
+        "colorScheme": "accent",
+        "state": "hover"
+      },
+      "editorProps": {
+        "label": "Button label"
+      }
+    },
+    {
+      "id": "button-pressed",
+      "component": "button",
+      "variantProps": {
+        "size": "m",
+        "variant": "primary",
+        "colorScheme": "accent",
+        "state": "pressed"
+      },
+      "editorProps": {
+        "label": "Button label"
+      }
+    },
+    {
+      "id": "button-disabled",
+      "component": "button",
+      "variantProps": {
+        "size": "m",
+        "variant": "primary",
+        "colorScheme": "accent",
+        "state": "disabled"
+      },
+      "editorProps": {
+        "label": "Button label"
+      }
+    },
+    {
+      "id": "input-default-False",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "default",
+        "placeholder": false
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-hover-False",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "hover",
+        "placeholder": false
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-pressed-False",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "pressed",
+        "placeholder": false
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-filled-False",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "filled",
+        "placeholder": false
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-error-False",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "error",
+        "placeholder": false
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-disabled default-False",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "disabled default",
+        "placeholder": false
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-disabled filled-False",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "disabled filled",
+        "placeholder": false
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-default-True",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "default",
+        "placeholder": true
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-hover-True",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "hover",
+        "placeholder": true
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-pressed-True",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "pressed",
+        "placeholder": true
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-filled-True",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "filled",
+        "placeholder": true
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-error-True",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "error",
+        "placeholder": true
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "input-disabled default-True",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "disabled default",
+        "placeholder": true
+      },
+      "editorProps": {
+        "label": "Label",
+        "placeholderText": "Placeholder"
+      }
+    },
+    {
+      "id": "checkbox-default-False-False",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "default",
+        "checked": false,
+        "indeterminate": false
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-hover-False-False",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "hover",
+        "checked": false,
+        "indeterminate": false
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-pressed-False-False",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "pressed",
+        "checked": false,
+        "indeterminate": false
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-disabled-False-False",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "disabled",
+        "checked": false,
+        "indeterminate": false
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-default-True-False",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "default",
+        "checked": true,
+        "indeterminate": false
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-hover-True-False",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "hover",
+        "checked": true,
+        "indeterminate": false
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-pressed-True-False",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "pressed",
+        "checked": true,
+        "indeterminate": false
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-disabled-True-False",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "disabled",
+        "checked": true,
+        "indeterminate": false
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-default-True-True",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "default",
+        "checked": true,
+        "indeterminate": true
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-hover-True-True",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "hover",
+        "checked": true,
+        "indeterminate": true
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-pressed-True-True",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "pressed",
+        "checked": true,
+        "indeterminate": true
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    },
+    {
+      "id": "checkbox-disabled-True-True",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "disabled",
+        "checked": true,
+        "indeterminate": true
+      },
+      "editorProps": {
+        "label": "Label"
+      }
+    }
+  ],
+  "themeOverrides": {},
+  "tokenReferences": [
+    "surface/primary/default",
+    "surface/primary/hover",
+    "border/error/default",
+    "Font family/primary"
+  ]
+}
