@@ -1,0 +1,41 @@
+name: Validate Builder PR
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run ds:validate
+      - run: npm run build:server
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:pages
+      - run: npx playwright install --with-deps chromium
+      # Portable behavioral checks; visual baselines are reviewed on macOS.
+      - run: npx playwright test --grep 'TagGroup changes|forbidden roots|Tag close'
+
+  visual:
+    # All scenarios, including screenshots: existing reviewed baselines are Darwin-specific.
+    # Linux validate above keeps portable smoke checks; no snapshot assertions are skipped here.
+    needs: validate
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install chromium
+      - run: npm run test:visual

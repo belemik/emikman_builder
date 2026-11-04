@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "fileKey": "wiJYO9bWctpEiq2STFkNYU",
+    "method": "get_variable_defs + get_design_context",
+    "coverage": "Sprint 04 selected variants only",
+    "date": "2026-10-29"
+  },
+  "tokens": {
+    "surface/primary/hover": {
+      "type": "color",
+      "value": "#3377ff",
+      "verifiedAtNode": "15:17429"
+    },
+    "surface/primary/pressed": {
+      "type": "color",
+      "value": "#0347d1",
+      "verifiedAtNode": "15:17401"
+    },
+    "surface/disabled/overlay-light": {
+      "type": "color",
+      "value": "#4453710d",
+      "verifiedAtNode": "15:17529"
+    },
+    "text/disabled/overlay-strong": {
+      "type": "color",
+      "value": "#44537180",
+      "verifiedAtNode": "15:17529"
+    },
+    "surface/neutral/overlay-light": {
+      "type": "color",
+      "value": "#4453710d",
+      "verifiedAtNode": "115:89"
+    },
+    "border/primary/hover": {
+      "type": "color",
+      "value": "#3377ff",
+      "verifiedAtNode": "115:80"
+    },
+    "border/primary/pressed": {
+      "type": "color",
+      "value": "#0347d1",
+      "verifiedAtNode": "115:125"
+    },
+    "border/error/default": {
+      "type": "color",
+      "value": "#f51743",
+      "verifiedAtNode": "115:135"
+    },
+    "text/error/default": {
+      "type": "color",
+      "value": "#f51743",
+      "verifiedAtNode": "115:135"
+    },
+    "Typography/Desktop/caption/font-size/2XS": {
+      "type": "dimension",
+      "value": 12,
+      "verifiedAtNode": "15:17377"
+    },
+    "Typography/Desktop/caption/line-height/2XS": {
+      "type": "dimension",
+      "value": 14,
+      "verifiedAtNode": "15:17377"
+    },
+    "icon/neutral/overlay-strong": {
+      "type": "color",
+      "value": "#44537133",
+      "verifiedAtNode": "115:71"
+    }
+  }
+}

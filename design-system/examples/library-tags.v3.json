@@ -1,0 +1,412 @@
+{
+  "schemaVersion": 3,
+  "platform": "web",
+  "elements": [
+    {
+      "id": "tag-item-195:1080",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "m",
+        "variant": "primary",
+        "state": "disabled"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1084",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "m",
+        "variant": "secondary",
+        "state": "disabled"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1088",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "s",
+        "variant": "primary",
+        "state": "default"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1093",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "s",
+        "variant": "primary",
+        "state": "error"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1098",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "s",
+        "variant": "primary",
+        "state": "hover"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1103",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "xs",
+        "variant": "primary",
+        "state": "default"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1108",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "xs",
+        "variant": "primary",
+        "state": "error"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1113",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "xs",
+        "variant": "primary",
+        "state": "hover"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1118",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "s",
+        "variant": "secondary",
+        "state": "default"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1123",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "s",
+        "variant": "secondary",
+        "state": "error"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1128",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "s",
+        "variant": "secondary",
+        "state": "hover"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1133",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "xs",
+        "variant": "secondary",
+        "state": "default"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1138",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "xs",
+        "variant": "secondary",
+        "state": "error"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1143",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "xs",
+        "variant": "secondary",
+        "state": "hover"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1148",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "s",
+        "variant": "primary",
+        "state": "disabled"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1153",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "xs",
+        "variant": "primary",
+        "state": "disabled"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1158",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "s",
+        "variant": "secondary",
+        "state": "disabled"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1163",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "xs",
+        "variant": "secondary",
+        "state": "disabled"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1168",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "m",
+        "variant": "primary",
+        "state": "default"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1172",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "m",
+        "variant": "primary",
+        "state": "error"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1176",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "m",
+        "variant": "primary",
+        "state": "hover"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1180",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "m",
+        "variant": "secondary",
+        "state": "default"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1184",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "m",
+        "variant": "secondary",
+        "state": "error"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-item-195:1188",
+      "component": "tag-item",
+      "variantProps": {
+        "size": "m",
+        "variant": "secondary",
+        "state": "hover"
+      },
+      "editorProps": {
+        "closable": true,
+        "labelText": "Label"
+      }
+    },
+    {
+      "id": "tag-group-195:28416",
+      "component": "tag-group",
+      "variantProps": {
+        "amount": "2",
+        "closable": false,
+        "disabled": false,
+        "size": "m"
+      },
+      "editorProps": {}
+    },
+    {
+      "id": "tag-group-195:28420",
+      "component": "tag-group",
+      "variantProps": {
+        "amount": "2",
+        "closable": false,
+        "disabled": true,
+        "size": "m"
+      },
+      "editorProps": {}
+    },
+    {
+      "id": "tag-group-195:28423",
+      "component": "tag-group",
+      "variantProps": {
+        "amount": "2",
+        "closable": true,
+        "disabled": false,
+        "size": "m"
+      },
+      "editorProps": {}
+    },
+    {
+      "id": "tag-group-195:28427",
+      "component": "tag-group",
+      "variantProps": {
+        "amount": "2",
+        "closable": true,
+        "disabled": true,
+        "size": "m"
+      },
+      "editorProps": {}
+    },
+    {
+      "id": "tag-group-195:28430",
+      "component": "tag-group",
+      "variantProps": {
+        "amount": "1",
+        "closable": false,
+        "disabled": false,
+        "size": "m"
+      },
+      "editorProps": {}
+    },
+    {
+      "id": "tag-group-195:28433",
+      "component": "tag-group",
+      "variantProps": {
+        "amount": "1",
+        "closable": false,
+        "disabled": true,
+        "size": "m"
+      },
+      "editorProps": {}
+    },
+    {
+      "id": "tag-group-195:28435",
+      "component": "tag-group",
+      "variantProps": {
+        "amount": "1",
+        "closable": true,
+        "disabled": false,
+        "size": "m"
+      },
+      "editorProps": {}
+    },
+    {
+      "id": "tag-group-195:28438",
+      "component": "tag-group",
+      "variantProps": {
+        "amount": "1",
+        "closable": true,
+        "disabled": true,
+        "size": "m"
+      },
+      "editorProps": {}
+    }
+  ],
+  "themeOverrides": {},
+  "tokenReferences": [
+    "Font family/primary",
+    "surface/primary/default",
+    "surface/error/overlay-light"
+  ]
+}

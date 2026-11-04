@@ -1,0 +1,460 @@
+{
+  "schemaVersion": 3,
+  "platform": "web",
+  "elements": [
+    {
+      "id": "chip-75:1402",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": true,
+        "state": "disabled",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1407",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": false,
+        "state": "disabled",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1412",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": true,
+        "state": "disabled",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1418",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": false,
+        "state": "disabled",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1424",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": true,
+        "state": "disabled",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1429",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": false,
+        "state": "disabled",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1434",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": true,
+        "state": "disabled",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1440",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": false,
+        "state": "disabled",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1446",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": true,
+        "state": "default",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1451",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": true,
+        "state": "hover",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1456",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": true,
+        "state": "pressed",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1462",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": true,
+        "state": "default",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1468",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": true,
+        "state": "hover",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1474",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": true,
+        "state": "pressed",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1481",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": true,
+        "state": "default",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1486",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": true,
+        "state": "hover",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1491",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": true,
+        "state": "pressed",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1497",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": true,
+        "state": "default",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1503",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": true,
+        "state": "hover",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1509",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": true,
+        "state": "pressed",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1516",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": false,
+        "state": "default",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1521",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": false,
+        "state": "default",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1527",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": false,
+        "state": "hover",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1532",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": false,
+        "state": "hover",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1538",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": false,
+        "state": "pressed",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1544",
+      "component": "chip",
+      "variantProps": {
+        "variant": "primary",
+        "selected": false,
+        "state": "pressed",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1551",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": false,
+        "state": "default",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1556",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": false,
+        "state": "default",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1562",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": false,
+        "state": "hover",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1567",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": false,
+        "state": "hover",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1573",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": false,
+        "state": "pressed",
+        "icon": false
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    },
+    {
+      "id": "chip-75:1579",
+      "component": "chip",
+      "variantProps": {
+        "variant": "secondary",
+        "selected": false,
+        "state": "pressed",
+        "icon": true
+      },
+      "editorProps": {
+        "counter": true,
+        "labelText": "Chips"
+      }
+    }
+  ],
+  "themeOverrides": {},
+  "tokenReferences": [
+    "Font family/primary",
+    "surface/primary/default",
+    "surface/error/overlay-light"
+  ]
+}

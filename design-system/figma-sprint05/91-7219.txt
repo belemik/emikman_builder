@@ -1,0 +1,324 @@
+const imgHeartRounded = "[temporary asset; see library-assets.json]";
+const imgCheck = "[temporary asset; see library-assets.json]";
+const imgHeartRounded1 = "[temporary asset; see library-assets.json]";
+const imgCheck1 = "[temporary asset; see library-assets.json]";
+const imgHeartRounded2 = "[temporary asset; see library-assets.json]";
+const imgCheck2 = "[temporary asset; see library-assets.json]";
+const imgHeartRounded3 = "[temporary asset; see library-assets.json]";
+const imgCheck3 = "[temporary asset; see library-assets.json]";
+
+type DropdownMenuProps = {
+  className?: string;
+  checkbox?: boolean;
+  disabled?: boolean;
+  hint?: boolean;
+  hintText?: string;
+  hover?: boolean;
+  icon?: boolean;
+  icon2?: boolean;
+  icon2Edit?: React.ReactNode | null;
+  iconEdit?: React.ReactNode | null;
+  itemText?: string;
+  preffixSlot?: boolean;
+  radio?: boolean;
+  selected?: boolean;
+  size?: "m" | "s";
+  type?: "menu item" | "group title" | "group divider";
+};
+
+export default function DropdownMenu({ className, checkbox = false, disabled = false, hint = false, hintText = "Hint", hover = false, icon = false, icon2 = false, icon2Edit = null, iconEdit = null, itemText = "Item text", preffixSlot = false, radio = false, selected = false, size = "m", type = "menu item" }: DropdownMenuProps) {
+  const isGroupDividerAndMAndNotSelectedAndNotHoverAndNotDisabledAndNot = type === "group divider" && size === "m" && !selected && !hover && !disabled && !icon2;
+  const isGroupDividerAndSAndNotSelectedAndNotHoverAndNotDisabledAndNot = type === "group divider" && size === "s" && !selected && !hover && !disabled && !icon2;
+  const isGroupTitleAndMAndNotSelectedAndNotHoverAndNotDisabledAndNot = type === "group title" && size === "m" && !selected && !hover && !disabled && !icon2;
+  const isGroupTitleAndSAndNotSelectedAndNotHoverAndNotDisabledAndNot = type === "group title" && size === "s" && !selected && !hover && !disabled && !icon2;
+  const isHoverAndIcon2 = hover && icon2;
+  const isHoverAndNotIcon2 = hover && !icon2;
+  const isIcon2 = icon2;
+  const isMenuItemAndIsNotDisabledOrNotHoverAndDisabled = type === "menu item" && (!disabled || (!hover && disabled));
+  const isMenuItemAndMAndNotHoverAndDisabled = type === "menu item" && size === "m" && !hover && disabled;
+  const isMenuItemAndMAndNotSelectedAndNotDisabled = type === "menu item" && size === "m" && !selected && !disabled;
+  const isMenuItemAndMAndSelectedAndHoverAndNotDisabled = type === "menu item" && size === "m" && selected && hover && !disabled;
+  const isMenuItemAndMAndSelectedAndNotHoverAndNotDisabled = type === "menu item" && size === "m" && selected && !hover && !disabled;
+  const isMenuItemAndSAndNotHoverAndDisabled = type === "menu item" && size === "s" && !hover && disabled;
+  const isMenuItemAndSAndNotSelectedAndNotDisabled = type === "menu item" && size === "s" && !selected && !disabled;
+  const isMenuItemAndSAndSelectedAndHoverAndNotDisabled = type === "menu item" && size === "s" && selected && hover && !disabled;
+  const isMenuItemAndSAndSelectedAndNotHoverAndNotDisabled = type === "menu item" && size === "s" && selected && !hover && !disabled;
+  const isNotHoverAndIcon2 = !hover && icon2;
+  const isNotSelectedAndIcon2 = !selected && icon2;
+  const isS = size === "s";
+  const isSelectedAndIcon2 = selected && icon2;
+  const isSelectedAndNotIcon2 = selected && !icon2;
+  return (
+    <div className={className || `content-stretch flex relative w-[280px] ${isGroupDividerAndSAndNotSelectedAndNotHoverAndNotDisabledAndNot ? "flex-col items-start justify-center py-[6px]" : isGroupDividerAndMAndNotSelectedAndNotHoverAndNotDisabledAndNot ? "flex-col items-start justify-center py-[8px]" : isGroupTitleAndSAndNotSelectedAndNotHoverAndNotDisabledAndNot ? "items-start justify-center px-[12px] py-[6px]" : isGroupTitleAndMAndNotSelectedAndNotHoverAndNotDisabledAndNot ? "items-start justify-center px-[12px] py-[8px]" : isMenuItemAndSAndSelectedAndHoverAndNotDisabled ? String.raw`bg-[var(--surface\/primary\/overlay-medium,rgba(0,85,255,0.1))] gap-[8px] items-center px-[12px] py-[6px] rounded-[6px]` : isMenuItemAndMAndSelectedAndHoverAndNotDisabled ? String.raw`bg-[var(--surface\/primary\/overlay-medium,rgba(0,85,255,0.1))] gap-[8px] items-center px-[12px] py-[8px] rounded-[6px]` : type === "menu item" && size === "s" && !selected && hover && !disabled ? String.raw`bg-[var(--surface\/neutral\/overlay-light,rgba(68,83,113,0.05))] gap-[8px] items-center px-[12px] py-[6px] rounded-[6px]` : type === "menu item" && size === "m" && !selected && hover && !disabled ? String.raw`bg-[var(--surface\/neutral\/overlay-light,rgba(68,83,113,0.05))] gap-[8px] items-center px-[12px] py-[8px] rounded-[6px]` : isMenuItemAndSAndSelectedAndNotHoverAndNotDisabled ? String.raw`bg-[var(--surface\/primary\/overlay-light,rgba(0,85,255,0.05))] gap-[8px] items-center px-[12px] py-[6px] rounded-[6px]` : isMenuItemAndMAndSelectedAndNotHoverAndNotDisabled ? String.raw`bg-[var(--surface\/primary\/overlay-light,rgba(0,85,255,0.05))] gap-[8px] items-center px-[12px] py-[8px] rounded-[6px]` : type === "menu item" && size === "s" && !hover && ((!selected && !disabled) || disabled) ? "gap-[8px] items-center px-[12px] py-[6px] rounded-[6px]" : "gap-[8px] items-center px-[12px] py-[8px] rounded-[6px]"}`} id={isGroupDividerAndSAndNotSelectedAndNotHoverAndNotDisabledAndNot ? "node-91_7466" : isGroupDividerAndMAndNotSelectedAndNotHoverAndNotDisabledAndNot ? "node-91_7464" : isGroupTitleAndSAndNotSelectedAndNotHoverAndNotDisabledAndNot ? "node-91_7462" : isGroupTitleAndMAndNotSelectedAndNotHoverAndNotDisabledAndNot ? "node-91_7460" : type === "menu item" && size === "s" && selected && !hover && disabled && icon2 ? "node-91_7449" : type === "menu item" && size === "s" && selected && !hover && disabled && !icon2 ? "node-91_7440" : type === "menu item" && size === "m" && selected && !hover && disabled && icon2 ? "node-91_7429" : type === "menu item" && size === "m" && selected && !hover && disabled && !icon2 ? "node-91_7420" : type === "menu item" && size === "s" && !selected && !hover && disabled && icon2 ? "node-91_7409" : type === "menu item" && size === "s" && !selected && !hover && disabled && !icon2 ? "node-91_7400" : type === "menu item" && size === "m" && !selected && !hover && disabled && icon2 ? "node-91_7389" : type === "menu item" && size === "m" && !selected && !hover && disabled && !icon2 ? "node-91_7380" : type === "menu item" && size === "s" && selected && hover && !disabled && icon2 ? "node-91_7369" : type === "menu item" && size === "s" && selected && hover && !disabled && !icon2 ? "node-91_7360" : type === "menu item" && size === "m" && selected && hover && !disabled && icon2 ? "node-91_7349" : type === "menu item" && size === "m" && selected && hover && !disabled && !icon2 ? "node-91_7340" : type === "menu item" && size === "s" && !selected && hover && !disabled && icon2 ? "node-91_7329" : type === "menu item" && size === "s" && !selected && hover && !disabled && !icon2 ? "node-91_7320" : type === "menu item" && size === "m" && !selected && hover && !disabled && icon2 ? "node-91_7309" : type === "menu item" && size === "m" && !selected && hover && !disabled && !icon2 ? "node-91_7300" : type === "menu item" && size === "s" && selected && !hover && !disabled && icon2 ? "node-91_7289" : type === "menu item" && size === "s" && selected && !hover && !disabled && !icon2 ? "node-91_7280" : type === "menu item" && size === "m" && selected && !hover && !disabled && icon2 ? "node-91_7269" : type === "menu item" && size === "m" && selected && !hover && !disabled && !icon2 ? "node-91_7260" : type === "menu item" && size === "s" && !selected && !hover && !disabled && icon2 ? "node-91_7249" : type === "menu item" && size === "s" && !selected && !hover && !disabled && !icon2 ? "node-91_7240" : type === "menu item" && size === "m" && !selected && !hover && !disabled && icon2 ? "node-91_7229" : "node-91_7220"}>
+      {isMenuItemAndIsNotDisabledOrNotHoverAndDisabled && radio && (
+        <div className="content-stretch flex gap-[8px] items-center relative shrink-0 size-[20px]" data-node-id="132427:9723" data-name="ButtonRadio">
+          <div className="content-stretch flex flex-col items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[20px]" data-node-id="I132427:9723;188:15589" data-name="Container">
+            <div className="bg-[var(--surface\/on-color\/default,white)] border-[1.5px] border-[var(--border\/neutral\/overlay-strong,rgba(68,83,113,0.2))] border-solid flex-[1_0_0] min-h-px relative rounded-[9999px] w-full" data-node-id="I132427:9723;188:15590" data-name="Frame" />
+          </div>
+        </div>
+      )}
+      {isMenuItemAndIsNotDisabledOrNotHoverAndDisabled && checkbox && (
+        <div className="content-stretch flex gap-[8px] items-center relative shrink-0" data-node-id="132427:7848" data-name="Checkbox">
+          <div className="content-stretch flex flex-col items-center justify-center p-[2px] relative rounded-[3px] shrink-0 size-[20px]" data-node-id="I132427:7848;44:377" data-name="Container">
+            <div className="bg-[var(--surface\/on-color\/default,white)] border-[1.5px] border-[var(--border\/neutral\/overlay-strong,rgba(68,83,113,0.2))] border-solid flex-[1_0_0] min-h-px relative rounded-[3px] w-full" data-node-id="I132427:7848;44:378" data-name="frame" />
+          </div>
+        </div>
+      )}
+      {isMenuItemAndIsNotDisabledOrNotHoverAndDisabled && preffixSlot && (
+        <div className="bg-[var(--surface\/primary\/subtle-medium,#e6eeff)] relative rounded-[99px] shrink-0 size-[36px]" data-node-id="91:7221" data-name="Avatar">
+          <p className="-translate-x-1/2 [word-break:break-word] absolute font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)] left-[calc(50%+0.5px)] text-[color:var(--text\/primary\/default,#05f)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] text-center top-[calc(50%-9px)] whitespace-nowrap" data-node-id="I91:7221;2024:25165">
+            ИБ
+          </p>
+        </div>
+      )}
+      {isMenuItemAndMAndNotSelectedAndNotDisabled && icon && (
+        <div className="content-stretch flex items-start pt-[2px] relative shrink-0" data-node-id="91:7222" data-name="Icon">
+          {iconEdit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7223" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded} />
+            </div>
+          )}
+        </div>
+      )}
+      {isMenuItemAndMAndNotSelectedAndNotDisabled && (
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" id={isHoverAndIcon2 ? "node-91_7315" : isHoverAndNotIcon2 ? "node-91_7304" : isNotHoverAndIcon2 ? "node-91_7235" : "node-91_7224"} data-name="Wrapper">
+          <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal items-start min-w-px relative" id={isHoverAndIcon2 ? "node-91_7316" : isHoverAndNotIcon2 ? "node-91_7305" : isNotHoverAndIcon2 ? "node-91_7236" : "node-91_7225"} data-name="Content">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] w-full" data-node-id="91:7226">
+              {itemText}
+            </p>
+            {hint && (
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/caption,#69758d)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="91:7227">
+                {hintText}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      {isMenuItemAndSAndNotSelectedAndNotDisabled && icon && (
+        <div className="content-stretch flex items-start relative shrink-0" data-node-id="91:7242" data-name="Icon">
+          {iconEdit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7243" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded} />
+            </div>
+          )}
+        </div>
+      )}
+      {isMenuItemAndSAndNotSelectedAndNotDisabled && (
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" id={isHoverAndIcon2 ? "node-91_7335" : isHoverAndNotIcon2 ? "node-91_7324" : isNotHoverAndIcon2 ? "node-91_7255" : "node-91_7244"} data-name="Wrapper">
+          <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal gap-[2px] items-start min-w-px relative" id={isHoverAndIcon2 ? "node-91_7336" : isHoverAndNotIcon2 ? "node-91_7325" : isNotHoverAndIcon2 ? "node-91_7256" : "node-91_7245"} data-name="Content">
+            <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="91:7246">
+              {itemText}
+            </p>
+            {hint && (
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[color:var(--text\/default\/caption,#69758d)] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] w-full" data-node-id="91:7247">
+                {hintText}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      {type === "menu item" && !selected && !disabled && icon2 && (
+        <div className={`content-stretch flex items-start relative shrink-0 ${isS ? "" : "pt-[2px]"}`} id={size === "s" && hover ? "node-91_7330" : size === "m" && hover ? "node-91_7310" : size === "s" && !hover ? "node-91_7250" : "node-91_7230"} data-name="Icon">
+          {icon2Edit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7231" data-name="check">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgCheck} />
+            </div>
+          )}
+        </div>
+      )}
+      {isMenuItemAndMAndNotHoverAndDisabled && icon && (
+        <div className="content-stretch flex items-start pt-[2px] relative shrink-0" data-node-id="91:7382" data-name="Icon">
+          {iconEdit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7383" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded3} />
+            </div>
+          )}
+        </div>
+      )}
+      {isMenuItemAndMAndNotHoverAndDisabled && (
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" id={isSelectedAndIcon2 ? "node-91_7435" : isSelectedAndNotIcon2 ? "node-91_7424" : isNotSelectedAndIcon2 ? "node-91_7395" : "node-91_7384"} data-name="Wrapper">
+          <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal items-start min-w-px relative text-[color:var(--text\/disabled\/overlay-strong,rgba(68,83,113,0.5))]" id={isSelectedAndIcon2 ? "node-91_7436" : isSelectedAndNotIcon2 ? "node-91_7425" : isNotSelectedAndIcon2 ? "node-91_7396" : "node-91_7385"} data-name="Content">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)] relative shrink-0 text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] w-full" data-node-id="91:7386">
+              {itemText}
+            </p>
+            {hint && (
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="91:7387">
+                {hintText}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      {isMenuItemAndSAndNotHoverAndDisabled && icon && (
+        <div className="content-stretch flex items-start relative shrink-0" data-node-id="91:7402" data-name="Icon">
+          {iconEdit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7403" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded3} />
+            </div>
+          )}
+        </div>
+      )}
+      {isMenuItemAndSAndNotHoverAndDisabled && (
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" id={isSelectedAndIcon2 ? "node-91_7455" : isSelectedAndNotIcon2 ? "node-91_7444" : isNotSelectedAndIcon2 ? "node-91_7415" : "node-91_7404"} data-name="Wrapper">
+          <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal gap-[2px] items-start min-w-px relative text-[color:var(--text\/disabled\/overlay-strong,rgba(68,83,113,0.5))]" id={isSelectedAndIcon2 ? "node-91_7456" : isSelectedAndNotIcon2 ? "node-91_7445" : isNotSelectedAndIcon2 ? "node-91_7416" : "node-91_7405"} data-name="Content">
+            <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="91:7406">
+              {itemText}
+            </p>
+            {hint && (
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] w-full" data-node-id="91:7407">
+                {hintText}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      {type === "menu item" && !hover && disabled && icon2 && (
+        <div className={`content-stretch flex items-start relative shrink-0 ${isS ? "" : "pt-[2px]"}`} id={size === "s" && selected ? "node-91_7450" : size === "m" && selected ? "node-91_7430" : size === "s" && !selected ? "node-91_7410" : "node-91_7390"} data-name="Icon">
+          {icon2Edit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7391" data-name="check">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgCheck3} />
+            </div>
+          )}
+        </div>
+      )}
+      {!selected && !hover && !disabled && !icon2 && ["group title", "group divider"].includes(type) && (
+        <div className={`relative ${type === "group divider" ? String.raw`bg-[var(--surface\/neutral\/overlay-strong,rgba(68,83,113,0.15))] h-px shrink-0 w-full` : String.raw`[word-break:break-word] flex flex-[1_0_0] flex-col font-[family-name:var(--font-family\/primary,"Manrope:Regular")] font-normal justify-center leading-[0] min-w-px text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)]`}`} id={type === "group divider" && size === "s" ? "node-91_7467" : type === "group divider" && size === "m" ? "node-91_7465" : type === "group title" && size === "s" ? "node-91_7463" : "node-91_7461"}>
+          {type === "group title" && <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)]">Title</p>}
+        </div>
+      )}
+      {isMenuItemAndMAndSelectedAndNotHoverAndNotDisabled && icon && (
+        <div className="content-stretch flex items-start pt-[2px] relative shrink-0" data-node-id="91:7262" data-name="Icon">
+          {iconEdit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7263" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded1} />
+            </div>
+          )}
+        </div>
+      )}
+      {isMenuItemAndMAndSelectedAndNotHoverAndNotDisabled && (
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" id={isIcon2 ? "node-91_7275" : "node-91_7264"} data-name="Wrapper">
+          <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal items-start min-w-px relative text-[color:var(--text\/primary\/default,#05f)]" id={isIcon2 ? "node-91_7276" : "node-91_7265"} data-name="Content">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)] relative shrink-0 text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] w-full" data-node-id="91:7266">
+              {itemText}
+            </p>
+            {hint && (
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="91:7267">
+                {hintText}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      {isMenuItemAndSAndSelectedAndNotHoverAndNotDisabled && icon && (
+        <div className="content-stretch flex items-start relative shrink-0" data-node-id="91:7282" data-name="Icon">
+          {iconEdit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7283" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded1} />
+            </div>
+          )}
+        </div>
+      )}
+      {isMenuItemAndSAndSelectedAndNotHoverAndNotDisabled && (
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" id={isIcon2 ? "node-91_7295" : "node-91_7284"} data-name="Wrapper">
+          <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal gap-[2px] items-start min-w-px relative text-[color:var(--text\/primary\/default,#05f)]" id={isIcon2 ? "node-91_7296" : "node-91_7285"} data-name="Content">
+            <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="91:7286">
+              {itemText}
+            </p>
+            {hint && (
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] w-full" data-node-id="91:7287">
+                {hintText}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      {type === "menu item" && selected && !hover && !disabled && icon2 && (
+        <div className={`content-stretch flex items-start relative shrink-0 ${isS ? "" : "pt-[2px]"}`} id={isS ? "node-91_7290" : "node-91_7270"} data-name="Icon">
+          {icon2Edit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7271" data-name="check">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgCheck1} />
+            </div>
+          )}
+        </div>
+      )}
+      {isMenuItemAndMAndSelectedAndHoverAndNotDisabled && icon && (
+        <div className="content-stretch flex items-start pt-[2px] relative shrink-0" data-node-id="91:7342" data-name="Icon">
+          {iconEdit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7343" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded2} />
+            </div>
+          )}
+        </div>
+      )}
+      {isMenuItemAndMAndSelectedAndHoverAndNotDisabled && (
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" id={isIcon2 ? "node-91_7355" : "node-91_7344"} data-name="Wrapper">
+          <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal items-start min-w-px relative text-[color:var(--text\/primary\/pressed,#0347d1)]" id={isIcon2 ? "node-91_7356" : "node-91_7345"} data-name="Content">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)] relative shrink-0 text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] w-full" data-node-id="91:7346">
+              {itemText}
+            </p>
+            {hint && (
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="91:7347">
+                {hintText}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      {isMenuItemAndSAndSelectedAndHoverAndNotDisabled && icon && (
+        <div className="content-stretch flex items-start relative shrink-0" data-node-id="91:7362" data-name="Icon">
+          {iconEdit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7363" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded2} />
+            </div>
+          )}
+        </div>
+      )}
+      {isMenuItemAndSAndSelectedAndHoverAndNotDisabled && (
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" id={isIcon2 ? "node-91_7375" : "node-91_7364"} data-name="Wrapper">
+          <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal gap-[2px] items-start min-w-px relative text-[color:var(--text\/primary\/pressed,#0347d1)]" id={isIcon2 ? "node-91_7376" : "node-91_7365"} data-name="Content">
+            <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="91:7366">
+              {itemText}
+            </p>
+            {hint && (
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] w-full" data-node-id="91:7367">
+                {hintText}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      {type === "menu item" && selected && hover && !disabled && icon2 && (
+        <div className={`content-stretch flex items-start relative shrink-0 ${isS ? "" : "pt-[2px]"}`} id={isS ? "node-91_7370" : "node-91_7350"} data-name="Icon">
+          {icon2Edit || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="91:7351" data-name="check">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgCheck2} />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: Dekstop/Body/SM - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/body/font-size/SM, weight: 400, lineHeight: Typography/Desktop/body/line-height/SM, letterSpacing: 0), Dekstop/Caption/2XS - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/caption/font-size/2XS, weight: 400, lineHeight: Typography/Desktop/caption/line-height/2XS, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## DropdownMenu
+**Node ID:** 91:7219
+
+⚙️ Внутренний компонент, строка DropdownMenu.
+
+Не используется отдельно
+
+## check
+**Node ID:** 15:18393
+
+check, tick, confirm
+The generated code contains image and SVG URL constants, e.g. const image = '[temporary asset; see library-assets.json] These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

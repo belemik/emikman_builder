@@ -1,0 +1,530 @@
+{
+  "schemaVersion": 3,
+  "platform": "web",
+  "elements": [
+    {
+      "id": "dropdown-menu-177:10720",
+      "component": "dropdown-menu",
+      "variantProps": {},
+      "editorProps": {}
+    },
+    {
+      "id": "menu-m-0",
+      "component": "dropdown-menu",
+      "variantProps": {},
+      "editorProps": {},
+      "slots": {
+        "items": [
+          {
+            "id": "list-m-0",
+            "component": "items-list",
+            "variantProps": {
+              "size": "m",
+              "amount": "x10"
+            },
+            "editorProps": {},
+            "slots": {
+              "items": [
+                {
+                  "id": "dropdown-item-91:7220",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7229",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7260",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": true,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7269",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": true,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7300",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": false,
+                    "hover": true,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7309",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": false,
+                    "hover": true,
+                    "disabled": false,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7340",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": true,
+                    "hover": true,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7349",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": true,
+                    "hover": true,
+                    "disabled": false,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7380",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": true,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7389",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": true,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "menu-m-10",
+      "component": "dropdown-menu",
+      "variantProps": {},
+      "editorProps": {},
+      "slots": {
+        "items": [
+          {
+            "id": "list-m-10",
+            "component": "items-list",
+            "variantProps": {
+              "size": "m",
+              "amount": "x4"
+            },
+            "editorProps": {},
+            "slots": {
+              "items": [
+                {
+                  "id": "dropdown-item-91:7420",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": true,
+                    "hover": false,
+                    "disabled": true,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7429",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "m",
+                    "selected": true,
+                    "hover": false,
+                    "disabled": true,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7460",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "group title",
+                    "size": "m",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7464",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "group divider",
+                    "size": "m",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "menu-s-0",
+      "component": "dropdown-menu",
+      "variantProps": {},
+      "editorProps": {},
+      "slots": {
+        "items": [
+          {
+            "id": "list-s-0",
+            "component": "items-list",
+            "variantProps": {
+              "size": "s",
+              "amount": "x10"
+            },
+            "editorProps": {},
+            "slots": {
+              "items": [
+                {
+                  "id": "dropdown-item-91:7240",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7249",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7280",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": true,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7289",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": true,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7320",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": false,
+                    "hover": true,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7329",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": false,
+                    "hover": true,
+                    "disabled": false,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7360",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": true,
+                    "hover": true,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7369",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": true,
+                    "hover": true,
+                    "disabled": false,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7400",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": true,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7409",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": true,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "menu-s-10",
+      "component": "dropdown-menu",
+      "variantProps": {},
+      "editorProps": {},
+      "slots": {
+        "items": [
+          {
+            "id": "list-s-10",
+            "component": "items-list",
+            "variantProps": {
+              "size": "s",
+              "amount": "x4"
+            },
+            "editorProps": {},
+            "slots": {
+              "items": [
+                {
+                  "id": "dropdown-item-91:7440",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": true,
+                    "hover": false,
+                    "disabled": true,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7449",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "menu item",
+                    "size": "s",
+                    "selected": true,
+                    "hover": false,
+                    "disabled": true,
+                    "icon2": true
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7462",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "group title",
+                    "size": "s",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                },
+                {
+                  "id": "dropdown-item-91:7466",
+                  "component": "dropdown-item",
+                  "variantProps": {
+                    "type": "group divider",
+                    "size": "s",
+                    "selected": false,
+                    "hover": false,
+                    "disabled": false,
+                    "icon2": false
+                  },
+                  "editorProps": {
+                    "itemText": "Item text"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "themeOverrides": {},
+  "tokenReferences": [
+    "Font family/primary",
+    "surface/primary/default",
+    "surface/error/overlay-light"
+  ]
+}

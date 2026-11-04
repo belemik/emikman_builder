@@ -1,0 +1,59 @@
+const imgPlus = "[temporary asset; see library-assets.json]";
+const imgPlus1 = "[temporary asset; see library-assets.json]";
+const imgPlus2 = "[temporary asset; see library-assets.json]";
+
+type TagMoreProps = {
+  className?: string;
+  size?: "m" | "s" | "xs";
+  state?: "default" | "hover";
+  variant?: "primary" | "secondary";
+};
+
+export default function TagMore({ className, size = "m", state = "default", variant = "primary" }: TagMoreProps) {
+  const isM = size === "m";
+  const isMAndPrimaryAndDefault = size === "m" && variant === "primary" && state === "default";
+  const isMAndPrimaryAndHover = size === "m" && variant === "primary" && state === "hover";
+  const isMAndSecondaryAndDefault = size === "m" && variant === "secondary" && state === "default";
+  const isMAndSecondaryAndHover = size === "m" && variant === "secondary" && state === "hover";
+  const isSAndPrimaryAndHover = size === "s" && variant === "primary" && state === "hover";
+  const isSAndSecondaryAndDefault = size === "s" && variant === "secondary" && state === "default";
+  const isSAndSecondaryAndHover = size === "s" && variant === "secondary" && state === "hover";
+  const isXs = size === "xs";
+  const isXsAndPrimaryAndDefault = size === "xs" && variant === "primary" && state === "default";
+  const isXsAndPrimaryAndHover = size === "xs" && variant === "primary" && state === "hover";
+  const isXsAndSecondaryAndDefault = size === "xs" && variant === "secondary" && state === "default";
+  const isXsAndSecondaryAndHover = size === "xs" && variant === "secondary" && state === "hover";
+  return (
+    <div className={className || `content-stretch flex items-center relative ${size === "m" && state === "hover" ? String.raw`bg-[var(--surface\/neutral\/subtle-medium,#edeef1)] rounded-[6px]` : size === "m" && state === "default" ? String.raw`bg-[var(--surface\/neutral\/subtle-light,#f5f6f8)] rounded-[6px]` : variant === "secondary" && ["s", "xs"].includes(size) ? "overflow-clip rounded-[4px]" : variant === "primary" && state === "hover" && ["s", "xs"].includes(size) ? String.raw`bg-[var(--surface\/neutral\/subtle-medium,#edeef1)] overflow-clip rounded-[4px]` : String.raw`bg-[var(--surface\/neutral\/subtle-light,#f5f6f8)] overflow-clip rounded-[4px]`}`} id={isMAndSecondaryAndHover ? "node-195_28411" : isMAndSecondaryAndDefault ? "node-195_28407" : isMAndPrimaryAndHover ? "node-195_28403" : isMAndPrimaryAndDefault ? "node-195_28399" : isXsAndSecondaryAndHover ? "node-195_28395" : isSAndSecondaryAndHover ? "node-195_28391" : isXsAndSecondaryAndDefault ? "node-195_28387" : isSAndSecondaryAndDefault ? "node-195_28383" : isXsAndPrimaryAndHover ? "node-195_28379" : isSAndPrimaryAndHover ? "node-195_28375" : isXsAndPrimaryAndDefault ? "node-195_28371" : "node-195_28367"}>
+      <div className={`content-stretch flex gap-[6px] items-center relative shrink-0 ${isM ? "h-[28px] px-[8px]" : isXs ? "h-[16px] px-[6px]" : "h-[20px] px-[6px]"}`} id={isMAndSecondaryAndHover ? "node-195_28412" : isMAndSecondaryAndDefault ? "node-195_28408" : isMAndPrimaryAndHover ? "node-195_28404" : isMAndPrimaryAndDefault ? "node-195_28400" : isXsAndSecondaryAndHover ? "node-195_28396" : isSAndSecondaryAndHover ? "node-195_28392" : isXsAndSecondaryAndDefault ? "node-195_28388" : isSAndSecondaryAndDefault ? "node-195_28384" : isXsAndPrimaryAndHover ? "node-195_28380" : isSAndPrimaryAndHover ? "node-195_28376" : isXsAndPrimaryAndDefault ? "node-195_28372" : "node-195_28368"} data-name="Wrapper">
+        <div className={`${String.raw`[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,"Manrope:Regular")] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] whitespace-nowrap `}${isM ? String.raw`text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)]` : isXs ? String.raw`text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)]` : String.raw`text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)]`}`} id={isMAndSecondaryAndHover ? "node-195_28413" : isMAndSecondaryAndDefault ? "node-195_28409" : isMAndPrimaryAndHover ? "node-195_28405" : isMAndPrimaryAndDefault ? "node-195_28401" : isXsAndSecondaryAndHover ? "node-195_28397" : isSAndSecondaryAndHover ? "node-195_28393" : isXsAndSecondaryAndDefault ? "node-195_28389" : isSAndSecondaryAndDefault ? "node-195_28385" : isXsAndPrimaryAndHover ? "node-195_28381" : isSAndPrimaryAndHover ? "node-195_28377" : isXsAndPrimaryAndDefault ? "node-195_28373" : "node-195_28369"}>
+          <p className={isM ? String.raw`leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]` : isXs ? String.raw`leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)]` : String.raw`leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)]`}>Add Tag</p>
+        </div>
+        <div className={`relative shrink-0 ${isM ? "size-[16px]" : isXs ? "size-[10px]" : "size-[12px]"}`} id={isMAndSecondaryAndHover ? "node-195_28414" : isMAndSecondaryAndDefault ? "node-195_28410" : isMAndPrimaryAndHover ? "node-195_28406" : isMAndPrimaryAndDefault ? "node-195_28402" : isXsAndSecondaryAndHover ? "node-195_28398" : isSAndSecondaryAndHover ? "node-195_28394" : isXsAndSecondaryAndDefault ? "node-195_28390" : isSAndSecondaryAndDefault ? "node-195_28386" : isXsAndPrimaryAndHover ? "node-195_28382" : isSAndPrimaryAndHover ? "node-195_28378" : isXsAndPrimaryAndDefault ? "node-195_28374" : "node-195_28370"} data-name="plus">
+          <img alt="" className="absolute block inset-0 max-w-none size-full" src={isM ? imgPlus2 : isXs ? imgPlus1 : imgPlus} />
+        </div>
+      </div>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: Dekstop/Caption/2XS - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/caption/font-size/2XS, weight: 400, lineHeight: Typography/Desktop/caption/line-height/2XS, letterSpacing: 0), Dekstop/Caption/3XS - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/caption/font-size/3XS, weight: 400, lineHeight: Typography/Desktop/caption/line-height/3XS, letterSpacing: 0), Dekstop/Body/SM - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/body/font-size/SM, weight: 400, lineHeight: Typography/Desktop/body/line-height/SM, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## TagMore
+**Node ID:** 195:28366
+
+⚙️ Внутренний компонент для TagGroup — кнопка создания нового тега. Не используется отдельно
+
+## plus
+**Node ID:** 15:18663
+
+plus, add, addition, calculate, mathematics
+The generated code contains image and SVG URL constants, e.g. const image = '[temporary asset; see library-assets.json] These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

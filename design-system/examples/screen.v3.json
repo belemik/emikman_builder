@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 3,
+  "platform": "web",
+  "elements": [
+    {
+      "id": "example-button",
+      "component": "button",
+      "variantProps": {
+        "size": "m",
+        "variant": "primary",
+        "colorScheme": "accent",
+        "state": "default"
+      },
+      "editorProps": {
+        "label": "Продолжить"
+      }
+    },
+    {
+      "id": "example-input",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "default",
+        "placeholder": false
+      },
+      "editorProps": {
+        "placeholderText": "Введите email",
+        "label": "Email"
+      }
+    },
+    {
+      "id": "example-select",
+      "component": "select",
+      "variantProps": {
+        "size": "l",
+        "state": "default",
+        "placeholder": true,
+        "label": true,
+        "foldDirection": "down"
+      },
+      "editorProps": {
+        "labelText": "Страна",
+        "placeholderText": "Выберите страну",
+        "optionsText": "Россия\nБеларусь\nКазахстан"
+      }
+    },
+    {
+      "id": "example-checkbox",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "default",
+        "checked": false,
+        "indeterminate": false
+      },
+      "editorProps": {
+        "label": "Согласен с условиями"
+      }
+    },
+    {
+      "id": "example-table",
+      "component": "table",
+      "variantProps": {},
+      "editorProps": {
+        "title": "Типы топлива"
+      }
+    }
+  ],
+  "themeOverrides": {},
+  "tokenReferences": [
+    "surface/primary/default",
+    "text/on-color/body",
+    "text/default/body",
+    "surface/on-color/default",
+    "text/default/caption",
+    "text/default/placeholder",
+    "icon/neutral/default",
+    "border/neutral/overlay-strong",
+    "surface/on-color/page",
+    "surface/primary/subtle-medium",
+    "text/primary/default",
+    "Font family/primary",
+    "Typography/Desktop/body/font-size/SM",
+    "Typography/Desktop/body/line-height/SM",
+    "Typography/Desktop/body/font-size/MD",
+    "Typography/Desktop/body/line-height/MD",
+    "spacing/padding/spacing-16",
+    "spacing/padding/spacing-24",
+    "spacing/gap/gap-8",
+    "spacing/radius/radius-4"
+  ]
+}

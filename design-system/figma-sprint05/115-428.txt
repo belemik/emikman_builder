@@ -1,0 +1,55 @@
+type ElementsHintContainerProps = {
+  className?: string;
+  counter?: boolean;
+  counterText?: string;
+  hint?: boolean;
+  hintText?: string;
+};
+
+export default function ElementsHintContainer({ className, counter = true, counterText = "10/25", hint = true, hintText = "Hint" }: ElementsHintContainerProps) {
+  const isHintAndCounter = hint && counter;
+  const isHintAndNotCounter = hint && !counter;
+  const isNotHintAndCounter = !hint && counter;
+  return (
+    <div className={className || `content-stretch flex items-start relative w-[280px] ${isNotHintAndCounter || isHintAndNotCounter ? "" : String.raw`[word-break:break-word] font-[family-name:var(--font-family\/primary,"Manrope:Regular")] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] text-[color:var(--text\/default\/caption,#69758d)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)]`}`} id={isHintAndNotCounter ? "node-115_434" : isNotHintAndCounter ? "node-115_432" : "node-115_429"}>
+      {isHintAndCounter && (
+        <>
+          <p className="flex-[1_0_0] min-w-px relative" data-node-id="115:430">
+            {hintText}
+          </p>
+          <p className="relative shrink-0 text-right whitespace-nowrap" data-node-id="115:431">
+            {counterText}
+          </p>
+        </>
+      )}
+      {isNotHintAndCounter && (
+        <p className="[word-break:break-word] flex-[1_0_0] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] min-w-px relative text-[color:var(--text\/default\/caption,#69758d)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] text-right" data-node-id="115:433">
+          {counterText}
+        </p>
+      )}
+      {isHintAndNotCounter && (
+        <p className="[word-break:break-word] flex-[1_0_0] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] min-w-px relative text-[color:var(--text\/default\/caption,#69758d)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)]" data-node-id="115:435">
+          {hintText}
+        </p>
+      )}
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: Dekstop/Caption/2XS - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/caption/font-size/2XS, weight: 400, lineHeight: Typography/Desktop/caption/line-height/2XS, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Elements / Hint Container
+**Node ID:** 115:428
+
+⚙️ Внутренний компонент, хинт, подсказка.
+
+Не используется отдельно
+The generated code contains image and SVG URL constants, e.g. const image = '[temporary asset; see library-assets.json] These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

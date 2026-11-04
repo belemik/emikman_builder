@@ -1,0 +1,93 @@
+const imgX = "[temporary asset; see library-assets.json]";
+const imgPlus = "[temporary asset; see library-assets.json]";
+
+type TagItemProps = {
+  className?: string;
+  closable?: boolean;
+  labelText?: string;
+  size?: "m";
+  state?: "default";
+  variant?: "primary";
+};
+
+function TagItem({ className, closable = true, labelText = "Label", size = "m", state = "default", variant = "primary" }: TagItemProps) {
+  return (
+    <div className={className || "bg-[var(--surface\\/neutral\\/overlay-light,rgba(68,83,113,0.05))] content-stretch flex items-center relative rounded-[6px]"} data-node-id="195:1168">
+      <div className="content-stretch flex gap-[6px] h-[28px] items-center justify-center px-[8px] relative shrink-0" data-node-id="195:1169" data-name="Wrapper">
+        <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="195:1170">
+          <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">{labelText}</p>
+        </div>
+        {closable && (
+          <div className="relative shrink-0 size-[16px]" data-node-id="195:1171" data-name="x">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgX} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type TagGroupProps = {
+  className?: string;
+  amount?: "1";
+  closable?: "true";
+  disabled?: "false";
+  editable?: boolean;
+  size?: "m";
+};
+
+function TagGroup({ className, amount = "1", closable = "true", disabled = "false", editable = true, size = "m" }: TagGroupProps) {
+  return (
+    <div className={className || "content-start flex flex-wrap gap-[var(--atmr-taggroup-m-spacing-horizontal,8px)] items-start relative"} data-node-id="195:28435">
+      <TagItem className="bg-[var(--surface\/neutral\/overlay-light,rgba(68,83,113,0.05))] content-stretch flex items-center relative rounded-[6px] shrink-0" />
+      {editable && (
+        <div className="bg-[var(--surface\/neutral\/subtle-light,#f5f6f8)] content-stretch flex items-center relative rounded-[6px] shrink-0" data-node-id="195:28437" data-name="TagMore">
+          <div className="content-stretch flex gap-[6px] h-[28px] items-center px-[8px] relative shrink-0" data-node-id="I195:28437;195:28400" data-name="Wrapper">
+            <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="I195:28437;195:28401">
+              <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">Add Tag</p>
+            </div>
+            <div className="relative shrink-0 size-[16px]" data-node-id="I195:28437;195:28402" data-name="plus">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgPlus} />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: Dekstop/Body/SM - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/body/font-size/SM, weight: 400, lineHeight: Typography/Desktop/body/line-height/SM, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## TagGroup
+**Node ID:** 195:28415
+
+Группа тегов
+
+## TagItem
+**Node ID:** 195:1079
+
+Тег. Элемент визуальной маркировки с использованием ключевых слов. Используется как отдельно, так и в группе
+
+## x
+**Node ID:** 15:18807
+
+x, close, exit, remove, cross, delete
+
+## TagMore
+**Node ID:** 195:28366
+
+⚙️ Внутренний компонент для TagGroup — кнопка создания нового тега. Не используется отдельно
+
+## plus
+**Node ID:** 15:18663
+
+plus, add, addition, calculate, mathematics
+The generated code contains image and SVG URL constants, e.g. const image = '[temporary asset; see library-assets.json] These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

@@ -1,0 +1,118 @@
+type ElementsItemsListProps = {
+  className?: string;
+  amount?: "x9";
+  size?: "s";
+};
+
+function ElementsItemsList({ className, amount = "x9", size = "s" }: ElementsItemsListProps) {
+  return (
+    <div className={className || "content-stretch flex flex-col gap-[4px] items-start p-[8px] relative w-[280px]"} data-node-id="91:7584">
+      <div className="content-stretch flex gap-[8px] items-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="91:7585" data-name="DropdownMenu">
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" data-node-id="I91:7585;91:7244" data-name="Wrapper">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px relative" data-node-id="I91:7585;91:7245" data-name="Content">
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="I91:7585;91:7246">
+              Item text
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[8px] items-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="91:7586" data-name="DropdownMenu">
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" data-node-id="I91:7586;91:7244" data-name="Wrapper">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px relative" data-node-id="I91:7586;91:7245" data-name="Content">
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="I91:7586;91:7246">
+              Item text
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[8px] items-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="91:7587" data-name="DropdownMenu">
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" data-node-id="I91:7587;91:7244" data-name="Wrapper">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px relative" data-node-id="I91:7587;91:7245" data-name="Content">
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="I91:7587;91:7246">
+              Item text
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[8px] items-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="91:7588" data-name="DropdownMenu">
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" data-node-id="I91:7588;91:7244" data-name="Wrapper">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px relative" data-node-id="I91:7588;91:7245" data-name="Content">
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="I91:7588;91:7246">
+              Item text
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[8px] items-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="91:7589" data-name="DropdownMenu">
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" data-node-id="I91:7589;91:7244" data-name="Wrapper">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px relative" data-node-id="I91:7589;91:7245" data-name="Content">
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="I91:7589;91:7246">
+              Item text
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[8px] items-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="91:7590" data-name="DropdownMenu">
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" data-node-id="I91:7590;91:7244" data-name="Wrapper">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px relative" data-node-id="I91:7590;91:7245" data-name="Content">
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="I91:7590;91:7246">
+              Item text
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[8px] items-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="91:7591" data-name="DropdownMenu">
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" data-node-id="I91:7591;91:7244" data-name="Wrapper">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px relative" data-node-id="I91:7591;91:7245" data-name="Content">
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="I91:7591;91:7246">
+              Item text
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[8px] items-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="91:7592" data-name="DropdownMenu">
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" data-node-id="I91:7592;91:7244" data-name="Wrapper">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px relative" data-node-id="I91:7592;91:7245" data-name="Content">
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="I91:7592;91:7246">
+              Item text
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[8px] items-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="91:7593" data-name="DropdownMenu">
+        <div className="content-stretch flex flex-[1_0_0] items-center min-w-px relative" data-node-id="I91:7593;91:7244" data-name="Wrapper">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px relative" data-node-id="I91:7593;91:7245" data-name="Content">
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="I91:7593;91:7246">
+              Item text
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: Dekstop/Caption/2XS - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/caption/font-size/2XS, weight: 400, lineHeight: Typography/Desktop/caption/line-height/2XS, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Elements / ItemsList
+**Node ID:** 91:7468
+
+⚙️ Внутренний компонент, список айтемов.
+
+Не используется отдельно
+
+## DropdownMenu
+**Node ID:** 91:7219
+
+⚙️ Внутренний компонент, строка DropdownMenu.
+
+Не используется отдельно
+The generated code contains image and SVG URL constants, e.g. const image = '[temporary asset; see library-assets.json] These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

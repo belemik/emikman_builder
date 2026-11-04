@@ -5,9 +5,11 @@ export interface CanvasElement {
   component: string;
   variantProps: Record<string, PropValue>;
   editorProps: Record<string, PropValue>;
+  interactionState?: { selectedValue: string | null };
+  slots?: Partial<Record<'hint' | 'label' | 'tags' | 'items', CanvasElement[]>>;
 }
-export interface CanvasDocument { schemaVersion: 2; platform: 'web'; elements: CanvasElement[]; themeOverrides: ThemeOverrides }
-export const emptyDocument = (): CanvasDocument => ({ schemaVersion: 2, platform: 'web', elements: [], themeOverrides: {} });
+export interface CanvasDocument { schemaVersion: 3; platform: 'web'; elements: CanvasElement[]; themeOverrides: ThemeOverrides; tokenReferences: import('../design-system').TokenName[] }
+export const emptyDocument = (): CanvasDocument => ({ schemaVersion: 3, tokenReferences: [], platform: 'web', elements: [], themeOverrides: {} });
 export function createElement(component: string): CanvasElement {
   const entry = definition(component);
   return { id: crypto.randomUUID(), component, variantProps: defaults(entry.variantProps), editorProps: defaults(entry.editorProps) };
