@@ -7,6 +7,8 @@ import { join } from 'node:path';
 import example from '../design-system/examples/screen.v3.json';
 import { catalog, tokens } from '../src/design-system/catalog.generated';
 import { registry } from '../src/registry';
+import { createElement } from '../src/canvas/model';
+import { libraryNode } from '../src/renderer/library-capabilities';
 import { verifiedTokens } from '../src/tokens';
 import librarySeed from '../tokens.sprint05.seed.json';
 import rendererSeed from '../tokens.renderer.seed.json';
@@ -78,7 +80,7 @@ test('v1/v2 migration preserves IDs, content, order and styles; explicit bridge 
   const result = migrateScreen(v1); assert.equal(valid(result).themeOverrides.radiusPx, 32);
   assert.equal(v1.theme.radius, 48); assert.ok(result.warnings.some(e => e.code === 'RADIUS_CLAMPED'));
   assert.deepEqual(parseDocument(JSON.stringify(v1)), valid(result));
-  assert.ok(toCanvasV2(screen()).warnings.some(e => e.code === 'TOKEN_MANIFEST_OMITTED'));
+  assert.equal(toCanvasV2(screen()).valid, false);
 });
 test('malformed structures, duplicate IDs, invalid overrides and oversize JSON fail without mutation', () => {
   for (const input of [null, [], {}, { ...screen(), elements: [example.elements[0], example.elements[0]] }, { ...screen(), elements: Array(501).fill(example.elements[0]) }, { ...screen(), themeOverrides: { radiusPx: NaN } }, { ...screen(), themeOverrides: { fontFamily: '' } }, { ...screen(), elements: [{ ...example.elements[0], editorProps: { label: 'x'.repeat(2001) } }] }]) assert.equal(validateScreen(input).valid, false);
@@ -104,4 +106,36 @@ test('CLI returns nonzero for invalid files; compatibility must be explicitly re
     assert.equal(run(['--unknown']).status, 2);
     assert.equal(run([join(dir, 'missing.json')]).status, 1);
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('prototype component names return structured errors at roots and nested slots', () => {
+  for (const name of ['__proto__', 'constructor', 'toString']) {
+    const bad = { ...example.elements[0], component: name, slots: { [name]: [] } };
+    assert.equal(libraryNode(bad as never), null);
+    const before = JSON.stringify(bad);
+    const component = validateComponent(bad);
+    assert.equal(component.valid, false);
+    assert.ok(component.errors.some(e => e.code === 'COMPONENT'));
+    assert.equal(validateScreen({ ...screen(), elements: [bad] }).valid, false);
+    const input = { ...example.elements[1], slots: { hint: [bad] } };
+    const nested = validateComponent(input);
+    assert.equal(nested.valid, false);
+    assert.ok(nested.errors.some(e => e.code === 'COMPONENT' && e.path.includes('/slots/hint/0')));
+    assert.equal(migrateJSON(JSON.stringify({ ...screen(), elements: [bad] })).valid, false);
+    assert.equal(JSON.stringify(bad), before);
+  }
+});
+test('v2 export refuses v3-only content without mutating or dropping data', () => {
+  const base = { ...screen(), tokenReferences: [] };
+  for (const document of [
+    screen(),
+    { ...base, elements: [createElement('chip')] },
+    { ...base, elements: [{ ...base.elements[0], slots: {} }] },
+    { ...base, elements: [{ ...base.elements[2], interactionState: { selectedValue: null } }] },
+  ]) {
+    const before = JSON.stringify(document), result = toCanvasV2(document);
+    assert.equal(result.valid, false);
+    assert.ok(result.errors.some(e => e.code === 'V2_UNSUPPORTED'));
+    assert.equal(JSON.stringify(document), before);
+  }
 });

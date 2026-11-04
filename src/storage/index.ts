@@ -31,3 +31,28 @@ export function exportRawDocument(raw: string) {
   const link = window.document.createElement('a'); link.href = url; link.download = 'wdeaf-canvas.json'; link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+/** Append-only, account-scoped raw backups. Existing legacy backups remain readable. */
+export function listRecoveryBackups(key = STORAGE_KEY): { key: string; raw: string }[] {
+  const prefix = key + '.rejected-backup';
+  const keys: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const candidate = localStorage.key(i);
+    if (candidate && (candidate === prefix || candidate.startsWith(prefix + '.') || candidate === key + '.pre-v3-backup')) keys.push(candidate);
+  }
+  return keys.sort().flatMap(key => {
+    const raw = localStorage.getItem(key);
+    return raw === null ? [] : [{ key, raw }];
+  });
+}
+export function preserveRejectedDocument(raw: string, key = STORAGE_KEY): string {
+  const existing = listRecoveryBackups(key).find(backup => backup.raw === raw);
+  if (existing) return existing.key;
+  let backupKey: string;
+  do { backupKey = key + '.rejected-backup.' + crypto.randomUUID(); }
+  while (localStorage.getItem(backupKey) !== null);
+  // No index to overwrite; a failed write leaves both the source and all prior copies intact.
+  localStorage.setItem(backupKey, raw);
+  if (localStorage.getItem(backupKey) !== raw) throw new Error('Не удалось проверить сохранение резервной копии.');
+  return backupKey;
+}

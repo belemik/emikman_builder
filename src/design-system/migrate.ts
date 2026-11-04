@@ -22,11 +22,16 @@ export function migrateJSON(raw: string): Result<ScreenDraft> {
   try { input = JSON.parse(raw); } catch { return { valid: false, errors: [{ code: 'JSON', path: '', message: 'Invalid JSON.' }], warnings: [] }; }
   return migrateScreen(input);
 }
-/** Explicit bridge to the unchanged Canvas v2 importer. Token manifest is metadata, not styling. */
+/** Legacy export only for flat Sprint 02 documents. No silent loss of v3 data. */
 export function toCanvasV2(input: unknown): Result<CanvasV2> {
   const r = validateScreen(input, { mode: 'compatible' });
   if (!r.valid) return r;
   const { tokenReferences, ...screen } = r.value;
-  if (tokenReferences.length) r.warnings.push({ code: 'TOKEN_MANIFEST_OMITTED', path: '/tokenReferences', message: 'Canvas v2 has no token manifest; preserve v3 separately.' });
+  const errors: Issue[] = [];
+  if (tokenReferences.length) errors.push({ code: 'V2_UNSUPPORTED', path: '/tokenReferences', message: 'Canvas v2 cannot preserve tokenReferences. Export v3 instead.' });
+  screen.elements.forEach((element, index) => {
+    if (!['button', 'input', 'select', 'checkbox', 'table'].includes(element.component) || Object.hasOwn(element, 'slots') || Object.hasOwn(element, 'interactionState')) errors.push({ code: 'V2_UNSUPPORTED', path: `/elements/${index}`, message: 'Canvas v2 supports only flat Sprint 02 elements without slots or interactionState. Export v3 instead.' });
+  });
+  if (errors.length) return { valid: false, errors, warnings: r.warnings };
   return { valid: true, value: { ...screen, schemaVersion: 2 }, warnings: r.warnings };
 }

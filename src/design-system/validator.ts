@@ -36,7 +36,7 @@ export function validateComponent(input: unknown, depth = 0): Result<ScreenEleme
   if (fields(input, ['id', 'component', 'variantProps', 'editorProps', ...(isObject(input) && own(input, 'slots') ? ['slots'] : []), ...(isObject(input) && input.component === 'select' && own(input, 'interactionState') ? ['interactionState'] : [])], '', errors)) {
     if (typeof input.id !== 'string' || !input.id || input.id.length > 100) errors.push(issue('ID', '/id', 'Expected nonempty ID, at most 100 characters.'));
     const entry = catalog.find(c => c.id === input.component);
-    if (!entry) errors.push(issue('COMPONENT', '/component', 'Component is not in the reviewed catalog.'));
+    if (!entry) return { valid: false, errors: [...errors, issue('COMPONENT', '/component', 'Component is not in the reviewed catalog.')], warnings: [] };
     else { validateProps(input.variantProps, entry.variantProps, '/variantProps', errors); validateProps(input.editorProps, entry.editorProps, '/editorProps', errors); }
   }
   if (isObject(input) && typeof input.component === 'string') {
@@ -45,18 +45,18 @@ export function validateComponent(input: unknown, depth = 0): Result<ScreenEleme
       const options = isObject(input.editorProps) && typeof input.editorProps.optionsText === 'string' ? input.editorProps.optionsText.split('\n').filter(x => x.trim()) : [];
       if (value !== null && (typeof value !== 'string' || value.length > 2000 || !options.includes(value))) errors.push(issue('SELECT_VALUE', '/interactionState/selectedValue', 'Выбранное значение отсутствует в optionsText. Сначала сбросьте выбор в инспекторе.'));
     }
-    const rows = (matrix as Record<string, { props: Record<string, unknown> }[]>)[input.component];
+    const rows = own(matrix, input.component) ? (matrix as Record<string, { props: Record<string, unknown> }[]>)[input.component] : undefined;
     // Existing Select metadata compatibility remains; strict capability validation uses the narrower matrix.
-    if (rows && input.component !== 'select' && isObject(input.variantProps) && !rows.some(row => Object.entries(row.props).every(([k,v]) => (input.variantProps as Obj)[k] === v))) errors.push(issue('UNVERIFIED_COMBINATION', '/variantProps', 'No such variant exists in the reviewed Figma matrix.'));
+    if (Array.isArray(rows) && input.component !== 'select' && isObject(input.variantProps) && !rows.some(row => Object.entries(row.props).every(([k,v]) => (input.variantProps as Obj)[k] === v))) errors.push(issue('UNVERIFIED_COMBINATION', '/variantProps', 'No such variant exists in the reviewed Figma matrix.'));
     if (own(input, 'slots')) {
-      const rules = slotRules[input.component] ?? {};
+      const rules = own(slotRules, input.component) ? slotRules[input.component] : {};
       if (fields(input.slots, Object.keys(rules), '/slots', errors, true)) for (const [slot, children] of Object.entries(input.slots)) {
-        const rule = rules[slot]; if (!rule) continue;
+        const rule = own(rules, slot) ? rules[slot] : undefined; if (!rule) continue;
         if (!Array.isArray(children) || children.length < rule.min || children.length > rule.max) { errors.push(issue('SLOT_COUNT', '/slots/'+slot, 'Invalid slot cardinality.')); continue; }
         for (let i=0; i<children.length; i++) {
           const child = children[i], result = validateComponent(child, depth+1);
           if (!result.valid) errors.push(...result.errors.map(e => ({...e,path:`/slots/${slot}/${i}${e.path}`})));
-          if (isObject(child) && typeof child.component === 'string' && allowedParents[child.component] && !allowedParents[child.component].includes(input.component)) errors.push(issue('PARENT_COMPONENT', `/slots/${slot}/${i}`, 'Родитель не разрешён подтверждённой структурой Figma.'));
+          if (isObject(child) && typeof child.component === 'string' && own(allowedParents, child.component) && !allowedParents[child.component].includes(input.component)) errors.push(issue('PARENT_COMPONENT', `/slots/${slot}/${i}`, 'Родитель не разрешён подтверждённой структурой Figma.'));
           if (!isObject(child) || child.component !== rule.component) errors.push(issue('SLOT_COMPONENT', '/slots/'+slot, 'Component is not allowed in this Figma slot.'));
         }
         if (isObject(input.variantProps) && ['tag-group','items-list'].includes(input.component) && children.length !== Number(String(input.variantProps.amount).replace('x',''))) errors.push(issue('SLOT_COUNT', '/slots/'+slot, 'Child count must match amount.'));

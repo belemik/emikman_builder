@@ -13,7 +13,7 @@ import { themeStyle } from './theme/model';
 import { Icon, CloseButton } from './ui';
 import { CatalogSample } from './ui/CatalogSample';
 import './ui/styles.css';
-import { exportDocument, exportRawDocument, loadDocument, saveDocument, migrationWarning } from './storage';
+import { exportDocument, exportRawDocument, loadDocument, saveDocument, migrationWarning, preserveRejectedDocument, listRecoveryBackups } from './storage';
 import { generatePrompt, generateRendererPrompt } from './prompt';
 import './styles.css';
 import './appearance/appearance.css';
@@ -33,12 +33,19 @@ function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
   const [message, setMessage] = useState(initial.error ?? initial.warning ?? '');
   const [promptOpen, setPromptOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [backups, setBackups] = useState<ReturnType<typeof listRecoveryBackups>>([]);
   const [inspectorMode, setInspectorMode] = useState<'properties' | 'theme'>('properties');
   const importRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const setDocument = (next: typeof document | ((current: typeof document) => typeof document)) => {
     try { setDocumentState(acceptEditorDocument(typeof next === 'function' ? next(document) : next)); }
     catch (error) { setMessage(`Изменение отклонено: ${error instanceof Error ? error.message : 'ошибка схемы'}`); }
+  };
+  const preserveRecovery = () => {
+    if (initial.recoveryRaw !== undefined) {
+      preserveRejectedDocument(initial.recoveryRaw, storageKey);
+      setBackups(listRecoveryBackups(storageKey));
+    }
   };
   const selectedElement = document.elements.find(element => element.id === selected);
   useEffect(() => {
@@ -62,11 +69,15 @@ function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
         const raw = await file.text();
         const imported = importEditorDocument(raw);
         if (document.elements.length && !window.confirm('Заменить текущий холст импортированным документом? При необходимости сначала экспортируйте текущий.')) return;
-        if(paused && initial.recoveryRaw)localStorage.setItem(storageKey+'.rejected-backup',initial.recoveryRaw);
+        if (paused) preserveRecovery();
         setDocument(imported.document); setSelected(undefined); setPaused(false); setMessage(migrationWarning(raw) ?? (imported.warnings.map(w => w.message).join(' ') || 'Документ импортирован.'));
       } catch (error) { setMessage(`Импорт отклонён: ${error instanceof Error ? error.message : 'неизвестная ошибка'}`); }
     }} />
-    {message && <div className="notice" role="status"><span>{message}</span>{paused && initial.recoveryRaw && <button onClick={()=>exportRawDocument(initial.recoveryRaw!)}>Скачать исходный JSON</button>}{paused && <button onClick={() => { try { if(initial.recoveryRaw)localStorage.setItem(storageKey+'.rejected-backup',initial.recoveryRaw);setPaused(false);setMessage('Исходный проект сохранён отдельно в браузере.'); } catch { setMessage('Не удалось сохранить резервную копию. Скачайте исходный JSON; автосохранение остаётся приостановленным.'); } }}>Продолжить с текущим холстом</button>}<CloseButton label="Закрыть сообщение" size="s" onClick={() => setMessage('')} /></div>}
+    {(message || paused) && <div className="notice" role="status"><span>{message}</span>{paused && initial.recoveryRaw && <button onClick={()=>exportRawDocument(initial.recoveryRaw!)}>Скачать исходный JSON</button>}{paused && <button onClick={() => { try { preserveRecovery();setPaused(false);setMessage('Исходный проект сохранён отдельно в браузере.'); } catch { setMessage('Не удалось сохранить резервную копию. Скачайте исходный JSON; автосохранение остаётся приостановленным.'); } }}>Продолжить с текущим холстом</button>}<CloseButton label="Закрыть сообщение" size="s" onClick={() => setMessage('')} /></div>}
+    <details className="notice" onToggle={event => { if (event.currentTarget.open) { try { setBackups(listRecoveryBackups(storageKey)); } catch { setMessage('Не удалось прочитать резервные копии. Исходники не изменены.'); } } }}>
+      <summary>Резервные копии JSON</summary>
+      {backups.length ? backups.map((backup, index) => <button key={backup.key} onClick={() => exportRawDocument(backup.raw)}>Скачать копию {index + 1}</button>) : <span>Сохранённых копий нет.</span>}
+    </details>
     <main className="workspace">
       <aside className="catalog panel"><div className="panel-heading"><h2>Компоненты</h2><span className="count">{registry.filter(entry=>!entry.internal).length}</span></div><p className="muted">Из библиотеки WDeaf PRO 2.0</p>
         <div className="catalog-list">{registry.filter(entry=>!entry.internal).map(entry => <button className="catalog-card" key={entry.id} disabled={document.elements.length >= 500} onClick={() => { const element = createElement(entry.id); setDocument(current => ({ ...current, elements: [...current.elements, element] })); setSelected(element.id); }}>

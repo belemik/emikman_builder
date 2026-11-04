@@ -48,7 +48,30 @@ test('forbidden roots are hidden; rejected saves can be recovered without overwr
  await expect(page.getByRole('status')).toContainText('INTERNAL_COMPONENT');await expect(page.locator('.catalog-card').filter({hasText:'TagInput'})).toHaveCount(0);
  expect(await page.evaluate(()=>localStorage.getItem('wdeaf.demo.emikman_builder.canvas.v2'))).toBe(raw);
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Скачать исходный JSON'}).click();const stream=await(await download).createReadStream();const chunks:Buffer[]=[];for await(const chunk of stream!)chunks.push(chunk);expect(Buffer.concat(chunks).toString()).toBe(raw);
- await page.getByRole('button',{name:'Продолжить с текущим холстом'}).click();expect(await page.evaluate(()=>localStorage.getItem('wdeaf.demo.emikman_builder.canvas.v2.rejected-backup'))).toBe(raw);
+ await page.getByRole('button',{name:'Продолжить с текущим холстом'}).click();
+ const backupValues=()=>page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('wdeaf.demo.emikman_builder.canvas.v2.rejected-backup.')).map(k=>localStorage.getItem(k)));
+ expect(await backupValues()).toEqual([raw]);
+ const raw2=raw.replace('old-tag-input','second-tag-input');
+ await page.evaluate(raw=>localStorage.setItem('wdeaf.demo.emikman_builder.canvas.v2',raw),raw2);
+ await page.reload();await page.getByRole('button',{name:'Открыть демоверсию'}).click();
+ await page.getByRole('button',{name:'Закрыть сообщение',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Скачать исходный JSON'})).toBeVisible();
+ await page.evaluate(()=>{Storage.prototype.setItem=function(){throw new DOMException('Full','QuotaExceededError');};});
+ await page.getByRole('button',{name:'Продолжить с текущим холстом'}).click();
+ await expect(page.getByRole('status')).toContainText('Не удалось сохранить резервную копию');
+ expect(await page.evaluate(()=>localStorage.getItem('wdeaf.demo.emikman_builder.canvas.v2'))).toBe(raw2);
+ expect(await backupValues()).toEqual([raw]);
+ await page.reload();await page.getByRole('button',{name:'Открыть демоверсию'}).click();
+ await page.getByRole('button',{name:'Продолжить с текущим холстом'}).click();
+ expect((await backupValues()).sort()).toEqual([raw,raw2].sort());
+ await page.reload();await page.getByRole('button',{name:'Открыть демоверсию'}).click();
+ await page.getByText('Резервные копии JSON',{exact:true}).click();
+ await expect(page.getByRole('button',{name:/Скачать копию/})).toHaveCount(2);
+ const copies:string[]=[];
+ for(const button of await page.getByRole('button',{name:/Скачать копию/}).all()){
+ const event=page.waitForEvent('download');await button.click();const stream=await(await event).createReadStream();const parts:Buffer[]=[];for await(const chunk of stream!)parts.push(chunk);copies.push(Buffer.concat(parts).toString());
+ }
+ expect(copies.sort()).toEqual([raw,raw2].sort());
 });
 test('Tag close removes only enabled closable roots and persists the remaining document',async({page})=>{
  await open(page,'composition');page.on('dialog',dialog=>dialog.accept());
