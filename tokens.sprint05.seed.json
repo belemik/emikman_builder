@@ -1,0 +1,154 @@
+{
+  "tokens": {
+    "icon/disabled/overlay-strong": {
+      "type": "color",
+      "value": "#44537180",
+      "verifiedAtNode": "195:1079",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "icon/default/default": {
+      "type": "color",
+      "value": "#191f29",
+      "verifiedAtNode": "195:1079",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "icon/error/default": {
+      "type": "color",
+      "value": "#f51743",
+      "verifiedAtNode": "195:1079",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "surface/error/overlay-light": {
+      "type": "color",
+      "value": "#f745690d",
+      "verifiedAtNode": "195:1079",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "surface/neutral/overlay-medium": {
+      "type": "color",
+      "value": "#4453711a",
+      "verifiedAtNode": "195:1079",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "Typography/Desktop/caption/font-size/3XS": {
+      "type": "number",
+      "value": 10,
+      "verifiedAtNode": "195:1079",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "Typography/Desktop/caption/line-height/3XS": {
+      "type": "number",
+      "value": 12,
+      "verifiedAtNode": "195:1079",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "surface/disabled/overlay-medium": {
+      "type": "color",
+      "value": "#44537126",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "border/disabled/overlay-strong": {
+      "type": "color",
+      "value": "#44537180",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "text/primary/hover": {
+      "type": "color",
+      "value": "#3377ff",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "text/primary/pressed": {
+      "type": "color",
+      "value": "#0347d1",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "icon/on-color/default": {
+      "type": "color",
+      "value": "#ffffff",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "border/primary/default": {
+      "type": "color",
+      "value": "#0055ff",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "surface/primary/overlay-light": {
+      "type": "color",
+      "value": "#0055ff0d",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "surface/primary/overlay-medium": {
+      "type": "color",
+      "value": "#0055ff1a",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "surface/primary/overlay-strong": {
+      "type": "color",
+      "value": "#0055ff26",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "surface/neutral/overlay-strong": {
+      "type": "color",
+      "value": "#44537126",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "surface/neutral/subtle-light": {
+      "type": "color",
+      "value": "#f5f6f8",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "surface/neutral/subtle-medium": {
+      "type": "color",
+      "value": "#edeef1",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "surface/neutral/subtle-strong": {
+      "type": "color",
+      "value": "#dadde3",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "border/neutral/default": {
+      "type": "color",
+      "value": "#445371",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "border/neutral/hover": {
+      "type": "color",
+      "value": "#69758d",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "border/neutral/pressed": {
+      "type": "color",
+      "value": "#39455f",
+      "verifiedAtNode": "75:1401",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "icon/primary/default": {
+      "type": "color",
+      "value": "#0055ff",
+      "verifiedAtNode": "91:7219",
+      "source": "Figma get_variable_defs Sprint 05"
+    },
+    "icon/primary/pressed": {
+      "type": "color",
+      "value": "#0347d1",
+      "verifiedAtNode": "91:7219",
+      "source": "Figma get_variable_defs Sprint 05"
+    }
+  }
+}

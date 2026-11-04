@@ -1,0 +1,217 @@
+const imgHeartRounded = "[temporary asset; see library-assets.json]";
+const imgHeartRounded1 = "[temporary asset; see library-assets.json]";
+const imgHeartRounded2 = "[temporary asset; see library-assets.json]";
+
+type ChipProps = {
+  className?: string;
+  counter?: boolean;
+  icon?: boolean;
+  iconVariant?: React.ReactNode | null;
+  labelText?: string;
+  selected?: boolean;
+  state?: "default" | "hover" | "pressed" | "disabled";
+  variant?: "primary" | "secondary";
+};
+
+export default function Chip({ className, counter = true, icon = false, iconVariant = null, labelText = "Chips", selected = true, state = "default", variant = "primary" }: ChipProps) {
+  const isDisabledAndIcon = state === "disabled" && icon;
+  const isDisabledAndNotIcon = state === "disabled" && !icon;
+  const isIconAndIsSecondaryAndTrueOrFalseAndDefaultOrHoverOrPressed = icon && ((variant === "secondary" && selected && state === "default") || (variant === "secondary" && selected && state === "hover") || (variant === "secondary" && selected && state === "pressed") || (!selected && state === "default") || (!selected && state === "hover") || (!selected && state === "pressed"));
+  const isPrimaryAndNotSelectedAndDefaultAndIcon = variant === "primary" && !selected && state === "default" && icon;
+  const isPrimaryAndNotSelectedAndDefaultAndNotIcon = variant === "primary" && !selected && state === "default" && !icon;
+  const isPrimaryAndNotSelectedAndDisabledAndIcon = variant === "primary" && !selected && state === "disabled" && icon;
+  const isPrimaryAndNotSelectedAndDisabledAndNotIcon = variant === "primary" && !selected && state === "disabled" && !icon;
+  const isPrimaryAndNotSelectedAndHoverAndIcon = variant === "primary" && !selected && state === "hover" && icon;
+  const isPrimaryAndNotSelectedAndHoverAndNotIcon = variant === "primary" && !selected && state === "hover" && !icon;
+  const isPrimaryAndNotSelectedAndPressedAndIcon = variant === "primary" && !selected && state === "pressed" && icon;
+  const isPrimaryAndNotSelectedAndPressedAndNotIcon = variant === "primary" && !selected && state === "pressed" && !icon;
+  const isPrimaryAndSelectedAndDefault = variant === "primary" && selected && state === "default";
+  const isPrimaryAndSelectedAndDefaultAndIcon = variant === "primary" && selected && state === "default" && icon;
+  const isPrimaryAndSelectedAndDefaultAndNotIcon = variant === "primary" && selected && state === "default" && !icon;
+  const isPrimaryAndSelectedAndDisabledAndIcon = variant === "primary" && selected && state === "disabled" && icon;
+  const isPrimaryAndSelectedAndHover = variant === "primary" && selected && state === "hover";
+  const isPrimaryAndSelectedAndHoverAndIcon = variant === "primary" && selected && state === "hover" && icon;
+  const isPrimaryAndSelectedAndHoverAndNotIcon = variant === "primary" && selected && state === "hover" && !icon;
+  const isPrimaryAndSelectedAndIconAndIsDefaultOrHoverOrPressed = variant === "primary" && selected && icon && ["default", "hover", "pressed"].includes(state);
+  const isPrimaryAndSelectedAndPressed = variant === "primary" && selected && state === "pressed";
+  const isPrimaryAndSelectedAndPressedAndIcon = variant === "primary" && selected && state === "pressed" && icon;
+  const isPrimaryAndSelectedAndPressedAndNotIcon = variant === "primary" && selected && state === "pressed" && !icon;
+  const isSecondaryAndNotSelectedAndDefaultAndIcon = variant === "secondary" && !selected && state === "default" && icon;
+  const isSecondaryAndNotSelectedAndDefaultAndNotIcon = variant === "secondary" && !selected && state === "default" && !icon;
+  const isSecondaryAndNotSelectedAndDisabledAndIcon = variant === "secondary" && !selected && state === "disabled" && icon;
+  const isSecondaryAndNotSelectedAndDisabledAndNotIcon = variant === "secondary" && !selected && state === "disabled" && !icon;
+  const isSecondaryAndNotSelectedAndHoverAndIcon = variant === "secondary" && !selected && state === "hover" && icon;
+  const isSecondaryAndNotSelectedAndHoverAndNotIcon = variant === "secondary" && !selected && state === "hover" && !icon;
+  const isSecondaryAndNotSelectedAndPressedAndIcon = variant === "secondary" && !selected && state === "pressed" && icon;
+  const isSecondaryAndNotSelectedAndPressedAndNotIcon = variant === "secondary" && !selected && state === "pressed" && !icon;
+  const isSecondaryAndSelectedAndDefault = variant === "secondary" && selected && state === "default";
+  const isSecondaryAndSelectedAndDefaultAndIcon = variant === "secondary" && selected && state === "default" && icon;
+  const isSecondaryAndSelectedAndDefaultAndNotIcon = variant === "secondary" && selected && state === "default" && !icon;
+  const isSecondaryAndSelectedAndDisabledAndIcon = variant === "secondary" && selected && state === "disabled" && icon;
+  const isSecondaryAndSelectedAndDisabledAndNotIcon = variant === "secondary" && selected && state === "disabled" && !icon;
+  const isSecondaryAndSelectedAndHoverAndIcon = variant === "secondary" && selected && state === "hover" && icon;
+  const isSecondaryAndSelectedAndHoverAndNotIcon = variant === "secondary" && selected && state === "hover" && !icon;
+  const isSecondaryAndSelectedAndPressedAndIcon = variant === "secondary" && selected && state === "pressed" && icon;
+  const isSecondaryAndSelectedAndPressedAndNotIcon = variant === "secondary" && selected && state === "pressed" && !icon;
+  return (
+    <div className={className || `content-stretch flex items-start relative rounded-[6px] ${variant === "secondary" && !selected && state === "pressed" ? String.raw`bg-[var(--surface\/neutral\/overlay-medium,rgba(68,83,113,0.1))] border border-[var(--border\/neutral\/pressed,#39455f)] border-solid` : variant === "secondary" && !selected && state === "hover" ? String.raw`bg-[var(--surface\/neutral\/overlay-light,rgba(68,83,113,0.05))] border border-[var(--border\/neutral\/hover,#69758d)] border-solid` : variant === "secondary" && !selected && state === "default" ? String.raw`border border-[var(--border\/neutral\/default,#445371)] border-solid` : variant === "primary" && !selected && state === "pressed" ? String.raw`bg-[var(--surface\/neutral\/subtle-strong,#dadde3)]` : variant === "primary" && !selected && state === "hover" ? String.raw`bg-[var(--surface\/neutral\/subtle-medium,#edeef1)]` : variant === "primary" && !selected && state === "default" ? String.raw`bg-[var(--surface\/neutral\/subtle-light,#f5f6f8)]` : isSecondaryAndSelectedAndPressedAndIcon ? String.raw`bg-[var(--surface\/primary\/overlay-strong,rgba(0,85,255,0.15))] border border-[var(--border\/primary\/pressed,#0347d1)] border-solid` : isSecondaryAndSelectedAndHoverAndIcon ? String.raw`bg-[var(--surface\/primary\/overlay-medium,rgba(0,85,255,0.1))] border border-[var(--border\/primary\/hover,#37f)] border-solid` : isSecondaryAndSelectedAndPressedAndNotIcon ? String.raw`bg-[var(--surface\/primary\/overlay-medium,rgba(0,85,255,0.1))] border border-[var(--border\/primary\/pressed,#0347d1)] border-solid` : isSecondaryAndSelectedAndHoverAndNotIcon ? String.raw`bg-[var(--surface\/primary\/overlay-light,rgba(0,85,255,0.05))] border border-[var(--border\/primary\/hover,#37f)] border-solid` : isSecondaryAndSelectedAndDefault ? String.raw`border border-[var(--border\/primary\/default,#05f)] border-solid` : isPrimaryAndSelectedAndPressed ? String.raw`bg-[var(--surface\/primary\/pressed,#0347d1)]` : isPrimaryAndSelectedAndHover ? String.raw`bg-[var(--surface\/primary\/hover,#37f)]` : isPrimaryAndSelectedAndDefault ? String.raw`bg-[var(--text\/primary\/default,#05f)]` : variant === "secondary" && state === "disabled" ? String.raw`bg-[var(--surface\/neutral\/overlay-light,rgba(68,83,113,0.05))] border border-[var(--border\/disabled\/overlay-strong,rgba(68,83,113,0.5))] border-solid` : String.raw`bg-[var(--surface\/neutral\/overlay-light,rgba(68,83,113,0.05))]`}`} id={isSecondaryAndNotSelectedAndPressedAndIcon ? "node-75_1579" : isSecondaryAndNotSelectedAndPressedAndNotIcon ? "node-75_1573" : isSecondaryAndNotSelectedAndHoverAndIcon ? "node-75_1567" : isSecondaryAndNotSelectedAndHoverAndNotIcon ? "node-75_1562" : isSecondaryAndNotSelectedAndDefaultAndIcon ? "node-75_1556" : isSecondaryAndNotSelectedAndDefaultAndNotIcon ? "node-75_1551" : isPrimaryAndNotSelectedAndPressedAndIcon ? "node-75_1544" : isPrimaryAndNotSelectedAndPressedAndNotIcon ? "node-75_1538" : isPrimaryAndNotSelectedAndHoverAndIcon ? "node-75_1532" : isPrimaryAndNotSelectedAndHoverAndNotIcon ? "node-75_1527" : isPrimaryAndNotSelectedAndDefaultAndIcon ? "node-75_1521" : isPrimaryAndNotSelectedAndDefaultAndNotIcon ? "node-75_1516" : isSecondaryAndSelectedAndPressedAndIcon ? "node-75_1509" : isSecondaryAndSelectedAndHoverAndIcon ? "node-75_1503" : isSecondaryAndSelectedAndDefaultAndIcon ? "node-75_1497" : isSecondaryAndSelectedAndPressedAndNotIcon ? "node-75_1491" : isSecondaryAndSelectedAndHoverAndNotIcon ? "node-75_1486" : isSecondaryAndSelectedAndDefaultAndNotIcon ? "node-75_1481" : isPrimaryAndSelectedAndPressedAndIcon ? "node-75_1474" : isPrimaryAndSelectedAndHoverAndIcon ? "node-75_1468" : isPrimaryAndSelectedAndDefaultAndIcon ? "node-75_1462" : isPrimaryAndSelectedAndPressedAndNotIcon ? "node-75_1456" : isPrimaryAndSelectedAndHoverAndNotIcon ? "node-75_1451" : isPrimaryAndSelectedAndDefaultAndNotIcon ? "node-75_1446" : isSecondaryAndNotSelectedAndDisabledAndIcon ? "node-75_1440" : isSecondaryAndSelectedAndDisabledAndIcon ? "node-75_1434" : isSecondaryAndNotSelectedAndDisabledAndNotIcon ? "node-75_1429" : isSecondaryAndSelectedAndDisabledAndNotIcon ? "node-75_1424" : isPrimaryAndNotSelectedAndDisabledAndIcon ? "node-75_1418" : isPrimaryAndSelectedAndDisabledAndIcon ? "node-75_1412" : isPrimaryAndNotSelectedAndDisabledAndNotIcon ? "node-75_1407" : "node-75_1402"}>
+      <div className="content-stretch flex gap-[6px] h-[32px] items-center justify-center px-[14px] relative rounded-[9999px] shrink-0" id={isSecondaryAndNotSelectedAndPressedAndIcon ? "node-75_1580" : isSecondaryAndNotSelectedAndPressedAndNotIcon ? "node-75_1574" : isSecondaryAndNotSelectedAndHoverAndIcon ? "node-75_1568" : isSecondaryAndNotSelectedAndHoverAndNotIcon ? "node-75_1563" : isSecondaryAndNotSelectedAndDefaultAndIcon ? "node-75_1557" : isSecondaryAndNotSelectedAndDefaultAndNotIcon ? "node-75_1552" : isPrimaryAndNotSelectedAndPressedAndIcon ? "node-75_1545" : isPrimaryAndNotSelectedAndPressedAndNotIcon ? "node-75_1540" : isPrimaryAndNotSelectedAndHoverAndIcon ? "node-75_1533" : isPrimaryAndNotSelectedAndHoverAndNotIcon ? "node-75_1528" : isPrimaryAndNotSelectedAndDefaultAndIcon ? "node-75_1522" : isPrimaryAndNotSelectedAndDefaultAndNotIcon ? "node-75_1517" : isSecondaryAndSelectedAndPressedAndIcon ? "node-75_1510" : isSecondaryAndSelectedAndHoverAndIcon ? "node-75_1504" : isSecondaryAndSelectedAndDefaultAndIcon ? "node-75_1498" : isSecondaryAndSelectedAndPressedAndNotIcon ? "node-75_1492" : isSecondaryAndSelectedAndHoverAndNotIcon ? "node-75_1487" : isSecondaryAndSelectedAndDefaultAndNotIcon ? "node-75_1482" : isPrimaryAndSelectedAndPressedAndIcon ? "node-75_1475" : isPrimaryAndSelectedAndHoverAndIcon ? "node-75_1469" : isPrimaryAndSelectedAndDefaultAndIcon ? "node-75_1463" : isPrimaryAndSelectedAndPressedAndNotIcon ? "node-75_1457" : isPrimaryAndSelectedAndHoverAndNotIcon ? "node-75_1452" : isPrimaryAndSelectedAndDefaultAndNotIcon ? "node-75_1447" : isSecondaryAndNotSelectedAndDisabledAndIcon ? "node-75_1441" : isSecondaryAndSelectedAndDisabledAndIcon ? "node-75_1435" : isSecondaryAndNotSelectedAndDisabledAndNotIcon ? "node-75_1430" : isSecondaryAndSelectedAndDisabledAndNotIcon ? "node-75_1425" : isPrimaryAndNotSelectedAndDisabledAndIcon ? "node-75_1419" : isPrimaryAndSelectedAndDisabledAndIcon ? "node-75_1413" : isPrimaryAndNotSelectedAndDisabledAndNotIcon ? "node-75_1408" : "node-75_1403"} data-name="Wrapper">
+        {!icon && ((variant === "secondary" && selected && state === "default") || (variant === "secondary" && selected && state === "hover") || (variant === "secondary" && selected && state === "pressed") || (!selected && state === "default") || (!selected && state === "hover") || (!selected && state === "pressed")) && (
+          <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium justify-center leading-[0] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="75:1483">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">{labelText}</p>
+          </div>
+        )}
+        {isIconAndIsSecondaryAndTrueOrFalseAndDefaultOrHoverOrPressed &&
+          (iconVariant || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="75:1499" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded2} />
+            </div>
+          ))}
+        {isIconAndIsSecondaryAndTrueOrFalseAndDefaultOrHoverOrPressed && (
+          <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium justify-center leading-[0] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="75:1500">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">{labelText}</p>
+          </div>
+        )}
+        {!selected && ["default", "hover", "pressed"].includes(state) && counter && (
+          <div className="bg-[var(--surface\/neutral\/overlay-strong,rgba(68,83,113,0.15))] content-stretch flex flex-col h-[18px] items-center justify-center px-[3px] relative rounded-[12px] shrink-0" data-node-id="81:2745" data-name="Counter">
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2745;81:2210" data-name="Padding" />
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] text-center whitespace-nowrap" data-node-id="I81:2745;81:2211">
+              3
+            </p>
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2745;81:2212" data-name="Padding" />
+          </div>
+        )}
+        {isDisabledAndNotIcon && (
+          <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium justify-center leading-[0] relative shrink-0 text-[color:var(--text\/disabled\/overlay-strong,rgba(68,83,113,0.5))] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="75:1404">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">{labelText}</p>
+          </div>
+        )}
+        {isDisabledAndNotIcon && counter && (
+          <div className="bg-[var(--surface\/disabled\/overlay-medium,rgba(68,83,113,0.15))] content-stretch flex flex-col h-[18px] items-center justify-center px-[3px] relative rounded-[12px] shrink-0" data-node-id="81:2669" data-name="Counter">
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2669;81:2210" data-name="Padding" />
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[color:var(--text\/disabled\/overlay-strong,rgba(68,83,113,0.5))] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] text-center whitespace-nowrap" data-node-id="I81:2669;81:2211">
+              3
+            </p>
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2669;81:2212" data-name="Padding" />
+          </div>
+        )}
+        {isDisabledAndIcon &&
+          (iconVariant || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="75:1414" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded} />
+            </div>
+          ))}
+        {isDisabledAndIcon && (
+          <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium justify-center leading-[0] relative shrink-0 text-[color:var(--text\/disabled\/overlay-strong,rgba(68,83,113,0.5))] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="75:1415">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">{labelText}</p>
+          </div>
+        )}
+        {isDisabledAndIcon && counter && (
+          <div className="bg-[var(--surface\/disabled\/overlay-medium,rgba(68,83,113,0.15))] content-stretch flex flex-col h-[18px] items-center justify-center px-[3px] relative rounded-[12px] shrink-0" data-node-id="81:2644" data-name="Counter">
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2644;81:2210" data-name="Padding" />
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[color:var(--text\/disabled\/overlay-strong,rgba(68,83,113,0.5))] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] text-center whitespace-nowrap" data-node-id="I81:2644;81:2211">
+              3
+            </p>
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2644;81:2212" data-name="Padding" />
+          </div>
+        )}
+        {variant === "primary" && selected && !icon && ["default", "hover", "pressed"].includes(state) && (
+          <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium justify-center leading-[0] relative shrink-0 text-[color:var(--text\/on-color\/body,white)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="75:1448">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">{labelText}</p>
+          </div>
+        )}
+        {isPrimaryAndSelectedAndIconAndIsDefaultOrHoverOrPressed &&
+          (iconVariant || (
+            <div className="relative shrink-0 size-[16px]" data-node-id="75:1464" data-name="heart-rounded">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgHeartRounded1} />
+            </div>
+          ))}
+        {isPrimaryAndSelectedAndIconAndIsDefaultOrHoverOrPressed && (
+          <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium justify-center leading-[0] relative shrink-0 text-[color:var(--text\/on-color\/body,white)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="75:1465">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">{labelText}</p>
+          </div>
+        )}
+        {isPrimaryAndSelectedAndDefault && counter && (
+          <div className="bg-[var(--surface\/on-color\/default,white)] content-stretch flex flex-col h-[18px] items-center justify-center px-[3px] relative rounded-[12px] shrink-0" data-node-id="81:2717" data-name="Counter">
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2717;81:2210" data-name="Padding" />
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[color:var(--text\/primary\/default,#05f)] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] text-center whitespace-nowrap" data-node-id="I81:2717;81:2211">
+              3
+            </p>
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2717;81:2212" data-name="Padding" />
+          </div>
+        )}
+        {isPrimaryAndSelectedAndHover && counter && (
+          <div className="bg-[var(--surface\/on-color\/default,white)] content-stretch flex flex-col h-[18px] items-center justify-center px-[3px] relative rounded-[12px] shrink-0" data-node-id="81:2701" data-name="Counter">
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2701;81:2210" data-name="Padding" />
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[color:var(--text\/primary\/hover,#37f)] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] text-center whitespace-nowrap" data-node-id="I81:2701;81:2211">
+              3
+            </p>
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2701;81:2212" data-name="Padding" />
+          </div>
+        )}
+        {isPrimaryAndSelectedAndPressed && counter && (
+          <div className="bg-[var(--surface\/on-color\/default,white)] content-stretch flex flex-col h-[18px] items-center justify-center px-[3px] relative rounded-[12px] shrink-0" data-node-id="81:2685" data-name="Counter">
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2685;81:2210" data-name="Padding" />
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[color:var(--text\/primary\/pressed,#0347d1)] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] text-center whitespace-nowrap" data-node-id="I81:2685;81:2211">
+              3
+            </p>
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2685;81:2212" data-name="Padding" />
+          </div>
+        )}
+        {isSecondaryAndSelectedAndDefault && counter && (
+          <div className="bg-[var(--surface\/primary\/default,#05f)] content-stretch flex flex-col h-[18px] items-center justify-center px-[3px] relative rounded-[12px] shrink-0" data-node-id="81:2548" data-name="Counter">
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2548;81:2210" data-name="Padding" />
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[color:var(--text\/on-color\/body,white)] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] text-center whitespace-nowrap" data-node-id="I81:2548;81:2211">
+              3
+            </p>
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2548;81:2212" data-name="Padding" />
+          </div>
+        )}
+        {variant === "secondary" && selected && state === "hover" && counter && (
+          <div className="bg-[var(--surface\/primary\/hover,#37f)] content-stretch flex flex-col h-[18px] items-center justify-center px-[3px] relative rounded-[12px] shrink-0" data-node-id="81:2586" data-name="Counter">
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2586;81:2210" data-name="Padding" />
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[color:var(--text\/on-color\/body,white)] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] text-center whitespace-nowrap" data-node-id="I81:2586;81:2211">
+              3
+            </p>
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2586;81:2212" data-name="Padding" />
+          </div>
+        )}
+        {variant === "secondary" && selected && state === "pressed" && counter && (
+          <div className="bg-[var(--surface\/primary\/pressed,#0347d1)] content-stretch flex flex-col h-[18px] items-center justify-center px-[3px] relative rounded-[12px] shrink-0" data-node-id="81:2612" data-name="Counter">
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2612;81:2210" data-name="Padding" />
+            <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Medium')] font-medium leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)] relative shrink-0 text-[color:var(--text\/on-color\/body,white)] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] text-center whitespace-nowrap" data-node-id="I81:2612;81:2211">
+              3
+            </p>
+            <div className="h-[2px] relative shrink-0 w-[12px]" data-node-id="I81:2612;81:2212" data-name="Padding" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: Dekstop/Body/SM - Medium: Font(family: "Font family/primary", style: Font weight/Medium, size: Typography/Desktop/body/font-size/SM, weight: 500, lineHeight: Typography/Desktop/body/line-height/SM, letterSpacing: 0), Dekstop/Caption/3XS - Medium: Font(family: "Font family/primary", style: Font weight/Medium, size: Typography/Desktop/caption/font-size/3XS, weight: 500, lineHeight: Typography/Desktop/caption/line-height/3XS, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Chip
+**Node ID:** 75:1401
+
+Чип. Элементы фильтрации по заранее заданным категориям или ключевым словам. При выборе одного или нескольких чипсов отображаются объекты, относящиеся к выбранным категориям
+
+## Counter
+**Node ID:** 81:2200
+
+Компонент для отрисовки счетчика в ячейках и кнопках.
+
+## heart-rounded
+**Node ID:** 15:18521
+
+heart, love, favorite
+The generated code contains image and SVG URL constants, e.g. const image = '[temporary asset; see library-assets.json] These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

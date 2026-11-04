@@ -10,6 +10,11 @@ export type ScreenElement = { [C in ComponentId]: {
   id: string;
   component: C;
   variantProps: Props<Extract<CatalogEntry, { id: C }>['variantProps']>;
+  slots?: C extends 'input' ? { hint?: Extract<ScreenElement, {component:'hint'}>[]; label?: Extract<ScreenElement, {component:'field-label'}>[] }
+    : C extends 'tag-group' ? { tags?: Extract<ScreenElement, {component:'tag-item'}>[] }
+    : C extends 'items-list' ? { items?: Extract<ScreenElement, {component:'dropdown-item'}>[] }
+    : C extends 'dropdown-menu' ? { items?: Extract<ScreenElement, {component:'items-list'}>[] } : never;
+  interactionState?: C extends 'select' ? { selectedValue: string | null } : never;
   editorProps: Props<Extract<CatalogEntry, { id: C }>['editorProps']>;
 } }[ComponentId];
 export interface EditorOverrides { primaryColor?: string; radiusPx?: number; fontFamily?: string }
@@ -30,5 +35,5 @@ export interface CanvasV1 extends Omit<CanvasV2, 'schemaVersion' | 'themeOverrid
 }
 export interface Issue { code: string; path: string; message: string }
 export type Result<T> = { valid: true; value: T; warnings: Issue[] } | { valid: false; errors: Issue[]; warnings: Issue[] };
-export const CONTRACT_VERSION = '1.1.0';
+export const CONTRACT_VERSION = '1.3.0';
 export const MAX_BYTES = 2_000_000;

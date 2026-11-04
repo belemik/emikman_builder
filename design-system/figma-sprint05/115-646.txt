@@ -1,0 +1,48 @@
+type ElementsLabelProps = {
+  className?: string;
+  counter?: "Hint Container";
+  hint?: "Elements";
+  necessarily?: boolean;
+  property3?: "Elements";
+  property4?: "Label";
+};
+
+function ElementsLabel({ className, counter = "Hint Container", hint = "Elements", necessarily = false, property3 = "Elements", property4 = "Label" }: ElementsLabelProps) {
+  return (
+    <div className={className || '[word-break:break-word] content-stretch flex font-[family-name:var(--font-family\\/primary,"Manrope:Regular")] font-normal items-start leading-[var(--typography\\/desktop\\/caption\\/line-height\\/2xs,14px)] relative text-[12px] w-[30px] whitespace-nowrap'} data-node-id="115:646">
+      <p className="overflow-hidden relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-ellipsis" data-node-id="115:647">
+        Label
+      </p>
+      {necessarily && (
+        <p className="absolute left-[-6px] overflow-hidden text-[color:var(--text\/error\/default,#f51743)] text-ellipsis top-0" data-node-id="2022:12237">
+          *
+        </p>
+      )}
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: Dekstop/Caption/2XS - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/caption/font-size/2XS, weight: 400, lineHeight: Typography/Desktop/caption/line-height/2XS, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## hint=Elements, counter=Hint Container, Property 3=Elements, Property 4=Label
+**Node ID:** 115:646
+
+⚙️ Внутренний компонент, лейбл.
+
+Не используется отдельно
+
+## Elements / Label
+**Node ID:** 115:638
+
+⚙️ Внутренний компонент, хинт, подсказка.
+
+Не используется отдельно
+The generated code contains image and SVG URL constants, e.g. const image = '[temporary asset; see library-assets.json] These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

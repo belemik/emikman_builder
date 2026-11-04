@@ -1,0 +1,89 @@
+const imgSearchLg = "[temporary asset; see library-assets.json]";
+const imgChevronDown = "[temporary asset; see library-assets.json]";
+
+type SelectProps = {
+  className?: string;
+  foldDirection?: "down";
+  hint?: boolean;
+  label?: "true";
+  leftIcon?: boolean;
+  leftIconEdit?: React.ReactNode | null;
+  placeholder?: "true";
+  size?: "l";
+  state?: "default";
+};
+
+function Select({ className, foldDirection = "down", hint = false, label = "true", leftIcon = false, leftIconEdit = null, placeholder = "true", size = "l", state = "default" }: SelectProps) {
+  return (
+    <div className={className || "content-stretch flex flex-col items-start relative w-[280px]"} data-node-id="195:56850">
+      <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full" data-node-id="195:56851" data-name="Body">
+        <div className="bg-[var(--surface\/on-color\/default,white)] border border-[var(--border\/neutral\/overlay-strong,rgba(68,83,113,0.2))] border-solid content-stretch flex gap-[8px] h-[50px] items-center px-[12px] relative rounded-[6px] shrink-0 w-full" data-node-id="195:56852" data-name="Input Container">
+          {leftIcon &&
+            (leftIconEdit || (
+              <div className="relative shrink-0 size-[16px]" data-node-id="195:56853" data-name="search-lg">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSearchLg} />
+              </div>
+            ))}
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start justify-center min-w-px relative" data-node-id="195:56854" data-name="Text Container">
+            <div className="content-stretch flex items-start relative shrink-0 w-full" data-node-id="195:56855" data-name="Elements / Label">
+              <p className="[word-break:break-word] font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] overflow-hidden relative shrink-0 text-[12px] text-[color:var(--text\/default\/caption,#69758d)] text-ellipsis whitespace-nowrap" data-node-id="I195:56855;115:647">
+                Label
+              </p>
+            </div>
+            <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] overflow-hidden relative shrink-0 text-[color:var(--text\/default\/placeholder,#b4bac6)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] text-ellipsis w-full whitespace-nowrap" data-node-id="195:56856">
+              <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)] overflow-hidden text-[14px] text-ellipsis">Placeholder</p>
+            </div>
+          </div>
+          <div className="relative shrink-0 size-[16px]" data-node-id="195:56858" data-name="chevron-down">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgChevronDown} />
+          </div>
+        </div>
+        {hint && (
+          <div className="[word-break:break-word] content-stretch flex font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal gap-[4px] items-start leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)] px-[12px] relative shrink-0 text-[color:var(--text\/on-color\/caption,#8f98aa)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] w-full" data-node-id="195:56859" data-name="Elements / Hint Container">
+            <p className="flex-[1_0_0] min-w-px relative" data-node-id="I195:56859;115:430">
+              Hint
+            </p>
+            <p className="relative shrink-0 text-right whitespace-nowrap" data-node-id="I195:56859;115:431">
+              10/25
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: Dekstop/Caption/2XS - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/caption/font-size/2XS, weight: 400, lineHeight: Typography/Desktop/caption/line-height/2XS, letterSpacing: 0), Dekstop/Body/SM - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/body/font-size/SM, weight: 400, lineHeight: Typography/Desktop/body/line-height/SM, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Select
+**Node ID:** 195:56849
+
+Отображает выпадающий список доступных вариантов
+
+## hint=Elements, counter=Hint Container, Property 3=Elements, Property 4=Label
+**Node ID:** 115:646
+
+⚙️ Внутренний компонент, лейбл.
+
+Не используется отдельно
+
+## Elements / Label
+**Node ID:** 115:638
+
+⚙️ Внутренний компонент, хинт, подсказка.
+
+Не используется отдельно
+
+## chevron-down
+**Node ID:** 15:20858
+
+chevron, down, dropdown
+The generated code contains image and SVG URL constants, e.g. const image = '[temporary asset; see library-assets.json] These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

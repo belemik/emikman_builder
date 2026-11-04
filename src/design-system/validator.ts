@@ -1,3 +1,5 @@
+import matrix from '../../design-system/library-matrix.json';
+import { slotRules, internalComponents, allowedParents } from './composition';
 import { catalog, tokens } from './catalog.generated';
 import { MAX_BYTES, type Issue, type Result, type ScreenSchema, type ScreenDraft, type ScreenElement, type TokenName, type TokenType } from './schema';
 
@@ -28,13 +30,42 @@ function validateProps(v: unknown, schema: Record<string, Prop>, path: string, e
     if (p.type === 'enum' ? typeof x !== 'string' || !p.values!.includes(x) : p.type === 'boolean' ? typeof x !== 'boolean' : typeof x !== 'string' || x.length > 2000) errors.push(issue('PROP_VALUE', path + '/' + k, 'Value is outside the reviewed seed schema.'));
   }
 }
-export function validateComponent(input: unknown): Result<ScreenElement> {
+export function validateComponent(input: unknown, depth = 0): Result<ScreenElement> {
+  if (depth > 3) return { valid: false, errors: [issue('DEPTH', '', 'Composition exceeds three levels.')], warnings: [] };
   const errors: Issue[] = [];
-  if (fields(input, ['id', 'component', 'variantProps', 'editorProps'], '', errors)) {
+  if (fields(input, ['id', 'component', 'variantProps', 'editorProps', ...(isObject(input) && own(input, 'slots') ? ['slots'] : []), ...(isObject(input) && input.component === 'select' && own(input, 'interactionState') ? ['interactionState'] : [])], '', errors)) {
     if (typeof input.id !== 'string' || !input.id || input.id.length > 100) errors.push(issue('ID', '/id', 'Expected nonempty ID, at most 100 characters.'));
     const entry = catalog.find(c => c.id === input.component);
     if (!entry) errors.push(issue('COMPONENT', '/component', 'Component is not in the reviewed catalog.'));
     else { validateProps(input.variantProps, entry.variantProps, '/variantProps', errors); validateProps(input.editorProps, entry.editorProps, '/editorProps', errors); }
+  }
+  if (isObject(input) && typeof input.component === 'string') {
+    if (own(input, 'interactionState') && input.component === 'select' && fields(input.interactionState, ['selectedValue'], '/interactionState', errors)) {
+      const value = input.interactionState.selectedValue;
+      const options = isObject(input.editorProps) && typeof input.editorProps.optionsText === 'string' ? input.editorProps.optionsText.split('\n').filter(x => x.trim()) : [];
+      if (value !== null && (typeof value !== 'string' || value.length > 2000 || !options.includes(value))) errors.push(issue('SELECT_VALUE', '/interactionState/selectedValue', 'Выбранное значение отсутствует в optionsText. Сначала сбросьте выбор в инспекторе.'));
+    }
+    const rows = (matrix as Record<string, { props: Record<string, unknown> }[]>)[input.component];
+    // Existing Select metadata compatibility remains; strict capability validation uses the narrower matrix.
+    if (rows && input.component !== 'select' && isObject(input.variantProps) && !rows.some(row => Object.entries(row.props).every(([k,v]) => (input.variantProps as Obj)[k] === v))) errors.push(issue('UNVERIFIED_COMBINATION', '/variantProps', 'No such variant exists in the reviewed Figma matrix.'));
+    if (own(input, 'slots')) {
+      const rules = slotRules[input.component] ?? {};
+      if (fields(input.slots, Object.keys(rules), '/slots', errors, true)) for (const [slot, children] of Object.entries(input.slots)) {
+        const rule = rules[slot]; if (!rule) continue;
+        if (!Array.isArray(children) || children.length < rule.min || children.length > rule.max) { errors.push(issue('SLOT_COUNT', '/slots/'+slot, 'Invalid slot cardinality.')); continue; }
+        for (let i=0; i<children.length; i++) {
+          const child = children[i], result = validateComponent(child, depth+1);
+          if (!result.valid) errors.push(...result.errors.map(e => ({...e,path:`/slots/${slot}/${i}${e.path}`})));
+          if (isObject(child) && typeof child.component === 'string' && allowedParents[child.component] && !allowedParents[child.component].includes(input.component)) errors.push(issue('PARENT_COMPONENT', `/slots/${slot}/${i}`, 'Родитель не разрешён подтверждённой структурой Figma.'));
+          if (!isObject(child) || child.component !== rule.component) errors.push(issue('SLOT_COMPONENT', '/slots/'+slot, 'Component is not allowed in this Figma slot.'));
+        }
+        if (isObject(input.variantProps) && ['tag-group','items-list'].includes(input.component) && children.length !== Number(String(input.variantProps.amount).replace('x',''))) errors.push(issue('SLOT_COUNT', '/slots/'+slot, 'Child count must match amount.'));
+        if (input.component === 'items-list' && isObject(input.variantProps)) for (const child of children) { if (isObject(child) && isObject(child.variantProps) && child.variantProps.size !== input.variantProps.size) errors.push(issue('SLOT_VARIANT', '/slots/'+slot, 'DropdownMenu size must match ItemsList size.')); }
+        if (input.component === 'tag-group' && isObject(input.variantProps)) for (const child of children) {
+          if (isObject(child) && isObject(child.variantProps) && isObject(child.editorProps) && (child.variantProps.size !== input.variantProps.size || child.variantProps.variant !== 'primary' || child.variantProps.state !== (input.variantProps.disabled ? 'disabled' : 'default') || child.editorProps.closable !== input.variantProps.closable)) errors.push(issue('SLOT_VARIANT', '/slots/'+slot, 'TagItem must match the verified group composition.'));
+        }
+      }
+    }
   }
   return errors.length ? { valid: false, errors, warnings: [] } : { valid: true, value: structuredClone(input) as ScreenElement, warnings: [] };
 }
@@ -69,6 +100,9 @@ export function validateScreen(input: unknown, options: { mode: 'strict' | 'comp
         else {
           if (ids.has(r.value.id)) errors.push(issue('DUPLICATE_ID', `/elements/${i}/id`, 'Duplicate ID.'));
           ids.add(r.value.id);
+          if (internalComponents.has(r.value.component)) errors.push(issue('INTERNAL_COMPONENT', `/elements/${i}`, `${r.value.component} — внутренний компонент Figma. Допустимый родитель: ${(allowedParents[r.value.component] ?? []).join(', ')}; требуется подтверждённый слот. Исходные данные не удалены.`));
+          const collect = (element: ScreenElement) => { for (const children of Object.values(element.slots ?? {})) for (const child of children ?? []) { if (ids.has(child.id)) errors.push(issue('DUPLICATE_ID', `/elements/${i}/slots`, 'Duplicate nested ID.')); ids.add(child.id); collect(child); } }; collect(r.value);
+          if (ids.size > 500) errors.push(issue('ELEMENTS', '/elements', 'Total component count exceeds 500.'));
           if (r.value.component === 'checkbox' && r.value.variantProps.indeterminate && !r.value.variantProps.checked) {
             const e = issue('UNVERIFIED_COMBINATION', `/elements/${i}/variantProps`, 'indeterminate=true/checked=false is an editor interpretation, not a verified Figma combination.');
             (options.mode === 'strict' ? errors : warnings).push(e);

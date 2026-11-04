@@ -1,0 +1,135 @@
+{
+  "tag-imgX": {
+    "path": "/ds-library/tag-imgX.svg",
+    "nodeId": "195:1079",
+    "width": 16,
+    "height": 16,
+    "sha256": "e12752ee6768a2b022f8d7cdd0cd7b7f71aee7082d18ac14bf641d9e309aba12"
+  },
+  "tag-imgX1": {
+    "path": "/ds-library/tag-imgX1.svg",
+    "nodeId": "195:1079",
+    "width": 14,
+    "height": 14,
+    "sha256": "15f785f85974de0552b04008bb8077330badbe3a43d39a84f97d167471a3f107"
+  },
+  "tag-imgX2": {
+    "path": "/ds-library/tag-imgX2.svg",
+    "nodeId": "195:1079",
+    "width": 14,
+    "height": 14,
+    "sha256": "c3a33ea7bae249c120c9350f15de919736d32f11c272690938462ad8dfeaae62"
+  },
+  "tag-imgX3": {
+    "path": "/ds-library/tag-imgX3.svg",
+    "nodeId": "195:1079",
+    "width": 14,
+    "height": 14,
+    "sha256": "8b560b1b12ae85a0657f73dd8781ec3e97779ef3922420653b36972c62238309"
+  },
+  "tag-imgX4": {
+    "path": "/ds-library/tag-imgX4.svg",
+    "nodeId": "195:1079",
+    "width": 16,
+    "height": 16,
+    "sha256": "423aa11d56eeee3f60395e437cad1e3b465756c0ec52507fee70d71c3ceb75a9"
+  },
+  "tag-imgX5": {
+    "path": "/ds-library/tag-imgX5.svg",
+    "nodeId": "195:1079",
+    "width": 16,
+    "height": 16,
+    "sha256": "7f89e5abb7496f96515f0792bf24abd78730df408fcafccf2c19ef966972c275"
+  },
+  "chip-imgHeartRounded": {
+    "path": "/ds-library/chip-imgHeartRounded.svg",
+    "nodeId": "75:1401",
+    "width": 16,
+    "height": 16,
+    "sha256": "dcb6a43a871efadf4ddff13fb5779c68b2ed26448d57b457112a40ed3825a392"
+  },
+  "chip-imgHeartRounded1": {
+    "path": "/ds-library/chip-imgHeartRounded1.svg",
+    "nodeId": "75:1401",
+    "width": 16,
+    "height": 16,
+    "sha256": "648de8c232e236fc7d0b90d4aca1896bc0a6652b5ca3f2e8ee870d6883089fc6"
+  },
+  "chip-imgHeartRounded2": {
+    "path": "/ds-library/chip-imgHeartRounded2.svg",
+    "nodeId": "75:1401",
+    "width": 16,
+    "height": 16,
+    "sha256": "9d76b0250b522785326ec7cfc2f4cc37e09ddaa13f99eef2ebdf9303d54fc897"
+  },
+  "more-imgPlus": {
+    "path": "/ds-library/more-imgPlus.svg",
+    "nodeId": "195:28366",
+    "width": 12,
+    "height": 12,
+    "sha256": "5afb38ab0003afae0dce7b905c945677e34034f56671621fe12307d336c5f4e8"
+  },
+  "more-imgPlus1": {
+    "path": "/ds-library/more-imgPlus1.svg",
+    "nodeId": "195:28366",
+    "width": 10,
+    "height": 10,
+    "sha256": "eee428ff07acdb0820f9aa4b1e9dc4ec7fb8a71c3eb2223c46b83101bc8f0815"
+  },
+  "more-imgPlus2": {
+    "path": "/ds-library/more-imgPlus2.svg",
+    "nodeId": "195:28366",
+    "width": 16,
+    "height": 16,
+    "sha256": "1ab88b3ce17fac47ed6eaf8e390e8cdd642e1ffd35561e7d2323ac97204b92f9"
+  },
+  "menu-imgCheck": {
+    "path": "/ds-library/menu-imgCheck.svg",
+    "nodeId": "91:7219",
+    "width": 16,
+    "height": 16,
+    "sha256": "59ae91c26b90b631d084050d0196eac578881512a41acabb53d7a44ee53d3509"
+  },
+  "menu-imgCheck1": {
+    "path": "/ds-library/menu-imgCheck1.svg",
+    "nodeId": "91:7219",
+    "width": 16,
+    "height": 16,
+    "sha256": "26351c112fa3341bb6d3538fe70fdc688b9b13aa7a766c0c8cfa0735553e2a50"
+  },
+  "menu-imgCheck2": {
+    "path": "/ds-library/menu-imgCheck2.svg",
+    "nodeId": "91:7219",
+    "width": 16,
+    "height": 16,
+    "sha256": "9efb895b2b9187d0d2ae7556e0fd69a324712286edeef54ca879b278ad5810ff"
+  },
+  "menu-imgCheck3": {
+    "path": "/ds-library/menu-imgCheck3.svg",
+    "nodeId": "91:7219",
+    "width": 16,
+    "height": 16,
+    "sha256": "4827d22bee3142860e29e939068b2695229b44de236fdfa2830f193e652b6c3d"
+  },
+  "select-imgChevronDown": {
+    "path": "/ds-library/select-imgChevronDown.svg",
+    "nodeId": "195:56850",
+    "width": 16,
+    "height": 16,
+    "sha256": "5b3910cd2c5458851e3a01e80807e46d3b79250cbf7d5ffaf90e675ee33960e4"
+  },
+  "select-imgChevronUp": {
+    "path": "/ds-library/select-imgChevronUp.svg",
+    "nodeId": "195:57018",
+    "width": 16,
+    "height": 16,
+    "sha256": "bce388e354bba698532c72dfb2568501d7c85ce3331d3f4c8c79ffcc288c3188"
+  },
+  "select-disabled-imgChevronDown": {
+    "path": "/ds-library/select-disabled-imgChevronDown.svg",
+    "nodeId": "195:57126",
+    "width": 16,
+    "height": 16,
+    "sha256": "707ee5407b3a168848456bfe812354fe8f669248bd274d964586fd695e0a7f45"
+  }
+}

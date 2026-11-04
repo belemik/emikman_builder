@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 3,
+  "platform": "web",
+  "elements": [
+    {
+      "id": "input-",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "default",
+        "placeholder": false
+      },
+      "editorProps": {
+        "placeholderText": "Введите email",
+        "label": "Email"
+      },
+      "slots": {
+        "hint": [
+          {
+            "id": "hint-",
+            "component": "hint",
+            "variantProps": {
+              "hint": true,
+              "counter": true
+            },
+            "editorProps": {
+              "hintText": "Hint",
+              "counterText": "10/25"
+            }
+          }
+        ],
+        "label": [
+          {
+            "id": "field-label-",
+            "component": "field-label",
+            "variantProps": {
+              "hint": "Elements",
+              "counter": "Hint Container",
+              "Property 3": "Elements",
+              "Property 4": "Label"
+            },
+            "editorProps": {
+              "necessarily": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "select-",
+      "component": "select",
+      "variantProps": {
+        "size": "l",
+        "state": "default",
+        "placeholder": true,
+        "label": true,
+        "foldDirection": "down"
+      },
+      "editorProps": {
+        "labelText": "Label",
+        "placeholderText": "Placeholder",
+        "optionsText": "Alpha\nBeta\nGamma"
+      }
+    },
+    {
+      "id": "tag-group-",
+      "component": "tag-group",
+      "variantProps": {
+        "amount": "2",
+        "closable": true,
+        "disabled": false,
+        "size": "m"
+      },
+      "editorProps": {},
+      "slots": {
+        "tags": [
+          {
+            "id": "tag-item-0",
+            "component": "tag-item",
+            "variantProps": {
+              "size": "m",
+              "variant": "primary",
+              "state": "default"
+            },
+            "editorProps": {
+              "closable": true,
+              "labelText": "Label"
+            }
+          },
+          {
+            "id": "tag-item-1",
+            "component": "tag-item",
+            "variantProps": {
+              "size": "m",
+              "variant": "primary",
+              "state": "default"
+            },
+            "editorProps": {
+              "closable": true,
+              "labelText": "Second"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "themeOverrides": {},
+  "tokenReferences": [
+    "Font family/primary",
+    "surface/primary/default",
+    "surface/error/overlay-light"
+  ]
+}

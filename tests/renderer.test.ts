@@ -41,8 +41,9 @@ test('renderer revalidates each call and does not trust a formerly validated obj
 });
 test('import, edits, prompt and strict export use DS validator; v2 editor overrides are retained', () => {
   const imported = importEditorDocument(JSON.stringify(fixture));
-  assert.equal(imported.document.schemaVersion, 2);
-  assert.ok(imported.warnings.some(w => w.code === 'TOKEN_MANIFEST_OMITTED'));
+  assert.equal(imported.document.schemaVersion, 3);
+  assert.deepEqual(imported.document.tokenReferences, fixture.tokenReferences);
+  assert.ok(!imported.warnings.some(w => w.code === 'TOKEN_MANIFEST_OMITTED'));
   assert.equal(strictDocument(imported.document).schemaVersion, 3);
   assert.equal(validateScreen(strictDocument(imported.document)).valid, true);
   const custom = { ...imported.document, themeOverrides: { radiusPx: 8 } };

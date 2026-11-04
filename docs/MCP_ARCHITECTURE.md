@@ -1,3 +1,5 @@
+> Обновление Sprint 05.1: правила внутренних компонентов и сохранение Select уточнены в [отчёте стабилизации](SPRINT05_1.md). Числа аудита ниже относятся к состоянию до стабилизации.
+
 # Будущий WDeaf MCP — архитектурный проект, не реализация
 
 ## Граница системы
@@ -41,3 +43,7 @@ MCP adapter → независимый design-system core → versioned JSON res
 ## После Sprint 04
 
 prepareRender(unknown) проверяет strict Screen Schema и capability matrix. Будущий MCP должен различать schemaValid и rendererSupported: валидный Select ещё не поддержан строгим renderer. Contract 1.1.0 добавил 12 проверенных токенов и сохранил форматы v1/v2/v3. UI использует bridge в v2; tokenReferences остаётся ограничением, а не скрытой поддержкой полного хранения v3. Реализация transport по-прежнему отсутствует.
+
+## Sprint 05 / Contract 1.2.0
+
+Canvas использует v3 напрямую и сохраняет tokenReferences и типизированные slots. MCP adapter должен объявлять supported contract version и точную capability matrix (library-matrix.json + Sprint 04), различать schemaValid и rendererSupported. Внутренние Hint/Label/ItemsList разрешены только в именованных слотах. Для всех входов обязательны ограничение bytes/depth/count, проверка уникальности ID всего дерева и повторная валидация до рендера. Перенос не требует React в validator или library-capabilities. Существующий toCanvasV2 — только явный legacy export, не путь сохранения.

@@ -1,7 +1,3084 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "WDeaf Screen Schema v3 (strict)",
-  "description": "Closed document grammar, not a pixel-perfect renderer certification. Runtime validator additionally checks unique IDs and known unverified combinations.",
+  "description": "Runtime additionally checks nested IDs, slot/parent consistency and renderer capability.",
+  "$defs": {
+    "tag-item": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "tag-item"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "type": "string",
+              "enum": [
+                "m",
+                "s",
+                "xs"
+              ]
+            },
+            "variant": {
+              "type": "string",
+              "enum": [
+                "primary",
+                "secondary"
+              ]
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "default",
+                "hover",
+                "error",
+                "disabled"
+              ]
+            }
+          },
+          "required": [
+            "size",
+            "variant",
+            "state"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "disabled"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "disabled"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "error"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "error"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "error"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "error"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "disabled"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "disabled"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "disabled"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "disabled"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "error"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "error"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "closable": {
+              "type": "boolean"
+            },
+            "labelText": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "closable",
+            "labelText"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "tag-input": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "tag-input"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "type": "string",
+              "enum": [
+                "m",
+                "s",
+                "xs"
+              ]
+            },
+            "variant": {
+              "type": "string",
+              "enum": [
+                "primary",
+                "secondary"
+              ]
+            }
+          },
+          "required": [
+            "size",
+            "variant"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "primary"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "primary"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "secondary"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "secondary"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "primary"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "tag-more": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "tag-more"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "type": "string",
+              "enum": [
+                "m",
+                "s",
+                "xs"
+              ]
+            },
+            "variant": {
+              "type": "string",
+              "enum": [
+                "primary",
+                "secondary"
+              ]
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "default",
+                "hover"
+              ]
+            }
+          },
+          "required": [
+            "size",
+            "variant",
+            "state"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "s"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "xs"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "primary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "tag-group": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "tag-group"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "string",
+              "enum": [
+                "1",
+                "2"
+              ]
+            },
+            "closable": {
+              "type": "boolean"
+            },
+            "disabled": {
+              "type": "boolean"
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "m"
+              ]
+            }
+          },
+          "required": [
+            "amount",
+            "closable",
+            "disabled",
+            "size"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "amount": {
+                  "const": "2"
+                },
+                "closable": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "2"
+                },
+                "closable": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": true
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "2"
+                },
+                "closable": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": false
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "2"
+                },
+                "closable": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": true
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "1"
+                },
+                "closable": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "1"
+                },
+                "closable": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": true
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "1"
+                },
+                "closable": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": false
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "1"
+                },
+                "closable": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": true
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tags": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": {
+                "$ref": "#/$defs/tag-item"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "chip": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "chip"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "variant": {
+              "type": "string",
+              "enum": [
+                "primary",
+                "secondary"
+              ]
+            },
+            "selected": {
+              "type": "boolean"
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "default",
+                "hover",
+                "pressed",
+                "disabled"
+              ]
+            },
+            "icon": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "variant",
+            "selected",
+            "state",
+            "icon"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "disabled"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "disabled"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "disabled"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "disabled"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "disabled"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "disabled"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "disabled"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "disabled"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "default"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "hover"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "pressed"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "default"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "hover"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "pressed"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "default"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "hover"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "pressed"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "default"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "hover"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": true
+                },
+                "state": {
+                  "const": "pressed"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "default"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "default"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "hover"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "hover"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "pressed"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "primary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "pressed"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "default"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "default"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "hover"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "hover"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "pressed"
+                },
+                "icon": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "variant": {
+                  "const": "secondary"
+                },
+                "selected": {
+                  "const": false
+                },
+                "state": {
+                  "const": "pressed"
+                },
+                "icon": {
+                  "const": true
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "counter": {
+              "type": "boolean"
+            },
+            "labelText": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "counter",
+            "labelText"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "hint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "hint"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "hint": {
+              "type": "boolean"
+            },
+            "counter": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "hint",
+            "counter"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "hint": {
+                  "const": true
+                },
+                "counter": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "hint": {
+                  "const": false
+                },
+                "counter": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "hint": {
+                  "const": true
+                },
+                "counter": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "hintText": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "counterText": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "hintText",
+            "counterText"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "field-label": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "field-label"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "hint": {
+              "type": "string",
+              "enum": [
+                "Elements"
+              ]
+            },
+            "counter": {
+              "type": "string",
+              "enum": [
+                "Hint Container"
+              ]
+            },
+            "Property 3": {
+              "type": "string",
+              "enum": [
+                "Elements"
+              ]
+            },
+            "Property 4": {
+              "type": "string",
+              "enum": [
+                "Label"
+              ]
+            }
+          },
+          "required": [
+            "hint",
+            "counter",
+            "Property 3",
+            "Property 4"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "hint": {
+                  "const": "Elements"
+                },
+                "counter": {
+                  "const": "Hint Container"
+                },
+                "Property 3": {
+                  "const": "Elements"
+                },
+                "Property 4": {
+                  "const": "Label"
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "necessarily": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "necessarily"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "dropdown-item": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "dropdown-item"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "menu item",
+                "group title",
+                "group divider"
+              ]
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "m",
+                "s"
+              ]
+            },
+            "selected": {
+              "type": "boolean"
+            },
+            "hover": {
+              "type": "boolean"
+            },
+            "disabled": {
+              "type": "boolean"
+            },
+            "icon2": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "size",
+            "selected",
+            "hover",
+            "disabled",
+            "icon2"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": true
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": true
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": true
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": true
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": true
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": true
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": true
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": true
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "menu item"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": true
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": true
+                },
+                "icon2": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "group title"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "group title"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "group divider"
+                },
+                "size": {
+                  "const": "m"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "group divider"
+                },
+                "size": {
+                  "const": "s"
+                },
+                "selected": {
+                  "const": false
+                },
+                "hover": {
+                  "const": false
+                },
+                "disabled": {
+                  "const": false
+                },
+                "icon2": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "itemText": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "itemText"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "items-list": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "items-list"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "string",
+              "enum": [
+                "x1",
+                "x2",
+                "x3",
+                "x4",
+                "x5",
+                "x6",
+                "x7",
+                "x8",
+                "x9",
+                "x10"
+              ]
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "m",
+                "s"
+              ]
+            }
+          },
+          "required": [
+            "amount",
+            "size"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "amount": {
+                  "const": "x1"
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x1"
+                },
+                "size": {
+                  "const": "s"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x2"
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x2"
+                },
+                "size": {
+                  "const": "s"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x3"
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x3"
+                },
+                "size": {
+                  "const": "s"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x4"
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x4"
+                },
+                "size": {
+                  "const": "s"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x5"
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x5"
+                },
+                "size": {
+                  "const": "s"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x6"
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x6"
+                },
+                "size": {
+                  "const": "s"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x7"
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x7"
+                },
+                "size": {
+                  "const": "s"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x8"
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x8"
+                },
+                "size": {
+                  "const": "s"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x9"
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x9"
+                },
+                "size": {
+                  "const": "s"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x10"
+                },
+                "size": {
+                  "const": "m"
+                }
+              }
+            },
+            {
+              "properties": {
+                "amount": {
+                  "const": "x10"
+                },
+                "size": {
+                  "const": "s"
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 10,
+              "items": {
+                "$ref": "#/$defs/dropdown-item"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "dropdown-menu": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "dropdown-menu"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {}
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "items": {
+                "$ref": "#/$defs/items-list"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "button": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "button"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "type": "string",
+              "enum": [
+                "s",
+                "m",
+                "l",
+                "xl"
+              ]
+            },
+            "variant": {
+              "type": "string",
+              "enum": [
+                "primary",
+                "secondary",
+                "outline",
+                "ghost"
+              ]
+            },
+            "colorScheme": {
+              "type": "string",
+              "enum": [
+                "accent",
+                "neutral"
+              ]
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "default",
+                "hover",
+                "pressed",
+                "disabled"
+              ]
+            }
+          },
+          "required": [
+            "size",
+            "variant",
+            "colorScheme",
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "input"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "type": "string",
+              "enum": [
+                "s",
+                "m",
+                "l"
+              ]
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "default",
+                "hover",
+                "pressed",
+                "filled",
+                "error",
+                "disabled default",
+                "disabled filled"
+              ]
+            },
+            "placeholder": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "size",
+            "state",
+            "placeholder"
+          ],
+          "additionalProperties": false
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "placeholderText": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "label": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "placeholderText",
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "hint": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "items": {
+                "$ref": "#/$defs/hint"
+              }
+            },
+            "label": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "items": {
+                "$ref": "#/$defs/field-label"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "select": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "select"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "type": "string",
+              "enum": [
+                "s",
+                "m",
+                "l"
+              ]
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "default",
+                "hover",
+                "filled",
+                "pressed",
+                "error",
+                "disabled filled",
+                "disabled default"
+              ]
+            },
+            "placeholder": {
+              "type": "boolean"
+            },
+            "label": {
+              "type": "boolean"
+            },
+            "foldDirection": {
+              "type": "string",
+              "enum": [
+                "down",
+                "up"
+              ]
+            }
+          },
+          "required": [
+            "size",
+            "state",
+            "placeholder",
+            "label",
+            "foldDirection"
+          ],
+          "additionalProperties": false
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "labelText": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "placeholderText": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "optionsText": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "labelText",
+            "placeholderText",
+            "optionsText"
+          ],
+          "additionalProperties": false
+        },
+        "interactionState": {
+          "type": "object",
+          "properties": {
+            "selectedValue": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "selectedValue"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "checkbox": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "checkbox"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "type": "string",
+              "enum": [
+                "s",
+                "xs"
+              ]
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "default",
+                "hover",
+                "pressed",
+                "disabled"
+              ]
+            },
+            "checked": {
+              "type": "boolean"
+            },
+            "indeterminate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "size",
+            "state",
+            "checked",
+            "indeterminate"
+          ],
+          "additionalProperties": false
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "table": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "table"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "title"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    }
+  },
   "type": "object",
   "properties": {
     "schemaVersion": {
@@ -16,350 +3093,31 @@
       "items": {
         "oneOf": [
           {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 100
-              },
-              "component": {
-                "const": "button"
-              },
-              "variantProps": {
-                "type": "object",
-                "properties": {
-                  "size": {
-                    "type": "string",
-                    "enum": [
-                      "s",
-                      "m",
-                      "l",
-                      "xl"
-                    ]
-                  },
-                  "variant": {
-                    "type": "string",
-                    "enum": [
-                      "primary",
-                      "secondary",
-                      "outline",
-                      "ghost"
-                    ]
-                  },
-                  "colorScheme": {
-                    "type": "string",
-                    "enum": [
-                      "accent",
-                      "neutral"
-                    ]
-                  },
-                  "state": {
-                    "type": "string",
-                    "enum": [
-                      "default",
-                      "hover",
-                      "pressed",
-                      "disabled"
-                    ]
-                  }
-                },
-                "required": [
-                  "size",
-                  "variant",
-                  "colorScheme",
-                  "state"
-                ],
-                "additionalProperties": false
-              },
-              "editorProps": {
-                "type": "object",
-                "properties": {
-                  "label": {
-                    "type": "string",
-                    "maxLength": 2000
-                  }
-                },
-                "required": [
-                  "label"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "id",
-              "component",
-              "variantProps",
-              "editorProps"
-            ],
-            "additionalProperties": false
+            "$ref": "#/$defs/tag-item"
           },
           {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 100
-              },
-              "component": {
-                "const": "input"
-              },
-              "variantProps": {
-                "type": "object",
-                "properties": {
-                  "size": {
-                    "type": "string",
-                    "enum": [
-                      "s",
-                      "m",
-                      "l"
-                    ]
-                  },
-                  "state": {
-                    "type": "string",
-                    "enum": [
-                      "default",
-                      "hover",
-                      "pressed",
-                      "filled",
-                      "error",
-                      "disabled default",
-                      "disabled filled"
-                    ]
-                  },
-                  "placeholder": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "size",
-                  "state",
-                  "placeholder"
-                ],
-                "additionalProperties": false
-              },
-              "editorProps": {
-                "type": "object",
-                "properties": {
-                  "placeholderText": {
-                    "type": "string",
-                    "maxLength": 2000
-                  },
-                  "label": {
-                    "type": "string",
-                    "maxLength": 2000
-                  }
-                },
-                "required": [
-                  "placeholderText",
-                  "label"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "id",
-              "component",
-              "variantProps",
-              "editorProps"
-            ],
-            "additionalProperties": false
+            "$ref": "#/$defs/tag-group"
           },
           {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 100
-              },
-              "component": {
-                "const": "select"
-              },
-              "variantProps": {
-                "type": "object",
-                "properties": {
-                  "size": {
-                    "type": "string",
-                    "enum": [
-                      "s",
-                      "m",
-                      "l"
-                    ]
-                  },
-                  "state": {
-                    "type": "string",
-                    "enum": [
-                      "default",
-                      "hover",
-                      "filled",
-                      "pressed",
-                      "error",
-                      "disabled filled",
-                      "disabled default"
-                    ]
-                  },
-                  "placeholder": {
-                    "type": "boolean"
-                  },
-                  "label": {
-                    "type": "boolean"
-                  },
-                  "foldDirection": {
-                    "type": "string",
-                    "enum": [
-                      "down",
-                      "up"
-                    ]
-                  }
-                },
-                "required": [
-                  "size",
-                  "state",
-                  "placeholder",
-                  "label",
-                  "foldDirection"
-                ],
-                "additionalProperties": false
-              },
-              "editorProps": {
-                "type": "object",
-                "properties": {
-                  "labelText": {
-                    "type": "string",
-                    "maxLength": 2000
-                  },
-                  "placeholderText": {
-                    "type": "string",
-                    "maxLength": 2000
-                  },
-                  "optionsText": {
-                    "type": "string",
-                    "maxLength": 2000
-                  }
-                },
-                "required": [
-                  "labelText",
-                  "placeholderText",
-                  "optionsText"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "id",
-              "component",
-              "variantProps",
-              "editorProps"
-            ],
-            "additionalProperties": false
+            "$ref": "#/$defs/chip"
           },
           {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 100
-              },
-              "component": {
-                "const": "checkbox"
-              },
-              "variantProps": {
-                "type": "object",
-                "properties": {
-                  "size": {
-                    "type": "string",
-                    "enum": [
-                      "s",
-                      "xs"
-                    ]
-                  },
-                  "state": {
-                    "type": "string",
-                    "enum": [
-                      "default",
-                      "hover",
-                      "pressed",
-                      "disabled"
-                    ]
-                  },
-                  "checked": {
-                    "type": "boolean"
-                  },
-                  "indeterminate": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "size",
-                  "state",
-                  "checked",
-                  "indeterminate"
-                ],
-                "additionalProperties": false
-              },
-              "editorProps": {
-                "type": "object",
-                "properties": {
-                  "label": {
-                    "type": "string",
-                    "maxLength": 2000
-                  }
-                },
-                "required": [
-                  "label"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "id",
-              "component",
-              "variantProps",
-              "editorProps"
-            ],
-            "additionalProperties": false
+            "$ref": "#/$defs/dropdown-menu"
           },
           {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 100
-              },
-              "component": {
-                "const": "table"
-              },
-              "variantProps": {
-                "type": "object",
-                "properties": {},
-                "required": [],
-                "additionalProperties": false
-              },
-              "editorProps": {
-                "type": "object",
-                "properties": {
-                  "title": {
-                    "type": "string",
-                    "maxLength": 2000
-                  }
-                },
-                "required": [
-                  "title"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "id",
-              "component",
-              "variantProps",
-              "editorProps"
-            ],
-            "additionalProperties": false
+            "$ref": "#/$defs/button"
+          },
+          {
+            "$ref": "#/$defs/input"
+          },
+          {
+            "$ref": "#/$defs/select"
+          },
+          {
+            "$ref": "#/$defs/checkbox"
+          },
+          {
+            "$ref": "#/$defs/table"
           }
         ]
       }
@@ -373,7 +3131,7 @@
     "tokenReferences": {
       "type": "array",
       "uniqueItems": true,
-      "maxItems": 32,
+      "maxItems": 57,
       "items": {
         "enum": [
           "surface/primary/default",
@@ -407,7 +3165,32 @@
           "text/error/default",
           "Typography/Desktop/caption/font-size/2XS",
           "Typography/Desktop/caption/line-height/2XS",
-          "icon/neutral/overlay-strong"
+          "icon/neutral/overlay-strong",
+          "icon/disabled/overlay-strong",
+          "icon/default/default",
+          "icon/error/default",
+          "surface/error/overlay-light",
+          "surface/neutral/overlay-medium",
+          "Typography/Desktop/caption/font-size/3XS",
+          "Typography/Desktop/caption/line-height/3XS",
+          "surface/disabled/overlay-medium",
+          "border/disabled/overlay-strong",
+          "text/primary/hover",
+          "text/primary/pressed",
+          "icon/on-color/default",
+          "border/primary/default",
+          "surface/primary/overlay-light",
+          "surface/primary/overlay-medium",
+          "surface/primary/overlay-strong",
+          "surface/neutral/overlay-strong",
+          "surface/neutral/subtle-light",
+          "surface/neutral/subtle-medium",
+          "surface/neutral/subtle-strong",
+          "border/neutral/default",
+          "border/neutral/hover",
+          "border/neutral/pressed",
+          "icon/primary/default",
+          "icon/primary/pressed"
         ]
       }
     }

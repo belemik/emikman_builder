@@ -1,0 +1,171 @@
+const imgX = "[temporary asset; see library-assets.json]";
+const imgX1 = "[temporary asset; see library-assets.json]";
+const imgX2 = "[temporary asset; see library-assets.json]";
+const imgX3 = "[temporary asset; see library-assets.json]";
+const imgX4 = "[temporary asset; see library-assets.json]";
+const imgX5 = "[temporary asset; see library-assets.json]";
+
+type TagItemProps = {
+  className?: string;
+  closable?: boolean;
+  labelText?: string;
+  size?: "m" | "s" | "xs";
+  state?: "default" | "hover" | "error" | "disabled";
+  variant?: "primary" | "secondary";
+};
+
+export default function TagItem({ className, closable = true, labelText = "Label", size = "m", state = "default", variant = "primary" }: TagItemProps) {
+  const isMAndDisabled = size === "m" && state === "disabled";
+  const isMAndError = size === "m" && state === "error";
+  const isMAndIsDefaultOrHover = size === "m" && ["default", "hover"].includes(state);
+  const isMAndPrimaryAndDefault = size === "m" && variant === "primary" && state === "default";
+  const isMAndPrimaryAndError = size === "m" && variant === "primary" && state === "error";
+  const isMAndPrimaryAndHover = size === "m" && variant === "primary" && state === "hover";
+  const isMAndSecondaryAndDefault = size === "m" && variant === "secondary" && state === "default";
+  const isMAndSecondaryAndDisabled = size === "m" && variant === "secondary" && state === "disabled";
+  const isMAndSecondaryAndError = size === "m" && variant === "secondary" && state === "error";
+  const isMAndSecondaryAndHover = size === "m" && variant === "secondary" && state === "hover";
+  const isPrimaryAndHover = variant === "primary" && state === "hover";
+  const isSAndDisabled = size === "s" && state === "disabled";
+  const isSAndError = size === "s" && state === "error";
+  const isSAndIsDefaultOrHover = size === "s" && ["default", "hover"].includes(state);
+  const isSAndPrimaryAndDefault = size === "s" && variant === "primary" && state === "default";
+  const isSAndPrimaryAndDisabled = size === "s" && variant === "primary" && state === "disabled";
+  const isSAndPrimaryAndError = size === "s" && variant === "primary" && state === "error";
+  const isSAndPrimaryAndHover = size === "s" && variant === "primary" && state === "hover";
+  const isSAndSecondaryAndDefault = size === "s" && variant === "secondary" && state === "default";
+  const isSAndSecondaryAndDisabled = size === "s" && variant === "secondary" && state === "disabled";
+  const isSAndSecondaryAndError = size === "s" && variant === "secondary" && state === "error";
+  const isSAndSecondaryAndHover = size === "s" && variant === "secondary" && state === "hover";
+  const isSecondary = variant === "secondary";
+  const isSecondaryAndDefault = variant === "secondary" && state === "default";
+  const isSecondaryAndHover = variant === "secondary" && state === "hover";
+  const isXsAndDisabled = size === "xs" && state === "disabled";
+  const isXsAndError = size === "xs" && state === "error";
+  const isXsAndIsDefaultOrHover = size === "xs" && ["default", "hover"].includes(state);
+  const isXsAndPrimaryAndDefault = size === "xs" && variant === "primary" && state === "default";
+  const isXsAndPrimaryAndDisabled = size === "xs" && variant === "primary" && state === "disabled";
+  const isXsAndPrimaryAndError = size === "xs" && variant === "primary" && state === "error";
+  const isXsAndPrimaryAndHover = size === "xs" && variant === "primary" && state === "hover";
+  const isXsAndSecondaryAndDefault = size === "xs" && variant === "secondary" && state === "default";
+  const isXsAndSecondaryAndDisabled = size === "xs" && variant === "secondary" && state === "disabled";
+  const isXsAndSecondaryAndError = size === "xs" && variant === "secondary" && state === "error";
+  const isXsAndSecondaryAndHover = size === "xs" && variant === "secondary" && state === "hover";
+  return (
+    <div className={className || `content-stretch flex items-center relative ${size === "m" && state === "hover" ? String.raw`bg-[var(--surface\/neutral\/overlay-medium,rgba(68,83,113,0.1))] rounded-[6px]` : isMAndError ? String.raw`bg-[var(--surface\/error\/overlay-light,rgba(247,69,105,0.05))] rounded-[6px]` : size === "m" && state === "default" ? String.raw`bg-[var(--surface\/neutral\/overlay-light,rgba(68,83,113,0.05))] rounded-[6px]` : state === "disabled" && ["s", "xs"].includes(size) ? String.raw`bg-[var(--surface\/disabled\/overlay-light,rgba(68,83,113,0.05))] overflow-clip rounded-[4px]` : state === "hover" && ["s", "xs"].includes(size) ? String.raw`bg-[var(--surface\/neutral\/overlay-medium,rgba(68,83,113,0.1))] overflow-clip rounded-[4px]` : state === "error" && ["s", "xs"].includes(size) ? String.raw`bg-[var(--surface\/error\/overlay-light,rgba(247,69,105,0.05))] overflow-clip rounded-[4px]` : state === "default" && ["s", "xs"].includes(size) ? String.raw`bg-[var(--surface\/neutral\/overlay-light,rgba(68,83,113,0.05))] overflow-clip rounded-[4px]` : String.raw`bg-[var(--surface\/disabled\/overlay-light,rgba(68,83,113,0.05))] overflow-clip rounded-[6px]`}`} id={isMAndSecondaryAndHover ? "node-195_1188" : isMAndSecondaryAndError ? "node-195_1184" : isMAndSecondaryAndDefault ? "node-195_1180" : isMAndPrimaryAndHover ? "node-195_1176" : isMAndPrimaryAndError ? "node-195_1172" : isMAndPrimaryAndDefault ? "node-195_1168" : isXsAndSecondaryAndDisabled ? "node-195_1163" : isSAndSecondaryAndDisabled ? "node-195_1158" : isXsAndPrimaryAndDisabled ? "node-195_1153" : isSAndPrimaryAndDisabled ? "node-195_1148" : isXsAndSecondaryAndHover ? "node-195_1143" : isXsAndSecondaryAndError ? "node-195_1138" : isXsAndSecondaryAndDefault ? "node-195_1133" : isSAndSecondaryAndHover ? "node-195_1128" : isSAndSecondaryAndError ? "node-195_1123" : isSAndSecondaryAndDefault ? "node-195_1118" : isXsAndPrimaryAndHover ? "node-195_1113" : isXsAndPrimaryAndError ? "node-195_1108" : isXsAndPrimaryAndDefault ? "node-195_1103" : isSAndPrimaryAndHover ? "node-195_1098" : isSAndPrimaryAndError ? "node-195_1093" : isSAndPrimaryAndDefault ? "node-195_1088" : isMAndSecondaryAndDisabled ? "node-195_1084" : "node-195_1080"}>
+      <div className={`content-stretch flex gap-[6px] items-center justify-center relative shrink-0 ${size === "xs" ? "h-[16px] px-[6px]" : size === "s" ? "h-[20px] px-[6px]" : "h-[28px] px-[8px]"}`} id={isMAndSecondaryAndHover ? "node-195_1189" : isMAndSecondaryAndError ? "node-195_1185" : isMAndSecondaryAndDefault ? "node-195_1181" : isMAndPrimaryAndHover ? "node-195_1177" : isMAndPrimaryAndError ? "node-195_1173" : isMAndPrimaryAndDefault ? "node-195_1169" : isXsAndSecondaryAndDisabled ? "node-195_1164" : isSAndSecondaryAndDisabled ? "node-195_1159" : isXsAndPrimaryAndDisabled ? "node-195_1154" : isSAndPrimaryAndDisabled ? "node-195_1149" : isXsAndSecondaryAndHover ? "node-195_1144" : isXsAndSecondaryAndError ? "node-195_1139" : isXsAndSecondaryAndDefault ? "node-195_1134" : isSAndSecondaryAndHover ? "node-195_1129" : isSAndSecondaryAndError ? "node-195_1124" : isSAndSecondaryAndDefault ? "node-195_1119" : isXsAndPrimaryAndHover ? "node-195_1114" : isXsAndPrimaryAndError ? "node-195_1109" : isXsAndPrimaryAndDefault ? "node-195_1104" : isSAndPrimaryAndHover ? "node-195_1099" : isSAndPrimaryAndError ? "node-195_1094" : isSAndPrimaryAndDefault ? "node-195_1089" : isMAndSecondaryAndDisabled ? "node-195_1085" : "node-195_1081"} data-name="Wrapper">
+        {isSAndIsDefaultOrHover && (
+          <>
+            <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] whitespace-nowrap" data-node-id="195:1090">
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)]">{labelText}</p>
+            </div>
+            <div className="relative shrink-0 size-[14px]" id={isSecondaryAndHover ? "node-195_42551" : isSecondaryAndDefault ? "node-195_42540" : isPrimaryAndHover ? "node-195_42548" : "node-195_42545"} data-name="x">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgX1} />
+            </div>
+          </>
+        )}
+        {isXsAndIsDefaultOrHover && (
+          <>
+            <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] whitespace-nowrap" data-node-id="195:1105">
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)]">{labelText}</p>
+            </div>
+            <div className="relative shrink-0 size-[14px]" id={isSecondaryAndHover ? "node-195_42590" : isSecondaryAndDefault ? "node-195_42593" : isPrimaryAndHover ? "node-195_42575" : "node-195_42572"} data-name="x">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgX1} />
+            </div>
+          </>
+        )}
+        {isMAndIsDefaultOrHover && (
+          <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/default\/body,#191f29)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="195:1170">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">{labelText}</p>
+          </div>
+        )}
+        {isMAndIsDefaultOrHover && closable && (
+          <div className="relative shrink-0 size-[16px]" data-node-id="195:1171" data-name="x">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgX4} />
+          </div>
+        )}
+        {isMAndDisabled && (
+          <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/disabled\/overlay-strong,rgba(68,83,113,0.5))] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="195:1082">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">{labelText}</p>
+          </div>
+        )}
+        {isMAndDisabled && closable && (
+          <div className="relative shrink-0 size-[16px]" data-node-id="195:1083" data-name="x">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgX} />
+          </div>
+        )}
+        {isSAndError && (
+          <>
+            <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/error\/default,#f51743)] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] whitespace-nowrap" data-node-id="195:1095">
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)]">{labelText}</p>
+            </div>
+            <div className="relative shrink-0 size-[14px]" id={isSecondary ? "node-195_42554" : "node-195_42557"} data-name="x">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgX2} />
+            </div>
+          </>
+        )}
+        {isXsAndError && (
+          <>
+            <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/error\/default,#f51743)] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] whitespace-nowrap" data-node-id="195:1110">
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)]">{labelText}</p>
+            </div>
+            <div className="relative shrink-0 size-[14px]" id={isSecondary ? "node-195_42587" : "node-195_42578"} data-name="x">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgX2} />
+            </div>
+          </>
+        )}
+        {isSAndDisabled && (
+          <>
+            <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/disabled\/overlay-strong,rgba(68,83,113,0.5))] text-[length:var(--typography\/desktop\/caption\/font-size\/2xs,12px)] whitespace-nowrap" data-node-id="195:1150">
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/2xs,14px)]">{labelText}</p>
+            </div>
+            <div className="relative shrink-0 size-[14px]" id={isSecondary ? "node-195_42566" : "node-195_42560"} data-name="x">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgX3} />
+            </div>
+          </>
+        )}
+        {isXsAndDisabled && (
+          <>
+            <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/disabled\/overlay-strong,rgba(68,83,113,0.5))] text-[length:var(--typography\/desktop\/caption\/font-size\/3xs,10px)] whitespace-nowrap" data-node-id="195:1155">
+              <p className="leading-[var(--typography\/desktop\/caption\/line-height\/3xs,12px)]">{labelText}</p>
+            </div>
+            <div className="relative shrink-0 size-[14px]" id={isSecondary ? "node-195_42584" : "node-195_42581"} data-name="x">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgX3} />
+            </div>
+          </>
+        )}
+        {isMAndError && (
+          <div className="[word-break:break-word] flex flex-col font-[family-name:var(--font-family\/primary,'Manrope:Regular')] font-normal justify-center leading-[0] relative shrink-0 text-[color:var(--text\/error\/default,#f51743)] text-[length:var(--typography\/desktop\/body\/font-size\/sm,14px)] whitespace-nowrap" data-node-id="195:1174">
+            <p className="leading-[var(--typography\/desktop\/body\/line-height\/sm,18px)]">{labelText}</p>
+          </div>
+        )}
+        {isMAndError && closable && (
+          <div className="relative shrink-0 size-[16px]" data-node-id="195:1175" data-name="x">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgX5} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: Dekstop/Body/SM - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/body/font-size/SM, weight: 400, lineHeight: Typography/Desktop/body/line-height/SM, letterSpacing: 0), Dekstop/Caption/2XS - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/caption/font-size/2XS, weight: 400, lineHeight: Typography/Desktop/caption/line-height/2XS, letterSpacing: 0), Dekstop/Caption/3XS - Regular: Font(family: "Font family/primary", style: Font weight/Regular, size: Typography/Desktop/caption/font-size/3XS, weight: 400, lineHeight: Typography/Desktop/caption/line-height/3XS, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## TagItem
+**Node ID:** 195:1079
+
+Тег. Элемент визуальной маркировки с использованием ключевых слов. Используется как отдельно, так и в группе
+
+## x
+**Node ID:** 15:18807
+
+x, close, exit, remove, cross, delete
+The generated code contains image and SVG URL constants, e.g. const image = '[temporary asset; see library-assets.json] These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

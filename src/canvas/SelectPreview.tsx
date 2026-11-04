@@ -1,10 +1,12 @@
 import { assetUrl } from '../runtime';
 import { useId, useRef, useState } from 'react';
 import type { CanvasElement } from './model';
-export function SelectPreview({ element, sample = false }: { element: CanvasElement; sample?: boolean }) {
+export function SelectPreview({ element, sample = false, onChange }: { element: CanvasElement; sample?: boolean; onChange?: (element: CanvasElement)=>void }) {
   const v = element.variantProps, e = element.editorProps;
-  const options = String(e.optionsText).split('\n').map(s => s.trim()).filter(Boolean).slice(0, 100);
-  const [open, setOpen] = useState(false), [selected, setSelected] = useState<number | undefined>(String(v.state).includes('filled') && options.length ? 0 : undefined);
+  const options = String(e.optionsText).split('\n').filter(s => s.trim()).slice(0, 100);
+  const [open, setOpen] = useState(false), [localSelected, setSelected] = useState<number | undefined>(String(v.state).includes('filled') && options.length ? 0 : undefined);
+  const selected = element.interactionState ? (element.interactionState.selectedValue === null ? undefined : options.indexOf(element.interactionState.selectedValue)) : localSelected;
+  const choose = (index: number) => { const value=options[index]; if(value===undefined)return;setSelected(index);onChange?.({...element,interactionState:{selectedValue:value}}); };
   const [active, setActive] = useState(0);
   const id = useId(), trigger = useRef<HTMLButtonElement>(null);
   const disabled = String(v.state).startsWith('disabled');
@@ -14,8 +16,8 @@ export function SelectPreview({ element, sample = false }: { element: CanvasElem
     <button ref={trigger} type="button" className="ds-select-trigger" role="combobox" aria-label={String(e.labelText) || 'Select'} aria-haspopup="listbox" aria-expanded={open} aria-controls={`${id}-options`} aria-activedescendant={open && options.length ? `${id}-${active}` : undefined} aria-invalid={v.state === 'error'} disabled={disabled} onClick={() => setOpen(!open)} onKeyDown={event => {
       if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) { event.preventDefault(); setOpen(true); setActive(index => event.key === 'Home' ? 0 : event.key === 'End' ? Math.max(0, options.length - 1) : Math.max(0, Math.min(options.length - 1, index + (event.key === 'ArrowDown' ? 1 : -1)))); }
       if (event.key === 'Escape') { event.preventDefault(); setOpen(false); }
-      if ((event.key === 'Enter' || event.key === ' ') && open) { event.preventDefault(); if (options.length) setSelected(active); setOpen(false); }
+      if ((event.key === 'Enter' || event.key === ' ') && open) { event.preventDefault(); if (options.length) choose(active); setOpen(false); }
     }}>{content}</button>
-    {open && <div className="ds-select-options" id={`${id}-options`} role="listbox" aria-label={String(e.labelText) || 'Варианты'}>{options.length ? options.map((option, index) => <div id={`${id}-${index}`} key={index} role="option" aria-selected={selected === index} data-active={active === index} onMouseDown={event => event.preventDefault()} onMouseEnter={() => setActive(index)} onClick={() => { setSelected(index); setOpen(false); trigger.current?.focus(); }}>{option}</div>) : <p>Нет вариантов. Добавьте строки в optionsText.</p>}</div>}
+    {open && <div className="ds-select-options" id={`${id}-options`} role="listbox" aria-label={String(e.labelText) || 'Варианты'}>{options.length ? options.map((option, index) => <div id={`${id}-${index}`} key={index} role="option" aria-selected={selected === index} data-active={active === index} onMouseDown={event => event.preventDefault()} onMouseEnter={() => setActive(index)} onClick={() => { choose(index); setOpen(false); trigger.current?.focus(); }}>{option}</div>) : <p>Нет вариантов. Добавьте строки в optionsText.</p>}</div>}
   </div>;
 }

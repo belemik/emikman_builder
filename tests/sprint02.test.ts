@@ -4,7 +4,7 @@ import { createElement as reactElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import oldSeed from '../components.seed.json';
 import newSeed from '../components.sprint02.seed.json';
-import { registry, defaults } from '../src/registry';
+import { registry as fullRegistry, defaults } from '../src/registry';
 import { createElement, emptyDocument } from '../src/canvas/model';
 import { parseDocument, loadDocument, saveDocument, migrationWarning } from '../src/storage';
 import { generatePrompt } from '../src/prompt';
@@ -12,12 +12,13 @@ import { verifiedTokens } from '../src/tokens';
 import { themeStyle, resolveTheme, editorDefaults } from '../src/theme/model';
 import { Preview } from '../src/canvas/Preview';
 
+const registry=fullRegistry.filter(e=>['button','input','select','checkbox','table'].includes(e.id));
 function legacy(radius = 14) {
   return { schemaVersion: 1, platform: 'web', elements: oldSeed.components.map((entry, index) => ({ id: `old-${index}`, component: entry.id, variantProps: defaults(entry.variantProps as any), editorProps: defaults(entry.editorProps as any) })), theme: { primaryColor: '#123456', radius, fontFamily: 'Arial' } };
 }
 test('v1 migrates keeping ids, content, order, colour and font; v2 round trip', () => {
   const old = legacy(); const doc = parseDocument(JSON.stringify(old));
-  assert.equal(doc.schemaVersion, 2); assert.deepEqual(doc.elements, old.elements);
+  assert.equal(doc.schemaVersion, 3); assert.deepEqual(doc.elements, old.elements);
   assert.deepEqual(doc.themeOverrides, { primaryColor: '#123456', radiusPx: 14, fontFamily: 'Arial' });
   assert.deepEqual(parseDocument(JSON.stringify(doc)), doc);
   assert.equal(parseDocument(JSON.stringify(legacy(48))).themeOverrides.radiusPx, 32);
@@ -73,9 +74,9 @@ test('local migration backs up raw v1 before write and keeps account storage iso
   try {
     const raw = JSON.stringify(legacy()); data.set('account-a', raw);
     const loaded = loadDocument('account-a'); saveDocument(loaded.document, 'account-a');
-    assert.equal(data.get('account-a.sprint01-backup'), raw);
-    assert.equal(JSON.parse(data.get('account-a')!).schemaVersion, 2);
+    assert.equal(data.get('account-a.pre-v3-backup'), raw);
+    assert.equal(JSON.parse(data.get('account-a')!).schemaVersion, 3);
     assert.equal(loadDocument('account-b').document.elements.length, 0);
-    saveDocument(emptyDocument(), 'account-a'); assert.equal(data.get('account-a.sprint01-backup'), raw);
+    saveDocument(emptyDocument(), 'account-a'); assert.equal(data.get('account-a.pre-v3-backup'), raw);
   } finally { if (oldStorage) Object.defineProperty(globalThis, 'localStorage', oldStorage); else Reflect.deleteProperty(globalThis, 'localStorage'); }
 });

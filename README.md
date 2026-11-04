@@ -1,3 +1,5 @@
+> Обновление Sprint 05.1: правила внутренних компонентов и сохранение Select уточнены в [отчёте стабилизации](docs/SPRINT05_1.md). Числа аудита ниже относятся к состоянию до стабилизации.
+
 # Публикация демоверсии на GitHub Pages
 
 Production-демо: https://belemik.github.io/emikman_builder/
@@ -119,3 +121,9 @@ APP_ORIGIN=https://builder.example.com HOST=0.0.0.0 PORT=3000 DATA_DIR=/persiste
 В Canvas доступны «Редакторский preview» и «Строгий DS Renderer». Первый сохраняет Theme Editor; второй отклоняет overrides и неподдерживаемые варианты. Проверенная матрица, источники Figma, визуальные тесты и ограничения: [docs/SPRINT04.md](docs/SPRINT04.md).
 
 Команды: `npm run typecheck`, `npm run ds:validate`, `npm test`, `npm run build`, `npm run test:visual`. Для визуальных тестов сначала `npx playwright install chromium`. Локальные шрифты поставляются с OFL. Автоматическая публикация не изменена; текущая работа ведётся в feat/ds-renderer.
+
+## Sprint 05 — Component Library
+
+Canvas хранит v3, tokenReferences и разрешённые вложения без потерь. v1/v2 автоматически мигрируют с резервной копией localStorage. Добавлены Tags, Chip, внутренние Hint/Label/ItemsList, DropdownMenu и минимальный интерактивный Select; строгий renderer блокирует варианты вне проверенной матрицы. Точное покрытие и ограничения: [docs/SPRINT05.md](docs/SPRINT05.md).
+
+Проверки: `npm run typecheck`, `npm run ds:validate`, `npm test`, `npm run build`, `npm run test:visual`, `npm run check:pages`. Для первого запуска браузерных тестов: `npx playwright install chromium`.

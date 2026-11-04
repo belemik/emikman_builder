@@ -1,0 +1,65 @@
+{
+  "internalComponents": [
+    "hint",
+    "field-label",
+    "items-list",
+    "tag-input",
+    "tag-more",
+    "dropdown-item"
+  ],
+  "allowedParents": {
+    "hint": [
+      "input"
+    ],
+    "field-label": [
+      "input"
+    ],
+    "items-list": [
+      "dropdown-menu"
+    ],
+    "tag-input": [
+      "tag-group"
+    ],
+    "tag-more": [
+      "tag-group"
+    ],
+    "dropdown-item": [
+      "items-list"
+    ]
+  },
+  "slots": {
+    "input": {
+      "hint": {
+        "component": "hint",
+        "min": 1,
+        "max": 1
+      },
+      "label": {
+        "component": "field-label",
+        "min": 1,
+        "max": 1
+      }
+    },
+    "tag-group": {
+      "tags": {
+        "component": "tag-item",
+        "min": 1,
+        "max": 2
+      }
+    },
+    "items-list": {
+      "items": {
+        "component": "dropdown-item",
+        "min": 1,
+        "max": 10
+      }
+    },
+    "dropdown-menu": {
+      "items": {
+        "component": "items-list",
+        "min": 1,
+        "max": 1
+      }
+    }
+  }
+}

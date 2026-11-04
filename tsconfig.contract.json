@@ -9,6 +9,7 @@
     "tests/renderer.test.ts",
     "src/vite-env.d.ts",
     "playwright.config.ts",
-    "tests/visual"
+    "tests/visual",
+    "tests/library.test.ts"
   ]
 }
