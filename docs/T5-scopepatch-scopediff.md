@@ -310,6 +310,6 @@ T5 завершён на уровне архитектурного проект�
 | [ADR-001-source-neutral-design-system-contract.md](ADR-001-source-neutral-design-system-contract.md) | `12d666bf5c2a08e222950c0ee8614825420a13be1b3d4cb62a7c89243bcb8651` |
 | [T2-unsupported-policy.md](T2-unsupported-policy.md) | `a5c0d3304ce31775150a79da4c2bbe3391b2dae9bf493daafdf6681a3d5b4c10` |
 | [T3-validator-facade.md](T3-validator-facade.md) | `698fe47720335167ea891575ec56debc6b78e6092cdc49324e6cf22481e9457e` |
-| [T4-coverage-inventory-metrics.md](T4-coverage-inventory-metrics.md) | `3f077358e825be7d3da0ff301a7bfac9f2457580130699c0c932dd6139501d26` |
+| [T4-coverage-inventory-metrics.md](T4-coverage-inventory-metrics.md) | `3d2b2602e1d79eb41f8bc4cc7d7c4b747e80f0a3b4c18ae6cf44690da0d267ea` |
 
 Итог: **T5 ACCEPTED от 04.11.2026**. Создан только этот документ. Код, T1–T4 и исходные данные не изменяются; Git-запись, T6–T7 и исполнение Preview не выполняются.

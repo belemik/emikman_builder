@@ -293,12 +293,15 @@ PR workflow [CI][] выполняет Linux проверки + 3 portable Playwr
 
 ## 10. Реестр доказательств и точные версии
 
-Все tracked evidence ниже закреплены feature SHA `1986326c713c87c2f360e0b66656d11518721284`; tree равен baseline merge. SHA-256 — локально прочитанные bytes на 04.11.2026. Для T1–T3 это версия утверждённых незакоммиченных документов, а не содержимое feature commit. Ссылки ведут на проверенные локальные файлы; при последующих правках сравнивать digest, не ссылаться молча на новую ревизию.
+Уточнение воспроизводимости от 05.11.2026: для tracked оснований канонический SHA-256 вычисляется по точным bytes Git blob указанного commit, без checkout-преобразований: `git show <commit>:<path> | shasum -a 256`. Исходный локальный `docs/ds-coverage.csv` имел CRLF (1703 окончания строк), SHA-256 `b91d91143ee2e4658c19e88d3a073813afe90f4eb50d03ed85320fec6c8b929e`; Git blob и новый checkout имеют LF, SHA-256 `7725bdfd8332ade0635f0a160fbd7edac5cf117057a82bcbdd071deee3f1ddcd`. Замена только CRLF на LF даёт точные bytes Git-версии; исходные данные не редактировались. Строка CSV ниже теперь содержит канонический Git digest. Для локальных архитектурных Markdown-оснований SHA относится к точным bytes соответствующей версии документа; после редакционной правки зависимые записи обновляются. Исторический CRLF digest сохранён здесь как provenance, не как текущий Git digest.
+
+
+Все tracked evidence ниже закреплены feature SHA `1986326c713c87c2f360e0b66656d11518721284`; tree равен baseline merge. SHA-256 — прочитанные bytes оснований; для tracked файлов используется Git blob указанного SHA, с явно описанным выше отличием CSV от исходного checkout. Для T1–T3 это версия утверждённых незакоммиченных документов, а не содержимое feature commit. Ссылки ведут на проверенные локальные файлы; при последующих правках сравнивать digest, не ссылаться молча на новую ревизию.
 
 | Evidence | Файл | SHA-256 |
 | --- | --- | --- |
 | I | [docs/ds-coverage-inventory.json](ds-coverage-inventory.json) | `59f2b0c58d754fbe97e0c02b24f41d185568bb559837fefc8077deed7c6026d4` |
-| CSV | [docs/ds-coverage.csv](ds-coverage.csv) | `b91d91143ee2e4658c19e88d3a073813afe90f4eb50d03ed85320fec6c8b929e` |
+| CSV | [docs/ds-coverage.csv](ds-coverage.csv) | `7725bdfd8332ade0635f0a160fbd7edac5cf117057a82bcbdd071deee3f1ddcd` |
 | COV | [docs/DS_COVERAGE.md](DS_COVERAGE.md) | `0333aaa34a6d1998f405f597978b80ad5d851e2b6bf92a6ed89ea9377d958df1` |
 | S1 | [components.seed.json](../components.seed.json) | `1aeeb014d51650663123a6ff0ff8ca776fadbc5c785836b25f1997a4638bb955` |
 | S2 | [components.sprint02.seed.json](../components.sprint02.seed.json) | `518e9faa36c1308a22b018f909d3abab616a1fd609dd5c09fbc7323fb4594c58` |
