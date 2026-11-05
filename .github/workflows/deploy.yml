@@ -2,6 +2,7 @@ name: Deploy demo to GitHub Pages
 on:
   push:
     branches: [main]
+    paths-ignore: ['docs/**']
   workflow_dispatch:
 permissions:
   contents: read
