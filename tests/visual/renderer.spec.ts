@@ -16,7 +16,7 @@ test('reviewed matrix snapshots, semantic states and assets', async ({ page }) =
   await expect(renderer.locator('[data-ds-component]')).toHaveCount(29);
   await expect(renderer.locator('button:disabled')).toHaveCount(1);
   await expect(renderer.locator('input[aria-invalid=true]')).toHaveCount(2);
-  expect(await renderer.locator('img').evaluateAll(images => images.every(image => (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth === 20 && image.getBoundingClientRect().width === 20))).toBe(true);
+  await expect.poll(() => renderer.locator('img').evaluateAll(images => images.every(image => (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth === 20 && image.getBoundingClientRect().width === 20))).toBe(true);
   expect(await page.evaluate(() => document.fonts.check('500 12px Manrope'))).toBe(true);
   await expect(renderer).toHaveScreenshot('reviewed-matrix.png', { animations: 'disabled' });
   const button = renderer.locator('button').first(); await button.hover();
