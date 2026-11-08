@@ -124,11 +124,11 @@ test('Workspace mobile: enlarged text keeps close/profile visible and only list 
   expect(await page.locator('.z-side-scroll').evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
 });
 
-test('Workspace profile/settings: honest demo, disabled logout, system theme and focus restoration', async ({ page }) => {
+test('Workspace profile/settings: honest demo, end-demo action, system theme and focus restoration', async ({ page }) => {
   await workspace(page, 'system');
   await page.getByRole('button', { name: 'Открыть демонстрационный профиль' }).click();
-  await expect(page.getByRole('button', { name: 'Выйти из системы' })).toBeDisabled();
-  await expect(page.getByText(/Workspace demo не подтверждает серверную сессию/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Завершить демо', exact: true })).toBeEnabled();
+  await expect(page.getByText(/Публичная демоверсия без серверной сессии/)).toBeVisible();
   await page.keyboard.press('Escape'); await expect(page.getByRole('button', { name: 'Открыть демонстрационный профиль' })).toBeFocused();
   const dialog = await settings(page);
   await dialog.getByRole('button', { name: 'Тёмная', exact: true }).click();
@@ -213,12 +213,16 @@ test('Workspace mobile project menu closes after navigation; settings and help a
   await expect(page.getByRole('heading', { name: 'Городские маршруты', exact: true })).toBeVisible();
 });
 
-test('Workspace Builder link leaves the demo route and keeps existing Builder available', async ({ page }) => {
-  await workspace(page); await page.getByRole('link', { name: 'Текущий Builder' }).click();
-  expect(new URL(page.url()).search).toBe(''); await expect(page.locator('.zarya')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Открыть демоверсию' })).toBeVisible();
-  await page.getByRole('button', { name: 'Открыть демоверсию' }).click();
+test('Workspace technical section opens the separate component laboratory and returns', async ({ page }) => {
+  await workspace(page);
+  await page.getByRole('button', { name: 'Открыть демонстрационный профиль' }).click();
+  await page.getByRole('button', { name: 'Технический раздел', exact: true }).click();
+  await page.getByRole('link', { name: 'Открыть лабораторию компонентов' }).click();
+  expect(new URL(page.url()).search).toBe('?view=laboratory');
+  await expect(page.locator('.zarya')).not.toBeVisible();
   await expect(page.getByRole('heading', { name: 'Компоненты', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Вернуться в Workspace' }).click();
+  await expect(page.getByRole('heading', { name: 'Что создадим сегодня?' })).toBeVisible();
 });
 
 test('Workspace composer: IME Enter is not submitted as a mock message', async ({ page }) => {
@@ -244,7 +248,7 @@ test('Workspace mobile: complete mock path, inspector keyboard tabs and truthful
     await nav.getByRole('button', { name: section, exact: true }).click();
     await expect(page.getByText(reason)).toBeVisible();
   }
-  await nav.getByRole('button', { name: 'Дизайн-система', exact: true }).click();
+  await nav.getByRole('button', { name: 'Дизайн-системы', exact: true }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole('button', { name: 'Autodata', exact: true }).click();
   await expect(page.getByText('Визуальный ориентир концепта. Макет не импортирован.').last()).toBeVisible();

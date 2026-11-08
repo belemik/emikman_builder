@@ -96,6 +96,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const host = process.env.HOST || '127.0.0.1';
   if (host !== '127.0.0.1' && (!process.env.APP_ORIGIN || !origin.startsWith('https://'))) throw new Error('Для внешнего доступа задайте APP_ORIGIN=https://ваш-домен и HTTPS reverse proxy.');
   const app = await createApp({ dev, origin });
-  app.server.listen(port, host, () => console.log(`WDeaf: ${origin} (${dev ? 'разработка' : 'production'}, вход обязателен)`));
+  app.server.listen(port, host, () => console.log(`ЗАРЯ: ${origin} (${dev ? 'разработка' : 'production'}, вход обязателен)`));
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, async () => { await app.close(); process.exit(); });
 }

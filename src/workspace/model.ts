@@ -112,7 +112,7 @@ export const projects: readonly MockProject[] = [
           { id: 'heading', name: 'Заголовок', kind: 'Текст', note: 'Пример подписи экрана. Свойства не применяются.' },
           { id: 'email', name: 'Input / Email', kind: 'Поле', note: 'Пример поля. Значение никуда не отправляется.' },
           { id: 'password', name: 'Input / Пароль', kind: 'Поле', note: 'Пример поля без проверки длины.' },
-          { id: 'button', name: 'Button / Продолжить', kind: 'Кнопка', note: 'Пример действия. Холст Builder не меняется.' },
+          { id: 'button', name: 'Button / Продолжить', kind: 'Кнопка', note: 'Пример действия. Холст лаборатории не меняется.' },
           { id: 'hint', name: 'Hint / Подсказка', kind: 'Текст', note: 'Статичная подпись под полями.' },
         ],
       },
@@ -148,7 +148,7 @@ export const projects: readonly MockProject[] = [
 export const libraries: readonly MockLibrary[] = [
   {
     id: 'wdeaf',
-    name: 'WDeaf',
+    name: 'WDeaf PRO 2.0',
     note: 'Пример библиотеки в списке. Синхронизация с Figma, Storybook и репозиториями не подключена.',
     version: 'пример',
     components: 'не посчитаны',

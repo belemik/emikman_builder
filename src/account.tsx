@@ -1,7 +1,7 @@
 import { assetUrl } from './runtime';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AppearancePicker } from './appearance';
-import { Avatar, CloseButton } from './ui';
+import { Avatar, CloseButton, Icon } from './ui';
 export interface User { id: string; username: string }
 export function AccountGate({ children }: { children: (user: User) => ReactNode }) {
   const [user, setUser] = useState<User>();
@@ -27,21 +27,30 @@ export function AccountGate({ children }: { children: (user: User) => ReactNode 
 function FigmaIcon({ name }: { name: 'user-circle' | 'log-out-01' }) {
   return <span className="wdeaf-icon-slot"><img className="wdeaf-icon" src={assetUrl(`/icons/${name}.svg`)} width="24" height="24" alt="" /></span>;
 }
-export function AccountButton({ user }: { user: User }) {
+export function AccountButton({ user, presentation = 'profile-dialog' }: { user: User; presentation?: 'profile-dialog' | 'menu-item' }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const logoutButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => { if (error) logoutButton.current?.focus(); }, [error]);
+  // Shared by the existing laboratory profile and the Workspace menu item.
+  const logout = async () => {
+    if (busy) return;
+    setBusy(true); setError(false);
+    try { const response = await fetch('/api/logout', { method: 'POST' }); if (!response.ok) throw new Error(); location.replace('/'); }
+    catch { setError(true); setBusy(false); }
+  };
+  if (presentation === 'menu-item') return <>
+    <button type="button" ref={logoutButton} disabled={busy} onClick={logout}><Icon name="log-out-01" />{busy ? 'Выход…' : 'Выйти'}</button>
+    {error && <p role="alert">Не удалось выйти. Проверьте соединение и повторите.</p>}
+  </>;
   return <><button className="avatar-trigger" aria-label={`Открыть профиль ${user.username}`} title={user.username} aria-haspopup="dialog" onClick={() => dialog.current?.showModal()}><Avatar initials={user.username} /></button>
     <dialog ref={dialog} className="profile-dialog" aria-labelledby="profile-title">
       <div className="dialog-heading"><h2 id="profile-title">Личный кабинет</h2><CloseButton label="Закрыть профиль" onClick={() => dialog.current?.close()} /></div>
-      <div className="profile-identity"><Avatar initials={user.username} size="48" /><div><strong>{user.username}</strong><p className="muted">Учётная запись WDeaf Builder</p></div></div>
+      <div className="profile-identity"><Avatar initials={user.username} size="48" /><div><strong>{user.username}</strong><p className="muted">Учётная запись ЗАРЯ</p></div></div>
       <section className="profile-section"><h3>Оформление интерфейса</h3><AppearancePicker /><p className="muted">Системное оформление следует настройкам устройства. Выбор сохраняется в этом браузере.</p></section>
       <section className="profile-section"><h3>Доступ с нескольких устройств</h3><p className="muted">Два и более участника могут войти с этим логином и паролем одновременно. Выход завершает только текущую сессию браузера.</p><p className="muted">Холсты хранятся отдельно в каждом браузере. Для передачи работы используйте JSON-экспорт и импорт.</p></section>
-      <button className="primary wdeaf-button profile-logout" disabled={busy} onClick={async () => {
-        setBusy(true); setError(false);
-        try { const response = await fetch('/api/logout', { method: 'POST' }); if (!response.ok) throw new Error(); location.replace('/'); }
-        catch { setError(true); setBusy(false); }
-      }}><FigmaIcon name="log-out-01" />{busy ? 'Выход…' : 'Выйти из системы'}</button>
+      <button className="primary wdeaf-button profile-logout" ref={logoutButton} disabled={busy} onClick={logout}><FigmaIcon name="log-out-01" />{busy ? 'Выход…' : 'Выйти из системы'}</button>
       {error && <p role="alert">Не удалось выйти. Проверьте соединение и повторите.</p>}
     </dialog></>;
 }

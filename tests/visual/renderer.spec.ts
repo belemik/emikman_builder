@@ -4,7 +4,7 @@ const fixture = JSON.parse(readFileSync(new URL('../../design-system/examples/re
 async function openRenderer(page: import('@playwright/test').Page, value = fixture) {
   await page.route('https://fonts.googleapis.com/**', route => route.abort());
   await page.route('https://fonts.gstatic.com/**', route => route.abort());
-  await page.goto('./'); await page.getByRole('button', { name: 'Открыть демоверсию' }).click();
+  await page.goto('./?view=laboratory'); await page.getByRole('button', { name: 'Открыть демоверсию' }).click();
   await page.locator('input[type=file]').setInputFiles({ name: 'renderer.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(value)) });
   await page.getByRole('button', { name: 'Строгий DS Renderer', exact: true }).click();
   await page.evaluate(() => document.fonts.ready);

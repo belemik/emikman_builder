@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 const read=(name:string)=>JSON.parse(readFileSync(new URL(`../../design-system/examples/library-${name}.v3.json`,import.meta.url),'utf8'));
-async function open(page:Page,name:string){await page.goto('./');await page.getByRole('button',{name:'Открыть демоверсию'}).click();await page.locator('input[type=file]').setInputFiles({name:'library.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(read(name)))});await page.getByRole('button',{name:'Строгий DS Renderer',exact:true}).click();await page.evaluate(()=>document.fonts.ready);await expect(page.locator('.wdeaf-renderer')).toBeVisible();}
+async function open(page:Page,name:string){await page.goto('./?view=laboratory');await page.getByRole('button',{name:'Открыть демоверсию'}).click();await page.locator('input[type=file]').setInputFiles({name:'library.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(read(name)))});await page.getByRole('button',{name:'Строгий DS Renderer',exact:true}).click();await page.evaluate(()=>document.fonts.ready);await expect(page.locator('.wdeaf-renderer')).toBeVisible();}
 for(const name of ['tags','chips','menu'])test(`${name}: reviewed states and original asset geometry`,async({page})=>{
  await open(page,name);const renderer=page.locator('.wdeaf-renderer');
  await expect.poll(()=>renderer.locator('img').evaluateAll(imgs=>imgs.every(img=>(img as HTMLImageElement).complete&&(img as HTMLImageElement).naturalWidth>0))).toBe(true);
@@ -43,7 +43,7 @@ test('TagGroup changes only between verified one/two-tag variants and persists c
  await page.reload();await page.getByRole('button',{name:'Открыть демоверсию'}).click();await page.getByRole('button',{name:'Строгий DS Renderer',exact:true}).click();await expect(group.locator('[data-ds-component=tag-item]')).toHaveCount(2);
 });
 test('forbidden roots are hidden; rejected saves can be recovered without overwrite',async({page})=>{
- await page.goto('./');const bad=read('tags');bad.elements=[{id:'old-tag-input',component:'tag-input',variantProps:{size:'m',variant:'primary'},editorProps:{}}];const raw=JSON.stringify(bad);
+ await page.goto('./?view=laboratory');const bad=read('tags');bad.elements=[{id:'old-tag-input',component:'tag-input',variantProps:{size:'m',variant:'primary'},editorProps:{}}];const raw=JSON.stringify(bad);
  await page.evaluate(raw=>localStorage.setItem('wdeaf.demo.emikman_builder.canvas.v2',raw),raw);await page.getByRole('button',{name:'Открыть демоверсию'}).click();
  await expect(page.getByRole('status')).toContainText('INTERNAL_COMPONENT');await expect(page.locator('.catalog-card').filter({hasText:'TagInput'})).toHaveCount(0);
  expect(await page.evaluate(()=>localStorage.getItem('wdeaf.demo.emikman_builder.canvas.v2'))).toBe(raw);
