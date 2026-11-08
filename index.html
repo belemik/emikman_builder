@@ -1,5 +1,21 @@
 <!doctype html>
 <html lang="ru">
-  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="theme-color" content="#0055ff" /><title>WDeaf — Конструктор интерфейсов</title><link rel="stylesheet" href="/wdeaf-controls.css" /></head>
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="theme-color" content="#0055ff" /><title>WDeaf — Конструктор интерфейсов</title><link rel="stylesheet" href="/wdeaf-controls.css" /><script>
+(function () {
+  try {
+    if (new URLSearchParams(location.search).get('demo') !== 'workspace') return;
+    var mode = 'system';
+    try {
+      var stored = localStorage.getItem('zarya-workspace-theme');
+      if (stored === 'light' || stored === 'dark' || stored === 'system') mode = stored;
+    } catch (e) {}
+    var dark = false;
+    try { dark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
+    var scheme = mode === 'dark' || (mode === 'system' && dark) ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-zarya-mode', mode);
+    document.documentElement.setAttribute('data-zarya-scheme', scheme);
+  } catch (e) {}
+})();
+</script></head>
   <body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body>
 </html>
