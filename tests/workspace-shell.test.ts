@@ -100,8 +100,11 @@ test('workspace demo does not call the builder document API', () => {
   assert.equal(model.includes('localStorage'), false);
   assert.match(theme, new RegExp(THEME_STORAGE_KEY));
   assert.match(htmlEntry, new RegExp(THEME_STORAGE_KEY));
-  assert.match(htmlEntry, /demo'\) !== 'workspace'/);
-  assert.match(entry, /demo'\) === 'workspace'/);
+  assert.match(htmlEntry, /view !== null && view !== 'workspace'/);
+  assert.match(entry, /<ApplicationShell/);
+  const application = readFileSync(new URL('../src/application/ApplicationShell.tsx', import.meta.url), 'utf8');
+  assert.match(application, /return isDemo/);
+  assert.match(application, /: <AccountGate>/);
   assert.match(entry, /setDocument/);
 });
 

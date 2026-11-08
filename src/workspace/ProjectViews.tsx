@@ -2,7 +2,7 @@ import { useId, useRef } from 'react';
 import { ChatComposer, Thread } from './ChatComposer';
 import { libraries, projectChatFor, type InspectorTab, type MockElement, type MockProject, type MockWork, type ProjectSection, type WorkspaceState } from './model';
 
-const sections: readonly [ProjectSection, string][] = [['canvas', 'Canvas'], ['sources', 'Источники'], ['libraries', 'Дизайн-система'], ['files', 'Файлы'], ['references', 'Референсы'], ['history', 'История'], ['settings', 'Настройки проекта']];
+const sections: readonly [ProjectSection, string][] = [['canvas', 'Canvas'], ['sources', 'Источники'], ['libraries', 'Дизайн-системы'], ['files', 'Файлы'], ['references', 'Референсы'], ['history', 'История'], ['settings', 'Настройки проекта']];
 export function ProjectPage({ project, allProjects, state, onProject, onSection, onOpen, onLibrary }: {
   project: MockProject; allProjects: readonly MockProject[]; state: WorkspaceState; onProject: (id: string) => void;
   onSection: (section: ProjectSection) => void; onOpen: (projectId: string, workId: string) => void; onLibrary: (id: string) => void;
@@ -34,7 +34,7 @@ function Unavailable({ title, reason, children }: { title: string; reason: strin
 export function Libraries({ libraryId, onSelect, embedded = false }: { libraryId: string; onSelect: (id: string) => void; embedded?: boolean }) {
   const selected = libraries.find(item => item.id === libraryId) ?? libraries[0];
   return <section className={embedded ? 'z-libraries' : 'z-page z-libraries'}>
-    <h2>Дизайн-системы</h2><p className="z-muted">Только демонстрационный список. Источники не опрашиваются и не синхронизируются.</p>
+    <h2>Дизайн-системы</h2><p className="z-muted">Каталог подключённых библиотек: компонентов, токенов, вариантов и источников. Подключение библиотек пока не реализовано. Пока доступен только демонстрационный список: источники не опрашиваются и не синхронизируются. Лаборатория компонентов — отдельный технический инструмент.</p>
     <div className="z-table-wrap"><table><caption className="z-sr">Примеры дизайн-систем</caption><thead><tr><th>Название</th><th>Версия</th><th>Компоненты</th><th>Источник</th><th>Статус</th></tr></thead><tbody>{libraries.map(item => <tr key={item.id} data-selected={selected.id === item.id}>
       <td><button type="button" className="z-button z-text-button" aria-pressed={selected.id === item.id} onClick={() => onSelect(item.id)}>{item.name}</button><small>{item.note}</small></td><td>{item.version}</td><td>{item.components}</td><td>{item.source}</td><td>{item.status}</td>
     </tr>)}</tbody></table></div><p className="z-notice">{selected.note}</p>
@@ -55,7 +55,7 @@ export function Editor({ state, project, work, onBack, onElement, onTab, onViewp
       <div className="z-devices" role="group" aria-label="Просмотр размера">{(['desktop', 'mobile'] as const).map(mode => <button className="z-button" key={mode} type="button" aria-pressed={state.viewport === mode} onClick={() => onViewport(mode)}>{mode === 'desktop' ? 'Desktop' : 'Mobile'}</button>)}</div>
       <button type="button" className="z-button" onClick={() => onTab('review')}>Проверка</button>
     </header>
-    <div className="z-editor-grid"><aside className="z-layers" aria-label="Структура интерфейса"><h2>Слои и компоненты</h2><p className="z-muted">Layers · выбор элемента</p><ul>{work.elements.map(item => <li key={item.id}><button type="button" className="z-layer" aria-current={element.id === item.id ? 'true' : undefined} onClick={() => onElement(item.id)}><small>{item.kind}</small>{item.name}</button></li>)}</ul><p className="z-muted">WDeaf показана как пример. Контракт здесь не проверяется.</p></aside>
+    <div className="z-editor-grid"><aside className="z-layers" aria-label="Структура интерфейса"><h2>Слои и компоненты</h2><p className="z-muted">Layers · выбор элемента</p><ul>{work.elements.map(item => <li key={item.id}><button type="button" className="z-layer" aria-current={element.id === item.id ? 'true' : undefined} onClick={() => onElement(item.id)}><small>{item.kind}</small>{item.name}</button></li>)}</ul><p className="z-muted">WDeaf PRO 2.0 показана как пример. Контракт здесь не проверяется.</p></aside>
       <div className="z-stage"><Canvas work={work} viewport={state.viewport} selected={element.id} onElement={onElement} />
         <div className="z-context"><button className="z-button" type="button" aria-expanded={state.chatOpen} onClick={onChat}>{state.chatOpen ? 'Скрыть чат' : 'Контекстный чат'}</button>
           {state.chatOpen && <><Thread messages={chat.thread} /><ChatComposer compact draft={chat.draft} onDraft={onDraft} onSend={onSend} onSource={onSource} /></>}
@@ -76,7 +76,7 @@ function Inspector({ element, tab, onTab }: { element: MockElement; tab: Inspect
     }
   }}>{tabs.map(([value, label]) => <button type="button" role="tab" key={value} id={`${id}-${value}`} aria-controls={`${id}-panel`} tabIndex={tab === value ? 0 : -1} aria-selected={tab === value} onClick={() => onTab(value)}>{label}</button>)}</div>
     <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${tab}`} tabIndex={0}>
-      {tab === 'params' && <><h3>{element.name}</h3><p className="z-muted">Пример свойств. Значения не записываются.</p><dl><dt>Тип</dt><dd>{element.kind}</dd><dt>Заметка</dt><dd>{element.note}</dd></dl><button type="button" className="z-button" disabled title="Демонстрация. Холст Builder не изменяется.">Применить к холсту</button><p className="z-muted">Apply и Trusted Admission не подключены.</p></>}
+      {tab === 'params' && <><h3>{element.name}</h3><p className="z-muted">Пример свойств. Значения не записываются.</p><dl><dt>Тип</dt><dd>{element.kind}</dd><dt>Заметка</dt><dd>{element.note}</dd></dl><button type="button" className="z-button" disabled title="Демонстрация. Холст лаборатории не изменяется.">Применить к холсту</button><p className="z-muted">Apply и Trusted Admission не подключены.</p></>}
       {tab === 'history' && <><h3>История</h3><p>Записей нет. Демонстрация не ведёт журнал и не сохраняет шаги.</p></>}
       {tab === 'comments' && <><h3>Комменты</h3><p>Пример: «Посмотреть отступ заголовка». Это не сообщение участника.</p><label>Комментарий<textarea disabled placeholder="Недоступно в демо" /></label><button className="z-button" type="button" disabled title="Комментарии пока не отправляются.">Добавить комментарий</button></>}
       {tab === 'review' && <><h3>Проверка</h3><p>Политика JSON здесь не запускается. Статус проверки не выдан. Совпадение с Figma не измерялось.</p><button className="z-button" type="button" disabled title="Демонстрация. Проверка не выполняется.">Запустить проверку</button></>}

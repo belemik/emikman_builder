@@ -20,7 +20,7 @@ test('server protects assets, validates login/origin, rotates and revokes sessio
   const base = `http://127.0.0.1:${app.server.address().port}`;
   const login = (password, extra = {}) => fetch(base + '/api/login', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', ...extra }, body: JSON.stringify({ username: 'tester', password }) });
   try {
-    assert.match(await (await fetch(base)).text(), /Вход в WDeaf/);
+    assert.match(await (await fetch(base)).text(), /Вход в ЗАРЮ/);
     assert.equal((await fetch(base + '/assets/private.js')).status, 401);
     assert.equal((await fetch(base + '/api/me')).status, 401);
     assert.equal((await login('test-password-12345', { Origin: 'https://evil.example' })).status, 403);

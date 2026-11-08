@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
+import type { User } from '../account';
 import { Avatar, CloseButton, Icon } from '../ui';
 import { Popover, containDialogTab } from './Overlays';
 import type { MockProject } from './model';
@@ -24,27 +25,28 @@ function SidebarSection({ title, children }: { title: string; children: ReactNod
   </section>;
 }
 
-function ProfileMenu({ onSettings, onHelp }: { onSettings: () => void; onHelp: () => void }) {
+function ProfileMenu({ onSettings, onHelp, onTechnical, user, accountAction, onDemoExit }: { onSettings: () => void; onHelp: () => void; onTechnical: () => void; user?: User; accountAction?: ReactNode; onDemoExit?: () => void }) {
   const [open, setOpen] = useState(false); const trigger = useRef<HTMLButtonElement>(null);
   return <div className="z-profile">
     {open && <Popover label="Меню пользователя" trigger={trigger} onClose={() => setOpen(false)}>
-      <p className="z-popover-label">Демонстрационный профиль</p>
+      <p className="z-popover-label">{user ? 'Профиль ЗАРЯ' : 'Демо-профиль ЗАРЯ'}</p>
       <button type="button" onClick={() => { setOpen(false); onSettings(); }}><Icon name="settings-01" />Настройки</button>
       <button type="button" onClick={() => { setOpen(false); onHelp(); }}>Справка</button>
+      <button type="button" onClick={() => { setOpen(false); onTechnical(); }}>Технический раздел</button>
       <hr />
-      <button type="button" disabled aria-describedby="z-logout-reason"><Icon name="log-out-01" />Выйти из системы</button>
-      <p id="z-logout-reason" className="z-muted">Недоступно: Workspace demo не подтверждает серверную сессию. Выход из Builder выполняется в самом Builder.</p>
+      {user ? accountAction ?? <button type="button" disabled aria-describedby="z-logout-reason">Выйти</button> : <button type="button" disabled={!onDemoExit} onClick={onDemoExit}><Icon name="log-out-01" />Завершить демо</button>}
+      <p id="z-logout-reason" className="z-muted">{user ? accountAction ? 'Выход завершает текущую серверную сессию.' : 'Действие выхода не подключено.' : 'Публичная демоверсия без серверной сессии. Завершение закрывает демо; холст лаборатории остаётся в браузере.'}</p>
     </Popover>}
-    <button type="button" className="z-profile-trigger" ref={trigger} data-profile-trigger aria-label="Открыть демонстрационный профиль" aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen(!open)}>
-      <Avatar initials="Д" size="32" /><span><strong>Демо-профиль</strong><small>Без подтверждённой сессии</small></span><Icon name="arrow-up" />
+    <button type="button" className="z-profile-trigger" ref={trigger} data-profile-trigger aria-label={user ? `Открыть профиль ${user.username}` : 'Открыть демонстрационный профиль'} aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen(!open)}>
+      <Avatar initials={user?.username ?? 'Д'} size="32" /><span><strong>{user?.username ?? 'Демо-профиль'}</strong><small>{user ? 'Подтверждённая сессия' : 'Без подтверждённой сессии'}</small></span><Icon name="arrow-up" />
     </button>
   </div>;
 }
 
-export function Sidebar({ mobile, allProjects, recentIds, currentProject, onHome, onAll, onProject, onToggle, onSettings, onHelp }: {
+export function Sidebar({ mobile, allProjects, recentIds, currentProject, onHome, onAll, onProject, onToggle, onSettings, onHelp, onTechnical, user, accountAction, onDemoExit }: {
   mobile: boolean; allProjects: readonly MockProject[]; recentIds: readonly string[]; currentProject: string | null;
   onHome: () => void; onAll: () => void; onProject: (id: string) => void; onToggle: () => void;
-  onSettings: () => void; onHelp: () => void;
+  onSettings: () => void; onHelp: () => void; onTechnical: () => void; user?: User; accountAction?: ReactNode; onDemoExit?: () => void;
 }) {
   return <div className="z-side-content">
     <div className="z-side-head"><button type="button" className="z-brand" aria-label="ЗАРЯ — главная Workspace" onClick={onHome}>ЗАРЯ<span>demo</span></button>
@@ -59,7 +61,7 @@ export function Sidebar({ mobile, allProjects, recentIds, currentProject, onHome
         {recentIds.map(id => allProjects.find(project => project.id === id)).filter((item): item is MockProject => !!item).map(project => <button type="button" key={project.id} onClick={() => onProject(project.id)}>{project.name}<small>mock</small></button>)}
       </SidebarSection>
     </nav>
-    <ProfileMenu onSettings={onSettings} onHelp={onHelp} />
+    <ProfileMenu onSettings={onSettings} onHelp={onHelp} onTechnical={onTechnical} user={user} accountAction={accountAction} onDemoExit={onDemoExit} />
   </div>;
 }
 

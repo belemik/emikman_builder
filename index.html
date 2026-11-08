@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="ru">
-  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="theme-color" content="#0055ff" /><title>WDeaf — Конструктор интерфейсов</title><link rel="stylesheet" href="/wdeaf-controls.css" /><script>
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="theme-color" content="#0055ff" /><title>ЗАРЯ Workspace</title><link rel="stylesheet" href="/wdeaf-controls.css" /><script>
 (function () {
   try {
-    if (new URLSearchParams(location.search).get('demo') !== 'workspace') return;
+    var view = new URLSearchParams(location.search).get('view');
+    if (view !== null && view !== 'workspace') return;
     var mode = 'system';
     try {
       var stored = localStorage.getItem('zarya-workspace-theme');

@@ -1,7 +1,7 @@
 import { DSRenderer } from './renderer/DSRenderer';
 import { acceptEditorDocument, importEditorDocument, screenFromCanvas, strictDocument } from './renderer/boundary';
 import { isDemo, DEMO_STORAGE_KEY } from './runtime';
-import { DemoAccountButton, DemoGate } from './demo';
+import { DemoAccountButton } from './demo';
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registry, definition, figmaUrl } from './registry';
@@ -20,11 +20,11 @@ import './appearance/appearance.css';
 import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/500.css';
 import './renderer/styles.css';
-import { AccountGate, AccountButton, type User } from './account';
-import { WorkspaceShell } from './workspace/WorkspaceShell';
+import { AccountButton, type User } from './account';
+import { ApplicationShell } from './application/ApplicationShell';
 import './workspace/workspace.css';
 
-function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
+function LegacyBuilder({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
   const storageKey = isDemo ? DEMO_STORAGE_KEY : `wdeaf.canvas.v1.${user.id}`;
   const [initial] = useState(() => loadDocument(storageKey, !isDemo && user.username === 'emikman'));
   const [document, setDocumentState] = useState(initial.document);
@@ -60,7 +60,7 @@ function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
   const rendererScreen = screenFromCanvas(document);
   const canvasThemeStyle = themeStyle(document.themeOverrides);
   return <>
-    <header className="app-header"><div className="brand"><span className="brand-mark">W</span><div><strong>WDeaf <span>Builder</span></strong><small>Конструктор дизайн-системы</small></div><span className="badge">Sprint 05</span></div>
+    <header className="app-header"><div className="brand"><span className="brand-mark">З</span><div><strong>ЗАРЯ</strong><small>Лаборатория компонентов</small></div><span className="badge">Legacy</span></div>
       <div className="header-actions"><button onClick={() => importRef.current?.click()}><Icon name="upload-01" /> Импорт JSON</button><button onClick={() => { try { exportDocument(strict ? strictDocument(document) : acceptEditorDocument(document)); } catch (error) { setMessage(`Экспорт заблокирован: ${error instanceof Error ? error.message : 'ошибка схемы'}`); } }}><Icon name="download-01" /> Экспорт JSON</button><button className="primary" onClick={() => { setCopied(false); setPromptOpen(true); }}>Сгенерировать промпт <Icon name="arrow-up-right" /></button>{isDemo ? <DemoAccountButton onExit={onDemoExit!} /> : <AccountButton user={user} />}</div>
     </header>
     {isDemo && <div className="notice" role="note">Демоверсия · Гостевой доступ без входа. Холст хранится только в этом браузере; общей базы проектов нет.</div>}
@@ -87,14 +87,14 @@ function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
           <span className="catalog-label"><strong>{entry.label}</strong><Icon name="plus" /></span><small>Добавить на холст</small>
         </button>)}</div>
         <div className="catalog-note"><span className="eyebrow">ИСТОЧНИК</span><h3>Метаданные Figma</h3><p className="muted">Варианты и ссылки сохранены из Figma. Для проверенной реализации включите строгий DS Renderer.</p><a href={figmaUrl} target="_blank" rel="noreferrer">Открыть дизайн-систему <Icon name="arrow-up-right" /></a></div>
-        <div className="ai-note"><strong>AI-чат · следующий этап</strong><p className="muted">Пока доступна генерация задания. Подключения к LLM нет.</p></div>
+        <div className="ai-note"><strong>Локальный генератор промптов</strong><p className="muted">Формирует текст задания без LLM. Это технический инструмент лаборатории.</p></div>
       </aside>
-      <section className="canvas-area"><div className="canvas-heading"><div><div className="eyebrow">РАБОЧАЯ ОБЛАСТЬ</div><h1>Ваш интерфейс</h1></div><span className="platform"><Icon name="globe-01" /> Web</span></div>
+      <section className="canvas-area"><div className="canvas-heading"><div><div className="eyebrow">РАБОЧАЯ ОБЛАСТЬ</div><h1>Экспериментальный холст</h1></div><span className="platform"><Icon name="globe-01" /> Web</span></div>
         <div className="canvas-meta"><span>{document.elements.length} элементов</span><span className="save-status">{saveStatus}</span></div>
         <div className="renderer-mode"><button aria-pressed={!strict} onClick={() => setStrict(false)}>Редакторский preview</button><button aria-pressed={strict} onClick={() => setStrict(true)}>Строгий DS Renderer</button><small>{strict ? 'Оригинальная тема Figma · без overrides' : 'Пользовательские overrides · приближённый preview'}</small></div>
         <div className="canvas-paper" style={canvasThemeStyle} data-color-override={Boolean(document.themeOverrides.primaryColor)} data-radius-override={document.themeOverrides.radiusPx !== undefined}>
           <div className="paper-caption"><span>Холст</span><span>Предпросмотр</span></div>
-          {strict ? <DSRenderer screen={rendererScreen} onRemove={id=>setDocument(current=>({...current,elements:current.elements.filter(item=>item.id!==id)}))} onSelect={setSelected} onChange={updated => setDocument(current => ({ ...current, elements: current.elements.map(item => item.id === updated.id ? updated : item) }))} /> : !document.elements.length ? <div className="empty-canvas"><div className="empty-icon"><Icon name="plus" /></div><h2>Начните с компонента</h2><p>Добавьте компонент из каталога слева.<br />Настройте варианты в инспекторе справа.</p><span className="badge">Пять компонентов из WDeaf.</span></div> : <div className="canvas-elements">{document.elements.map((element, index) => <article key={element.id} className={`canvas-item ${selected === element.id ? 'selected' : ''}`} onClick={() => setSelected(element.id)}>
+          {strict ? <DSRenderer screen={rendererScreen} onRemove={id=>setDocument(current=>({...current,elements:current.elements.filter(item=>item.id!==id)}))} onSelect={setSelected} onChange={updated => setDocument(current => ({ ...current, elements: current.elements.map(item => item.id === updated.id ? updated : item) }))} /> : !document.elements.length ? <div className="empty-canvas"><div className="empty-icon"><Icon name="plus" /></div><h2>Начните с компонента</h2><p>Добавьте компонент из каталога слева.<br />Настройте варианты в инспекторе справа.</p><span className="badge">Компоненты WDeaf PRO 2.0.</span></div> : <div className="canvas-elements">{document.elements.map((element, index) => <article key={element.id} className={`canvas-item ${selected === element.id ? 'selected' : ''}`} onClick={() => setSelected(element.id)}>
             <div className="element-toolbar"><button className="element-select" aria-pressed={selected === element.id} onClick={() => setSelected(element.id)}><span>{String(index + 1).padStart(2, '0')}</span> {definition(element.component).label}</button><div className="element-actions">
               <button aria-label={`Переместить ${definition(element.component).label} ${index + 1} вверх`} disabled={index === 0} onClick={e => { e.stopPropagation(); setDocument(current => ({ ...current, elements: moveElement(current.elements, element.id, -1) })); }}><Icon name="arrow-up" /></button>
               <button aria-label={`Переместить ${definition(element.component).label} ${index + 1} вниз`} disabled={index === document.elements.length - 1} onClick={e => { e.stopPropagation(); setDocument(current => ({ ...current, elements: moveElement(current.elements, element.id, 1) })); }}><Icon name="arrow-down" /></button>
@@ -110,5 +110,4 @@ function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
     <dialog ref={dialogRef} onCancel={() => setPromptOpen(false)} onClose={() => setPromptOpen(false)}><div className="dialog-heading"><div><h2>Задание для AI-редактора</h2><p className="muted">Codex · Cursor · Claude Code</p></div><CloseButton label="Закрыть промпт" onClick={() => setPromptOpen(false)} /></div><textarea aria-label="Сгенерированный промпт" readOnly value={prompt} /><div className="dialog-footer"><span className="muted" role="status">{copied ? 'Текст скопирован' : 'Генерация локальная, без обращения к AI'}</span><button className="primary" onClick={async () => { try { await navigator.clipboard.writeText(prompt); setCopied(true); } catch { setCopied(false); setMessage('Буфер обмена недоступен. Выделите текст промпта и нажмите ⌘C.'); dialogRef.current?.querySelector('textarea')?.select(); } }}>Скопировать текст</button></div></dialog>
   </>;
 }
-const workspaceDemo = new URLSearchParams(window.location.search).get('demo') === 'workspace';
-createRoot(window.document.getElementById('root')!).render(<React.StrictMode>{workspaceDemo ? <WorkspaceShell /> : isDemo ? <DemoGate>{exit => <App user={{ id: 'guest', username: 'Гость' }} onDemoExit={exit} />}</DemoGate> : <AccountGate>{user => <App key={user.id} user={user} />}</AccountGate>}</React.StrictMode>);
+createRoot(window.document.getElementById('root')!).render(<React.StrictMode><ApplicationShell renderLaboratory={(user, exit) => <LegacyBuilder key={user.id} user={user} onDemoExit={exit} />} /></React.StrictMode>);
