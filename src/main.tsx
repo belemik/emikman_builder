@@ -21,6 +21,8 @@ import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/500.css';
 import './renderer/styles.css';
 import { AccountGate, AccountButton, type User } from './account';
+import { WorkspaceShell } from './workspace/WorkspaceShell';
+import './workspace/workspace.css';
 
 function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
   const storageKey = isDemo ? DEMO_STORAGE_KEY : `wdeaf.canvas.v1.${user.id}`;
@@ -108,4 +110,5 @@ function App({ user, onDemoExit }: { user: User; onDemoExit?: () => void }) {
     <dialog ref={dialogRef} onCancel={() => setPromptOpen(false)} onClose={() => setPromptOpen(false)}><div className="dialog-heading"><div><h2>Задание для AI-редактора</h2><p className="muted">Codex · Cursor · Claude Code</p></div><CloseButton label="Закрыть промпт" onClick={() => setPromptOpen(false)} /></div><textarea aria-label="Сгенерированный промпт" readOnly value={prompt} /><div className="dialog-footer"><span className="muted" role="status">{copied ? 'Текст скопирован' : 'Генерация локальная, без обращения к AI'}</span><button className="primary" onClick={async () => { try { await navigator.clipboard.writeText(prompt); setCopied(true); } catch { setCopied(false); setMessage('Буфер обмена недоступен. Выделите текст промпта и нажмите ⌘C.'); dialogRef.current?.querySelector('textarea')?.select(); } }}>Скопировать текст</button></div></dialog>
   </>;
 }
-createRoot(window.document.getElementById('root')!).render(<React.StrictMode>{isDemo ? <DemoGate>{exit => <App user={{ id: 'guest', username: 'Гость' }} onDemoExit={exit} />}</DemoGate> : <AccountGate>{user => <App key={user.id} user={user} />}</AccountGate>}</React.StrictMode>);
+const workspaceDemo = new URLSearchParams(window.location.search).get('demo') === 'workspace';
+createRoot(window.document.getElementById('root')!).render(<React.StrictMode>{workspaceDemo ? <WorkspaceShell /> : isDemo ? <DemoGate>{exit => <App user={{ id: 'guest', username: 'Гость' }} onDemoExit={exit} />}</DemoGate> : <AccountGate>{user => <App key={user.id} user={user} />}</AccountGate>}</React.StrictMode>);
