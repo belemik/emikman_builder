@@ -1,6 +1,6 @@
 import { types, TextDecoder } from 'node:util';
 import { inspectProjectRequest } from '../../src/projects/request.validation';
-import type { RequestJson } from '../../src/projects/repository.dto';
+import type { RequestJson, RequestRecord } from '../../src/projects/repository.dto';
 import { PROJECT_INGEST_TEST_PROFILE as limits } from './ingest-profile';
 import type { ProjectCommandInspection, ProjectDecodeCode, ProjectDecodeCounters } from './ingest-profile';
 
@@ -71,7 +71,7 @@ function inspectClosedDto(operation: string, root: RequestJson): void {
  * intrinsics; this is not a sandbox for a hostile same-realm program that patches builtins.
  * Own bytes are copied before decoding. No bytes/tree/DTO/candidate escape in either result.
  */
-export function decodeProjectCommandTestOnly(operation: string, input: Uint8Array): ProjectCommandInspection {
+function inspectOwned(operation: string, input: Uint8Array, handoff?: { data?: RequestRecord; bytes?: Uint8Array; missingGuard?: boolean }): ProjectCommandInspection {
   let bodyBytes: number | null = null, decodedLength: number | null = null, i = 0;
   const counters = { nodes: 0, properties: 0, arrayItems: 0, maxContainerDepth: 0,
     maxKeyScalars: 0, maxStringScalars: 0, maxRawStringTokenBytes: 0 };
@@ -208,7 +208,19 @@ export function decodeProjectCommandTestOnly(operation: string, input: Uint8Arra
     }
     whitespace(); if (i !== text.length) deny('R1_SYNTAX');
     if (unsupportedValues) deny('R1_DTO');
+    if (handoff && dataRecord(root) && ['update-metadata','create-revision','restore-project','soft-delete-project'].includes(operation) && !Object.hasOwn(root,'expectedRevision')) handoff.missingGuard=true;
     inspectClosedDto(operation, root);
+    if (handoff) {
+      if (!dataRecord(root)) deny('R1_INTERNAL');
+      const pending: RequestJson[] = [root];
+      while (pending.length) {
+        const value = pending.pop()!;
+        if (value !== null && typeof value === 'object') {
+          pending.push(...Object.values(value)); Object.freeze(value);
+        }
+      }
+      handoff.data = root; handoff.bytes = owned;
+    }
 
     return Object.freeze({ ...boundary(), kind: 'test-dto-inspected', counterSemantics: 'COMPLETE_DOCUMENT',
       diagnostics: Object.freeze([] as const) });
@@ -220,4 +232,28 @@ export function decodeProjectCommandTestOnly(operation: string, input: Uint8Arra
         offset: decodedLength === null ? null : Math.min(i, decodedLength),
         offsetDomain: 'DECODED_UTF16_CODE_UNITS' as const })]) });
   }
+}
+
+/** Original report-only public R1 API: unchanged result and authority. */
+export function decodeProjectCommandTestOnly(operation: string, input: Uint8Array): ProjectCommandInspection {
+  return inspectOwned(operation, input);
+}
+type OwnedHandoff = Readonly<{ operation: string; profileId: typeof limits.id;
+  data: RequestRecord; bytes: Uint8Array }>;
+const ownedHandoffs = new WeakMap<object, OwnedHandoff>();
+/** INTERNAL TEST ONLY: one-use transfer from the same R1 scan, not a caller-provided DTO.
+ * Handle identity is checked in a private registry. No callback or second parse of caller bytes.
+ * Consuming transfers sole ownership of bytes; the receiver must not expose their mutable view.
+ */
+export function createOwnedHandoffTestOnly(operation: string, input: Uint8Array) {
+  const transfer: { data?: RequestRecord; bytes?: Uint8Array; missingGuard?: boolean } = {};
+  const report = inspectOwned(operation, input, transfer);
+  if (report.kind !== 'test-dto-inspected' || !transfer.data || !transfer.bytes) return { report, handle: null, missingGuard: transfer.missingGuard === true };
+  const handle = Object.freeze({ scope: 'R1_INTERNAL_HANDOFF_TEST_ONLY' });
+  ownedHandoffs.set(handle, Object.freeze({ operation, profileId: limits.id, data: transfer.data, bytes: transfer.bytes }));
+  return Object.freeze({ report, handle });
+}
+export function takeOwnedHandoffTestOnly(handle: object): OwnedHandoff | null {
+  const transfer = ownedHandoffs.get(handle); ownedHandoffs.delete(handle);
+  return transfer ?? null;
 }
