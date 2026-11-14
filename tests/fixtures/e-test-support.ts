@@ -1,0 +1,8 @@
+import {dEnvironment} from './d-test-support';import {startCTestHttp,type CTestOptions} from '../../server/projects/c-test-http';import {EWorkspace,type EFixturePort} from './e-workspace-client';
+export {createRequest,header,candidate,dCounts} from './d-test-support';export {post,get,headers,A,B,sleep} from './c-test-support';
+export async function eHost(options:{ledger?:string;admit?:boolean;http?:CTestOptions}={}){
+ const env=dEnvironment({ledger:options.ledger});if(options.admit===true&&!env.runtime.admit()){env.close();throw Error('E_TEST_ADMIT');}let http:Awaited<ReturnType<typeof startCTestHttp>>;
+ http=await startCTestHttp({...options.http,main:env.runtime.repository.volume.directory,ledger:env.volume.directory,sessions:env.sessions,beforeDispatch:async()=>{env.runtime.httpGuard(http.repository);await options.http?.beforeDispatch?.();env.runtime.httpGuard(http.repository);},beforeDelivery:async()=>{env.runtime.httpGuard(http.repository);await options.http?.beforeDelivery?.();env.runtime.httpGuard(http.repository);}});
+ const port:EFixturePort={origin:http.url,lookup:token=>{try{const lease=env.sessions.get(token),meta=env.ledger.meta();return lease?{scope:String(meta.store_id)+'|'+lease.account,identity:lease.identity,recovery:String(meta.store_id)+'|'+String(meta.generation)}:null;}catch{return null;}},ready:()=>{try{return env.ledger.exclusive(()=>env.runtime.health().ready&&http.repository.current());}catch{return false;}}};
+ return {env,http,port,client:(token=env.token,timeout=4000)=>new EWorkspace(port,token,timeout),async close(){await http.close();env.close();}};
+}
