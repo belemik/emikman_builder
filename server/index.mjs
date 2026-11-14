@@ -4,6 +4,8 @@ import { resolve, extname, sep } from 'node:path';
 import { randomBytes, createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { users, verifyPassword, hashPassword } from './auth.mjs';
+import { createSessionContext } from './session-context.mjs';
+import { installPrincipalBoundary } from './projects/principal-boundary.mjs';
 
 export async function createApp({ dev = false, origin = 'http://127.0.0.1:5173', sessionTTL = 8 * 60 * 60 * 1000 } = {}) {
   const secure = new URL(origin).protocol === 'https:';
@@ -12,6 +14,17 @@ export async function createApp({ dev = false, origin = 'http://127.0.0.1:5173',
   const digest = value => createHash('sha256').update(value).digest('hex');
   const cookie = (token, age) => `wdeaf_session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${age}${secure ? '; Secure' : ''}`;
   const json = (res, status, data) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(data)); };
+  // Private resolver rechecks the exact live session after each async user lookup.
+  let principalActive = true;
+  const context = createSessionContext(async key => {
+    if (!principalActive) return null;
+    const current = sessions.get(key);
+    if (!current) return null;
+    const accountId = current.userId, expiresAt = current.expires;
+    const active = (await users()).some(item => item.id === accountId);
+    if (!principalActive || !active || sessions.get(key) !== current || current.userId !== accountId || current.expires !== expiresAt) return null;
+    return { identity: current, accountId, expiresAt };
+  });
   let vite;
   const server = createServer(async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
@@ -53,8 +66,14 @@ export async function createApp({ dev = false, origin = 'http://127.0.0.1:5173',
         if (token) sessions.delete(digest(token));
         res.setHeader('Set-Cookie', cookie('', 0)); return json(res, 200, { ok: true });
       }
+      // Only actual guard output is bound. No body/owner/role claim enters context.
+      if (user && session && token) context.bind(req, {
+        key: digest(token), identity: session, accountId: user.id, expiresAt: session.expires,
+      });
+      const principal = user ? await principalBoundary.principalFor(req) : null;
+      const stillAuthorized = () => principal && principalBoundary.isCurrent(principal, req);
       if (path === '/api/me') {
-        if (!user) return json(res, 401, { error: 'Требуется вход.' });
+        if (!principal || !await stillAuthorized()) return json(res, 401, { error: 'Требуется вход.' });
         return json(res, 200, { id: user.id, username: user.username });
       }
       // Only these public, non-sensitive assets are needed by the login form.
@@ -63,7 +82,7 @@ export async function createApp({ dev = false, origin = 'http://127.0.0.1:5173',
         res.setHeader('Content-Type', path.endsWith('.svg') ? 'image/svg+xml' : 'text/css; charset=utf-8');
         return res.end(req.method === 'HEAD' ? undefined : await readFile(resolve('public', '.' + path)));
       }
-      if (!user) {
+      if (!principal) {
         if (path === '/' && req.method === 'GET') { res.setHeader('Content-Type', 'text/html; charset=utf-8'); return res.end(await readFile(new URL('./login.html', import.meta.url))); }
         return json(res, 401, { error: 'Требуется вход.' });
       }
@@ -77,17 +96,20 @@ export async function createApp({ dev = false, origin = 'http://127.0.0.1:5173',
         if (!(await stat(file)).isFile()) return json(res, 404, { error: 'Не найдено.' });
         const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2' };
         res.setHeader('Content-Type', `${mime[extname(file)] || 'application/octet-stream'}; charset=utf-8`);
-        res.end(req.method === 'HEAD' ? undefined : await readFile(file));
+        const body = req.method === 'HEAD' ? undefined : await readFile(file);
+        if (!await stillAuthorized()) return json(res, 401, { error: 'Требуется вход.' });
+        res.end(body);
       } catch (error) { if (error.code === 'ENOENT') return json(res, 404, { error: 'Не найдено.' }); throw error; }
     } catch { if (!res.headersSent) json(res, 500, { error: 'Ошибка сервера.' }); else res.end(); }
   });
+  const principalBoundary = installPrincipalBoundary(server, context);
   server.requestTimeout = 15000;
   server.headersTimeout = 10000;
   if (dev) {
     const { createServer: createViteServer } = await import('vite');
     vite = await createViteServer({ server: { middlewareMode: true, hmr: false, fs: { deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/.data/**', '**/server/**'] } }, appType: 'spa' });
   }
-  return { server, close: async () => { await vite?.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); } };
+  return { server, close: async () => { principalActive = false; await vite?.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); } };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const dev = process.argv.includes('--dev');
