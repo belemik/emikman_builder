@@ -1,0 +1,6 @@
+import {writeFileSync} from 'node:fs';import {join} from 'node:path';
+import {dEnvironment} from './d-test-support';import {adoptBTestVolume} from '../../server/projects/b-test-volume';import {createTestCommandCandidate} from '../../server/projects/test-command-candidate';
+const [ledger,mode,stage,arg1,arg2]=process.argv.slice(2);
+process.send?.('ready');process.once('message',()=>{void(async()=>{let e:ReturnType<typeof dEnvironment>|undefined;const kill=(s:string)=>{if(s===stage){writeFileSync(join(ledger,'d-fault-observed'),s);process.kill(process.pid,'SIGKILL');}};
+ try{e=dEnvironment({ledger,fault:kill});if(mode==='observe'){process.send?.({kind:'observed',health:e.runtime.health()});return;}if(mode==='write'){if(!e.runtime.admit())throw Error('D_ADMIT');const c=createTestCommandCandidate('update-metadata',Buffer.from(arg1,'base64'));if(c.kind!=='candidate')throw Error('D_CANDIDATE');process.send?.({kind:'result',result:e.runtime.execute(e.principal,c.candidate)});}else if(mode==='restore'){await e.runtime.restore(adoptBTestVolume(arg1),adoptBTestVolume(arg2),kill);process.send?.({kind:'restored'});}else throw Error('D_MODE');
+ }catch{process.send?.({kind:'boot-refused'});}finally{e?.close();process.disconnect?.();}})();});
