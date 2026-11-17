@@ -17,7 +17,22 @@ jobs:
       - run: npm run typecheck
       - run: npm run ds:validate
       - run: npm run build:server
-      - run: npm test
+      - name: Run portable TypeScript and Node tests
+        shell: bash
+        run: |
+          shopt -s nullglob
+          ts_tests=(tests/*.test.ts)
+          node_tests=()
+          for test_file in tests/*.test.mjs; do
+            case "$test_file" in
+              tests/project-durable-session-bridge.test.mjs|tests/project-session-authority.test.mjs|tests/project-session-store-recovery.test.mjs|tests/project-session-store.test.mjs) ;;
+              *) node_tests+=("$test_file") ;;
+            esac
+          done
+          test "${#ts_tests[@]}" -gt 0
+          test "${#node_tests[@]}" -gt 0
+          node node_modules/tsx/dist/cli.mjs --test "${ts_tests[@]}"
+          node --test "${node_tests[@]}"
       - run: npm run build
       - run: npm run check:pages
       - run: npx playwright install --with-deps chromium
@@ -39,3 +54,115 @@ jobs:
       - run: npm run build
       - run: npx playwright install chromium
       - run: npm run test:visual
+
+  g1b:
+    name: G1b qualified runtime
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26.13.0'
+          architecture: arm64
+      - name: Verify runtime and probe local filesystem
+        shell: bash
+        env:
+          TESTED_MERGE: ${{ github.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { DatabaseSync } from 'node:sqlite';
+          assert.equal(process.platform, 'darwin');
+          assert.equal(process.arch, 'arm64');
+          assert.equal(process.version, 'v26.13.0');
+          assert.equal(process.versions.sqlite, '3.54.0');
+          const db = new DatabaseSync(':memory:');
+          try { assert.equal(db.prepare('select sqlite_version() as v').get().v, '3.54.0'); }
+          finally { db.close(); }
+          JS
+          test "$(cd /private/var/tmp && pwd -P)" = /private/var/tmp
+          diskutil info -plist "$(df -P /private/var/tmp | awk 'NR == 2 {print $1}')" | python3 -c 'import plistlib,sys; d=plistlib.loads(sys.stdin.buffer.read()); assert d.get("FilesystemType") == "apfs"; print("APFS:", d.get("DeviceIdentifier"), d.get("MountPoint"))'
+          test "$(id -u)" -ne 0
+          printf 'Image %s %s; tested merge %s; head %s; base %s\n' "$ImageOS" "$ImageVersion" "$TESTED_MERGE" "$PR_HEAD" "$PR_BASE"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { spawnSync } from 'node:child_process';
+          import { constants as c, closeSync, fstatSync, fsyncSync, lstatSync, mkdirSync, mkdtempSync,
+            openSync, readFileSync, realpathSync, rmdirSync, unlinkSync, writeFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          const base = '/private/var/tmp';
+          assert.equal(realpathSync(base), base);
+          const dev = lstatSync(base).dev;
+          const root = mkdtempSync(join(base, 'zarya-g1b-ci-fs-'));
+          const stat = lstatSync(root);
+          assert.equal(stat.dev, dev);
+          assert.equal(stat.uid, process.getuid());
+          assert.equal(stat.mode & 0o7777, 0o700);
+          const file = join(root, 'probe');
+          const fd = openSync(file, c.O_WRONLY | c.O_CREAT | c.O_EXCL | c.O_NOFOLLOW, 0o600);
+          try {
+            assert.equal(fstatSync(fd).mode & 0o7777, 0o600);
+            writeFileSync(fd, 'synthetic-cp0-fsync');
+            fsyncSync(fd);
+          } finally { closeSync(fd); }
+          const directory = openSync(root, c.O_RDONLY | c.O_DIRECTORY | c.O_NOFOLLOW);
+          try { fsyncSync(directory); } finally { closeSync(directory); }
+          assert.equal(readFileSync(file, 'utf8'), 'synthetic-cp0-fsync');
+          const reopened = spawnSync(process.execPath, ['--input-type=module', '-e', `
+            import assert from 'node:assert/strict';
+            import { constants as c, closeSync, fstatSync, openSync, readFileSync } from 'node:fs';
+            const fd = openSync(process.argv[1], c.O_RDONLY | c.O_NOFOLLOW);
+            try {
+              const stat = fstatSync(fd);
+              assert.ok(stat.isFile());
+              assert.equal(stat.mode & 0o7777, 0o600);
+              assert.equal(stat.uid, process.getuid());
+              assert.equal(readFileSync(fd, 'utf8'), 'synthetic-cp0-fsync');
+            } finally { closeSync(fd); }
+            process.stdout.write('CP0_FS_REOPEN_OK');
+          `, file], { encoding: 'utf8' });
+          assert.ifError(reopened.error);
+          assert.equal(reopened.signal, null);
+          assert.equal(reopened.status, 0);
+          assert.equal(reopened.stdout, 'CP0_FS_REOPEN_OK');
+          unlinkSync(file);
+          rmdirSync(root);
+          mkdirSync(join(base, 'zarya-g1b-cp0'), { mode: 0o700 });
+          JS
+          test "$(stat -f '%u:%Lp:%d' /private/var/tmp/zarya-g1b-cp0)" = "$(id -u):700:$(stat -f '%d' /private/var/tmp)"
+      - run: npm ci
+      - name: Strict G1b JavaScript
+        run: |
+          node node_modules/typescript/bin/tsc --allowJs --checkJs --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext --strict --types node \
+            server/session-store.mjs server/session-recovery-authority.mjs tests/fixtures/session-store-worker.mjs \
+            tests/project-session-store.test.mjs tests/project-session-authority.test.mjs \
+            tests/project-session-store-recovery.test.mjs tests/project-durable-session-bridge.test.mjs
+      - run: npm run build:server
+      - name: Run G1b and adjacent auth regression
+        run: |
+          node --test --test-concurrency=1 \
+            tests/project-durable-session-bridge.test.mjs tests/project-session-bridge.test.mjs \
+            tests/project-principal-boundary.test.mjs tests/auth.test.mjs tests/project-session-store.test.mjs \
+            tests/project-session-store-recovery.test.mjs tests/project-session-authority.test.mjs
+
+  g1b-integration:
+    name: G1b integration gate
+    if: ${{ always() }}
+    needs: [validate, visual, g1b]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all jobs to succeed
+        shell: bash
+        env:
+          VALIDATE_RESULT: ${{ needs.validate.result }}
+          VISUAL_RESULT: ${{ needs.visual.result }}
+          G1B_RESULT: ${{ needs.g1b.result }}
+        run: |
+          test "$VALIDATE_RESULT" = success
+          test "$VISUAL_RESULT" = success
+          test "$G1B_RESULT" = success
