@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { createInterface } from 'node:readline';
 
 // A disposable server/users directory: no real accounts, production storage or auth changes.
-async function disposableServer(dev = true) {
+async function disposableServer(dev = true, secondAccount = false) {
   const data = await mkdtemp(join(tmpdir(), 'zarya-w03-auth-'));
   const child = spawn(process.execPath, ['--input-type=module', '-'], { cwd: process.cwd(), env: { ...process.env, DATA_DIR: data }, stdio: ['pipe', 'pipe', 'pipe'] });
   let diagnostics = ''; child.stderr.on('data', value => { diagnostics += value; });
@@ -27,6 +27,7 @@ async function disposableServer(dev = true) {
     const port = probe.address().port; await new Promise(r => probe.close(r));
     const origin = 'http://127.0.0.1:' + port;
     await addUser('w03-tester', 'disposable-test-password-2026');
+    if (${secondAccount}) await addUser('p2-other', 'disposable-test-password-2026');
     const app = await createApp({ dev: ${dev}, origin });
     await new Promise(r => app.server.listen(port, '127.0.0.1', r));
     console.log('W03_READY ' + origin);
@@ -35,11 +36,11 @@ async function disposableServer(dev = true) {
   const close = async () => { child.kill('SIGTERM'); await closed; lines.close(); await rm(data, { recursive: true, force: true }); };
   try { return { origin: await ready, data, close }; } catch (error) { await close(); throw error; }
 }
-async function login(page: import('@playwright/test').Page, origin: string) {
+async function login(page: import('@playwright/test').Page, origin: string, username = 'w03-tester') {
   await page.goto(origin + '/?demo=workspace');
   await expect(page.getByRole('heading', { name: 'Вход в ЗАРЮ' })).toBeVisible();
   await expect(page).toHaveTitle('Вход · ЗАРЯ');
-  await page.getByLabel('Логин', { exact: true }).fill('w03-tester');
+  await page.getByLabel('Логин', { exact: true }).fill(username);
   await page.getByLabel('Пароль', { exact: true }).fill('disposable-test-password-2026');
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Что создадим сегодня?' })).toBeVisible();
@@ -222,4 +223,115 @@ test('W03b MULTI-SESSION: A/B/C share one account with independent cookies, mock
   } finally {
     await Promise.all(contexts.map(context => context.close())); await server.close();
   }
+});
+
+for (const width of [1440, 390]) test(`P2.1 ${width}px: edit, validate, export and reopen a temporary project`, async ({ page }, info) => {
+  test.setTimeout(60000);
+  await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
+  await page.addInitScript(() => localStorage.setItem('zarya-workspace-theme', 'dark'));
+  const server = await disposableServer();
+  try {
+    await login(page, server.origin);
+    await expect(page.locator('.zarya')).toHaveAttribute('data-zarya-scheme', 'dark');
+    const before = await page.evaluate(() => ({ ...localStorage }));
+    const projectRequests: string[] = [];
+    page.on('request', request => {
+      if (new URL(request.url()).pathname.startsWith('/api/') &&
+          !['/api/me', '/api/logout'].includes(new URL(request.url()).pathname)) projectRequests.push(request.url());
+    });
+    await page.getByRole('button', { name: 'Создать проект', exact: true }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { name: 'Новый проект' })).toBeFocused();
+    await expect(page.getByLabel('Тип проекта')).toHaveValue('web-application');
+    await page.getByLabel('Название проекта').fill('Экран входа');
+    await page.getByRole('button', { name: 'Открыть Canvas' }).click();
+    await expect(page.getByRole('heading', { name: 'Экран входа' })).toBeFocused();
+    await expect(page.getByRole('heading', { name: 'Начните с компонента' })).toBeVisible();
+    await expect(page.getByText('Тестовый проект — не сохраняется после обновления страницы.')).toBeVisible();
+    for (const name of ['Input', 'Button', 'Checkbox']) {
+      await page.locator('.catalog').getByRole('button', { name: new RegExp('^' + name + ' Добавить') }).click();
+    }
+    await page.locator('.canvas-elements').getByRole('button', { name: '02 Button' }).click();
+    await page.locator('.inspector-fields label').filter({ has: page.getByText('label', { exact: true }) })
+      .getByRole('textbox').fill('Войти в проект');
+    await page.getByRole('button', { name: 'Переместить Button 2 вниз' }).click();
+    await expect(page.locator('.element-select')).toHaveText(['01 Input', '02 Checkbox', '03 Button']);
+    await page.getByRole('button', { name: 'Удалить Checkbox 2' }).click();
+    await expect(page.locator('.element-select')).toHaveText(['01 Input', '02 Button']);
+    await page.locator('.catalog').getByRole('button', { name: /^Checkbox Добавить/ }).click();
+    await page.getByRole('button', { name: 'Переместить Checkbox 3 вверх' }).click();
+    await page.getByRole('button', { name: 'Проверить документ' }).click();
+    await expect(page.getByRole('status')).toContainText('Документ прошёл строгую проверку.');
+    await expect(page.locator('[data-renderer-valid="true"]')).toContainText('Войти в проект');
+    await expect(page.locator('.canvas-paper')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+    await expect(page.locator('.canvas-paper')).toHaveCSS('color-scheme', 'light');
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Экспорт JSON' }).click();
+    const exported = JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+    expect(exported.schemaVersion).toBe(3);
+    expect(exported.elements.map((item: { component: string }) => item.component)).toEqual(['input', 'checkbox', 'button']);
+    expect(exported.elements[2].editorProps.label).toBe('Войти в проект');
+    await page.locator('.canvas-area').scrollIntoViewIfNeeded();
+    await info.attach('canvas', { body: await page.screenshot({ path: info.outputPath('canvas.png') }), contentType: 'image/png' });
+    await page.getByRole('button', { name: 'Мои проекты', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Мои проекты' })).toBeFocused();
+    await info.attach('projects', { body: await page.screenshot({ path: info.outputPath('projects.png') }), contentType: 'image/png' });
+    await page.getByRole('button', { name: 'Открыть Canvas' }).click();
+    await expect(page.locator('.element-select')).toHaveText(['01 Input', '02 Checkbox', '03 Button']);
+    await expect(page.locator('.component-preview').getByRole('button', { name: 'Войти в проект' })).toBeVisible();
+    expect(await page.evaluate(() => ({ ...localStorage }))).toEqual(before);
+    expect(projectRequests).toEqual([]);
+    if (width === 390) await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+
+    const navigation = await page.evaluate(() => {
+      const event = new Event('beforeunload', { cancelable: true });
+      window.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+    expect(navigation).toBe(true);
+    page.once('dialog', dialog => dialog.accept());
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Что создадим сегодня?' })).toBeVisible();
+    if (width === 390) await page.getByRole('button', { name: 'Открыть меню' }).click();
+    await page.getByRole('button', { name: 'Мои проекты', exact: true }).click();
+    await expect(page.getByText('У вас пока нет тестового проекта.')).toBeVisible();
+  } finally { await server.close(); }
+});
+
+test('P2.1 account switch discards the previous account’s personal project', async ({ page }) => {
+  test.setTimeout(60000);
+  const server = await disposableServer(true, true);
+  try {
+    await login(page, server.origin);
+    await page.getByRole('button', { name: 'Создать проект', exact: true }).click();
+    await page.getByLabel('Название проекта').fill('Проект только первого аккаунта');
+    await page.getByRole('button', { name: 'Открыть Canvas' }).click();
+    await page.getByRole('button', { name: 'Мои проекты', exact: true }).click();
+    await page.getByRole('button', { name: 'Открыть профиль w03-tester' }).click();
+    const cancel = page.waitForEvent('dialog').then(async dialog => {
+      expect(dialog.message()).toContain('Тестовый проект');
+      await dialog.dismiss();
+    });
+    await page.getByRole('button', { name: 'Выйти', exact: true }).click();
+    await cancel;
+    await expect(page.getByRole('heading', { name: 'Проект только первого аккаунта' })).toBeVisible();
+
+    // Rotate the actual session in the same browser context. The next focus check
+    // replaces the account without a page reload and must unmount the old project.
+    expect((await page.request.post(server.origin + '/api/login', {
+      headers: { Origin: server.origin }, data: { username: 'p2-other', password: 'disposable-test-password-2026' },
+    })).status()).toBe(200);
+    let release!: () => void;
+    const held = new Promise<void>(resolve => { release = resolve; });
+    await page.route('**/api/me', async route => { await held; await route.continue(); });
+    try {
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+      await expect(page.getByText('Проверка входа…')).toBeVisible();
+      await expect(page.getByText('Проект только первого аккаунта', { exact: true })).toBeHidden();
+    } finally { release(); }
+    await expect(page.getByRole('button', { name: 'Открыть профиль p2-other' })).toBeVisible();
+    await page.getByRole('button', { name: 'Мои проекты', exact: true }).click();
+    await expect(page.getByText('У вас пока нет тестового проекта.')).toBeVisible();
+    await expect(page.getByText('Проект только первого аккаунта')).toHaveCount(0);
+  } finally { await server.close(); }
 });
