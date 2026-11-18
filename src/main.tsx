@@ -2,6 +2,7 @@ import { DSRenderer } from './renderer/DSRenderer';
 import { acceptEditorDocument, importEditorDocument, screenFromCanvas, strictDocument } from './renderer/boundary';
 import { isDemo, DEMO_STORAGE_KEY } from './runtime';
 import { DemoAccountButton } from './demo';
+import demoExample from './demo-editor-example.json?raw';
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registry, definition, figmaUrl } from './registry';
@@ -49,6 +50,22 @@ function LegacyBuilder({ user, onDemoExit }: { user: User; onDemoExit?: () => vo
       setBackups(listRecoveryBackups(storageKey));
     }
   };
+  const importCanvas = (raw: string, confirmReplace: boolean) => {
+    const imported = importEditorDocument(raw);
+    if (confirmReplace && !window.confirm('Заменить текущий холст импортированным документом? При необходимости сначала экспортируйте текущий.')) return;
+    if (paused) preserveRecovery();
+    setDocument(imported.document); setSelected(undefined); setPaused(false);
+    setMessage(migrationWarning(raw) ?? (imported.warnings.map(w => w.message).join(' ') || 'Документ импортирован.'));
+  };
+  const openDemoExample = () => {
+    try {
+      const hasLocalWork = paused || document.elements.length > 0 || document.tokenReferences.length > 0
+        || Object.keys(document.themeOverrides).length > 0;
+      importCanvas(demoExample, hasLocalWork);
+    } catch (error) {
+      setMessage(`Пример не открыт: ${error instanceof Error ? error.message : 'неизвестная ошибка'}`);
+    }
+  };
   const selectedElement = document.elements.find(element => element.id === selected);
   useEffect(() => {
     if (paused) { setSaveStatus('Автосохранение приостановлено'); return; }
@@ -63,16 +80,16 @@ function LegacyBuilder({ user, onDemoExit }: { user: User; onDemoExit?: () => vo
     <header className="app-header"><div className="brand"><span className="brand-mark">З</span><div><strong>ЗАРЯ</strong><small>Лаборатория компонентов</small></div><span className="badge">Legacy</span></div>
       <div className="header-actions"><button onClick={() => importRef.current?.click()}><Icon name="upload-01" /> Импорт JSON</button><button onClick={() => { try { exportDocument(strict ? strictDocument(document) : acceptEditorDocument(document)); } catch (error) { setMessage(`Экспорт заблокирован: ${error instanceof Error ? error.message : 'ошибка схемы'}`); } }}><Icon name="download-01" /> Экспорт JSON</button><button className="primary" onClick={() => { setCopied(false); setPromptOpen(true); }}>Сгенерировать промпт <Icon name="arrow-up-right" /></button>{isDemo ? <DemoAccountButton onExit={onDemoExit!} /> : <AccountButton user={user} />}</div>
     </header>
-    {isDemo && <div className="notice" role="note">Демоверсия · Гостевой доступ без входа. Холст хранится только в этом браузере; общей базы проектов нет.</div>}
+    {isDemo && <section className="notice" aria-label="Как попробовать редактор">
+      <span>Изменения остаются в этом браузере. Рабочие проекты на сервере не сохраняются. Выберите элемент на холсте, измените его в инспекторе «Свойства», включите строгий DS Renderer для проверки и скачайте документ через «Экспорт JSON».</span>
+      <button type="button" onClick={openDemoExample}>Загрузить пример</button>
+    </section>}
     <input ref={importRef} type="file" accept=".json,application/json" hidden onChange={async e => {
       const file = e.target.files?.[0]; e.target.value = ''; if (!file) return;
       try {
         if (file.size > 2_000_000) throw new Error('Файл превышает 2 МБ.');
         const raw = await file.text();
-        const imported = importEditorDocument(raw);
-        if (document.elements.length && !window.confirm('Заменить текущий холст импортированным документом? При необходимости сначала экспортируйте текущий.')) return;
-        if (paused) preserveRecovery();
-        setDocument(imported.document); setSelected(undefined); setPaused(false); setMessage(migrationWarning(raw) ?? (imported.warnings.map(w => w.message).join(' ') || 'Документ импортирован.'));
+        importCanvas(raw, document.elements.length > 0);
       } catch (error) { setMessage(`Импорт отклонён: ${error instanceof Error ? error.message : 'неизвестная ошибка'}`); }
     }} />
     {(message || paused) && <div className="notice" role="status"><span>{message}</span>{paused && initial.recoveryRaw && <button onClick={()=>exportRawDocument(initial.recoveryRaw!)}>Скачать исходный JSON</button>}{paused && <button onClick={() => { try { preserveRecovery();setPaused(false);setMessage('Исходный проект сохранён отдельно в браузере.'); } catch { setMessage('Не удалось сохранить резервную копию. Скачайте исходный JSON; автосохранение остаётся приостановленным.'); } }}>Продолжить с текущим холстом</button>}<CloseButton label="Закрыть сообщение" size="s" onClick={() => setMessage('')} /></div>}

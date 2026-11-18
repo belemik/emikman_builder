@@ -45,6 +45,7 @@ export function WorkspaceShell({ initial = initialWorkspaceState, active = true,
           {!!state.thread.length && <><Thread messages={state.thread} /><div className="z-notice"><p>Пример плана, не ответ модели. Компоненты не подобраны и не проверены. Холст не изменён.</p><button className="z-button" type="button" onClick={() => onOpen(projects[0].id, projects[0].works[0].id)}>Открыть пример в Canvas</button></div></>}
           <ChatComposer draft={state.draft} onDraft={draft => dispatch({ type: 'set-draft', draft })} onSend={send} onSource={openSource} />
           <div className="z-scenarios" aria-label="Сценарии создания">{scenarios.map(item => <button type="button" className="z-scenario" key={item.id} onClick={() => dispatch({ type: 'choose-scenario', scenarioId: item.id })}><strong>{item.title}</strong><small>{item.note}</small></button>)}</div>
+          {onDemoExit && <p className="z-home-note"><a className="z-button" href={applicationHref('laboratory')} onClick={onLaboratory}>Попробовать редактор</a></p>}
           <p className="z-home-note">Без подключения LLM, импорта и сохранения проектов</p>
         </main>)}
         {state.view === 'projects' && <ProjectPage state={state} project={project} allProjects={allProjects} onProject={onProject} onSection={section => dispatch({ type: 'project-section', section })} onOpen={onOpen} onLibrary={libraryId => dispatch({ type: 'select-library', libraryId })} />}
