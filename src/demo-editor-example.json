@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 3,
+  "platform": "web",
+  "elements": [
+    {
+      "id": "example-input",
+      "component": "input",
+      "variantProps": {
+        "size": "l",
+        "state": "default",
+        "placeholder": false
+      },
+      "editorProps": {
+        "placeholderText": "Введите имя для примера",
+        "label": "Имя для примера"
+      }
+    },
+    {
+      "id": "example-checkbox",
+      "component": "checkbox",
+      "variantProps": {
+        "size": "s",
+        "state": "default",
+        "checked": false,
+        "indeterminate": false
+      },
+      "editorProps": {
+        "label": "Запомнить выбор"
+      }
+    },
+    {
+      "id": "example-button",
+      "component": "button",
+      "variantProps": {
+        "size": "m",
+        "variant": "primary",
+        "colorScheme": "accent",
+        "state": "default"
+      },
+      "editorProps": {
+        "label": "Продолжить"
+      }
+    }
+  ],
+  "themeOverrides": {},
+  "tokenReferences": []
+}
