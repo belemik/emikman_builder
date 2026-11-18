@@ -56,9 +56,80 @@ npm start
 
 Логин владельца — emikman, пароль задан отдельно. Хеши scrypt хранятся в `.data/users.json`, исключённом из Git и раздачи Vite. Пароль в клиентскую сборку не включён.
 
+### Подготовка DATA_DIR перед первым аккаунтом
+
+`addUser()` больше **не создаёт отсутствующий DATA_DIR и его родителей**. Перед `npm run user:add` оператор отдельно готовит доверенный локальный каталог: канонический путь, текущий владелец, точные права `0700`, стабильная доверенная цепочка родителей. Права сами по себе не доказывают отсутствие сторонних ACL или безопасный том. Не используйте для этой процедуры сетевой, FUSE, RAM или синхронизируемый каталог (включая iCloud). Сначала подтвердите локальный filesystem и доступ к родителям; при неопределённости остановитесь без записи.
+
+Для локального Mac перейдите в **фактический checkout проекта** на заранее проверенном локальном томе. Его существующий родитель для `.data` должен уже быть подготовлен и иметь подтверждённые необходимые файловые барьеры. Выберите новый, ещё не существующий каталог:
+
+```sh
+export DATA_DIR="$(pwd -P)/.data"
+```
+
+Для пользовательского `DATA_DIR` вместо строки выше задайте **свой проверенный абсолютный канонический путь**. Например, `export DATA_DIR='/absolute/trusted/local-parent/zarya-accounts'` — лишь шаблон, не команда для копирования без проверки. Непосредственный родитель уже должен существовать. Если требуется новая цепочка родителей, оператор готовит и проверяет её отдельно, синхронизируя новые directory entries снизу вверх до уже долговечного ancestor включительно. Не используйте `mkdir -p`, рекурсивные `chmod/chown` или этот пример для исправления неизвестного существующего хранилища.
+
+После проверки filesystem, ACL и стабильности родителей следующий блок создаёт **только новый конечный каталог**, отказывает при существующем пути и подтверждает локальные sync/reopen барьеры. Он не квалифицирует том и всю цепочку родителей автоматически:
+
+```sh
+node --input-type=module <<'JS'
+import assert from 'node:assert/strict';
+import { constants as c, closeSync, fstatSync, fsyncSync, lstatSync,
+  mkdirSync, openSync, realpathSync } from 'node:fs';
+import { dirname, isAbsolute, resolve } from 'node:path';
+const path = process.env.DATA_DIR;
+assert.ok(path && isAbsolute(path) && resolve(path) === path);
+const parent = dirname(path), uid = process.getuid();
+assert.equal(realpathSync(parent), parent);
+const before = lstatSync(parent);
+assert.ok(before.isDirectory() && !before.isSymbolicLink());
+assert.equal(before.uid, uid);
+assert.equal(before.mode & 0o022, 0);
+const parentFd = openSync(parent, c.O_RDONLY | c.O_DIRECTORY | c.O_NOFOLLOW);
+try {
+  const opened = fstatSync(parentFd);
+  assert.equal(opened.dev, before.dev); assert.equal(opened.ino, before.ino);
+  assert.equal(realpathSync(parent), parent);
+  mkdirSync(path, { mode: 0o700 }); // EEXIST: STOP, никаких изменений existing store.
+  const created = lstatSync(path);
+  assert.ok(created.isDirectory() && !created.isSymbolicLink());
+  assert.equal(created.uid, uid); assert.equal(created.mode & 0o7777, 0o700);
+  const directoryFd = openSync(path, c.O_RDONLY | c.O_DIRECTORY | c.O_NOFOLLOW);
+  try {
+    const openedDirectory = fstatSync(directoryFd);
+    assert.equal(openedDirectory.dev, created.dev);
+    assert.equal(openedDirectory.ino, created.ino);
+    fsyncSync(directoryFd);
+  } finally { closeSync(directoryFd); }
+  fsyncSync(parentFd);
+  assert.equal(realpathSync(path), path);
+  const verifyFd = openSync(path, c.O_RDONLY | c.O_DIRECTORY | c.O_NOFOLLOW);
+  try {
+    const reopened = fstatSync(verifyFd);
+    assert.equal(reopened.dev, created.dev); assert.equal(reopened.ino, created.ino);
+    assert.equal(reopened.uid, uid); assert.equal(reopened.mode & 0o7777, 0o700);
+  } finally { closeSync(verifyFd); }
+} finally { closeSync(parentFd); }
+console.log('Новый локальный DATA_DIR подготовлен; production durability не подтверждена.');
+JS
+```
+
+До user:add проверьте ACL также у нового DATA_DIR: на Mac выполните `ls -lde "$DATA_DIR"`. При лишних или непонятных разрешениях — STOP, без автоматического изменения ACL, chmod или chown.
+
+При любой ошибке STOP: сохраните созданные объекты для ручной проверки, не удаляйте их и не повторяйте блок автоматически. Для уже существующего каталога пропустите создание: отдельно проверьте canonical binding, владельца, `0700`, ACL, filesystem и необходимые барьеры; не изменяйте его автоматически. При разрешённом alias `users.json` родитель фактического target также должен быть доверенным, принадлежать текущему UID и иметь `0700`; неизвестные alias/symlink не создавайте и не исправляйте этим примером. Барьеры самого DATA_DIR не подтверждают публикацию ранее созданной цепочки родителей. Успешный локальный sync не доказывает физическую power-loss durability и не является разрешением production.
+
+В **том же Terminal с тем же DATA_DIR** создайте аккаунт; это же значение передавайте при `npm run dev` / `npm start`:
+
 ```sh
 npm run user:add -- tester
 ```
+
+Если каталог отсутствует или не отвечает предусловиям, API выдаёт `ACCOUNT_WRITE_NOT_PUBLISHED`, а CLI — «Запись аккаунта не опубликована. При ошибке очистки нужна ручная проверка.». Устраните конкретную причину, проверьте готовность каталога и результат cleanup до новой попытки. Это описание данной попытки, а не гарантия отсутствия действий другого writer. Не меняйте пароль, account IDs или существующие записи ради обхода отказа.
+
+### Неопределённая запись и stale lock
+
+`ACCOUNT_WRITER_BUSY` после ожидания около 15 секунд не доказывает, что `.users.json.writer-lock` устарел. Возраст, найденный PID и таймаут не разрешают удаление. `ACCOUNT_WRITE_PUBLISHED_UNCONFIRMED` означает неопределённость самой публикации и/или долговечности после попытки rename; это не подтверждённый rollback. `ACCOUNT_WRITE_COMMITTED_CLEANUP_FAILED` означает подтверждённые file/directory sync, но неподтверждённый cleanup. В обоих случаях не повторяйте `user:add` вслепую. Отсутствие lock тоже не доказывает успех или отсутствие записи.
+
+Ручная процедура: закройте новые account writes; докажите завершение **всех** writers/CLI/aliases и их I/O. Приватно зафиксируйте canonical пути, dev/ino, типы, права и точный состав lock/temp/target; с отдельным разрешением сохраните проверенную резервную копию, не публикуя users.json, usernames, passwords и hashes. Offline сопоставьте фактический JSON с намерением записи, устраните I/O-причину и отдельно подтвердите необходимые барьеры. Только после этого и отдельного решения для конкретного **пустого** lock допускается его точечное удаление с повторной сверкой dev/ino и sync родителя. Никаких auto-reclaim, wildcard, recursive delete, восстановления старого users.json или повторной записи наугад. Неизвестное содержимое, смена inode, живой writer или неоднозначный результат — STOP. Это не G1b session offline reset; процедура здесь не даёт разрешения работать с production.
 
 Пароль вводится скрыто в Terminal (12–128 символов). Несколько людей могут войти под одним логином: сессии независимы между браузерами; выход завершает текущую сессию. Сессии живут 8 часов и сбрасываются после перезапуска сервера. HttpOnly, SameSite=Strict; при HTTPS — Secure. Лимит попыток: 10 за 15 минут на адрес соединения; за reverse proxy лимит может быть общим.
 
@@ -102,7 +173,7 @@ public/          # оригинальные локальные SVG
 
 ## Размещение
 
-Публичная ссылка пока не создана. Нужен HTTPS reverse proxy и Node.js-хостинг с постоянным диском для `.data`, один процесс приложения. Создайте аккаунты на сервере командой user:add; не публикуйте .data или резервные копии.
+Публичная ссылка пока не создана. Нужен HTTPS reverse proxy и Node.js-хостинг с постоянным диском для `.data`, один процесс приложения. До user:add подготовьте и проверьте DATA_DIR по разделу «Подготовка DATA_DIR перед первым аккаунтом»; передавайте один и тот же DATA_DIR в CLI и backend. Не публикуйте .data или резервные копии. Это описание возможного размещения, а не разрешение production deployment.
 
 ```sh
 APP_ORIGIN=https://builder.example.com HOST=0.0.0.0 PORT=3000 DATA_DIR=/persistent/wdeaf npm start

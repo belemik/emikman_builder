@@ -17,22 +17,12 @@ jobs:
       - run: npm run typecheck
       - run: npm run ds:validate
       - run: npm run build:server
-      - name: Run portable TypeScript and Node tests
-        shell: bash
+      - name: Strict F-01/F-02 JavaScript
         run: |
-          shopt -s nullglob
-          ts_tests=(tests/*.test.ts)
-          node_tests=()
-          for test_file in tests/*.test.mjs; do
-            case "$test_file" in
-              tests/project-durable-session-bridge.test.mjs|tests/project-session-authority.test.mjs|tests/project-session-store-recovery.test.mjs|tests/project-session-store.test.mjs) ;;
-              *) node_tests+=("$test_file") ;;
-            esac
-          done
-          test "${#ts_tests[@]}" -gt 0
-          test "${#node_tests[@]}" -gt 0
-          node node_modules/tsx/dist/cli.mjs --test "${ts_tests[@]}"
-          node --test "${node_tests[@]}"
+          node node_modules/typescript/bin/tsc --allowJs --checkJs --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext --strict --types node \
+            scripts/ci-test-matrix.mjs tests/auth-add-user.test.mjs
+      - name: Run portable TypeScript and Node tests
+        run: node scripts/ci-test-matrix.mjs portable
       - run: npm run build
       - run: npm run check:pages
       - run: npx playwright install --with-deps chromium
@@ -141,14 +131,11 @@ jobs:
           node node_modules/typescript/bin/tsc --allowJs --checkJs --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext --strict --types node \
             server/session-store.mjs server/session-recovery-authority.mjs tests/fixtures/session-store-worker.mjs \
             tests/project-session-store.test.mjs tests/project-session-authority.test.mjs \
-            tests/project-session-store-recovery.test.mjs tests/project-durable-session-bridge.test.mjs
+            tests/project-session-store-recovery.test.mjs tests/project-durable-session-bridge.test.mjs \
+            scripts/ci-test-matrix.mjs tests/auth-add-user.test.mjs
       - run: npm run build:server
       - name: Run G1b and adjacent auth regression
-        run: |
-          node --test --test-concurrency=1 \
-            tests/project-durable-session-bridge.test.mjs tests/project-session-bridge.test.mjs \
-            tests/project-principal-boundary.test.mjs tests/auth.test.mjs tests/project-session-store.test.mjs \
-            tests/project-session-store-recovery.test.mjs tests/project-session-authority.test.mjs
+        run: node scripts/ci-test-matrix.mjs qualified
 
   g1b-integration:
     name: G1b integration gate
