@@ -1,0 +1,15 @@
+{
+  "version": "0.1",
+  "hero": {
+    "layout": "split",
+    "heading": "День открытых мастерских",
+    "body": { "text": "Посмотрите, как работают художники и дизайнеры." },
+    "image": { "assetId": "event-mark", "alt": "Знак мероприятия" },
+    "cta": { "label": "Посмотреть программу", "targetId": "program" }
+  },
+  "program": {
+    "id": "program",
+    "heading": "Программа",
+    "items": [{ "text": "Открытие" }, { "text": "Экскурсия по мастерским" }]
+  }
+}
