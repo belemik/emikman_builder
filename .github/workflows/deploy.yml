@@ -22,22 +22,12 @@ jobs:
       - run: npm ci
       - run: npm run ds:validate
       - run: npm run build:server
-      - name: Run portable TypeScript and Node tests
-        shell: bash
+      - name: Strict F-01/F-02 JavaScript
         run: |
-          shopt -s nullglob
-          ts_tests=(tests/*.test.ts)
-          node_tests=()
-          for test_file in tests/*.test.mjs; do
-            case "$test_file" in
-              tests/project-durable-session-bridge.test.mjs|tests/project-session-authority.test.mjs|tests/project-session-store-recovery.test.mjs|tests/project-session-store.test.mjs) ;;
-              *) node_tests+=("$test_file") ;;
-            esac
-          done
-          test "${#ts_tests[@]}" -gt 0
-          test "${#node_tests[@]}" -gt 0
-          node node_modules/tsx/dist/cli.mjs --test "${ts_tests[@]}"
-          node --test "${node_tests[@]}"
+          node node_modules/typescript/bin/tsc --allowJs --checkJs --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext --strict --types node \
+            scripts/ci-test-matrix.mjs tests/auth-add-user.test.mjs
+      - name: Run portable TypeScript and Node tests
+        run: node scripts/ci-test-matrix.mjs portable
       - run: npm run build
       - run: npm run check:pages
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
