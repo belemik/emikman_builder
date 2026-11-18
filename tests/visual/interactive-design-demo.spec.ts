@@ -29,6 +29,8 @@ for (const width of [1440, 390]) {
     const enter = page.getByRole('button', { name: 'Открыть демоверсию', exact: true });
     await expect(enter).toBeFocused();
     await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'Создать проект', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Мои проекты', exact: true })).toHaveCount(0);
     const tryEditor = page.getByRole('link', { name: 'Попробовать редактор', exact: true });
     await activateWithKeyboard(page, tryEditor);
     await expect(page).toHaveURL(/\?view=laboratory$/);

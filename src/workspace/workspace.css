@@ -194,3 +194,16 @@
   .zarya .z-work-title { flex-basis:calc(100% - 130px); }
   .zarya .z-modal-body { padding:20px; }
 }
+
+.zarya .z-personal { display:grid; gap:16px; max-width:680px; }
+.zarya .z-personal form, .zarya .z-personal label { display:grid; gap:12px; }
+.zarya .z-personal-actions { display:flex; flex-wrap:wrap; gap:12px; }
+.project-editor-header { min-height:0; padding-block:12px; }
+.project-editor-header p { overflow-wrap:anywhere; font-size:.875rem; }
+.project-canvas .canvas-heading h1 { overflow-wrap:anywhere; }
+.project-canvas .canvas-area { min-width:0; }
+@media (max-width:520px) {
+  .project-canvas .catalog-list { display:flex; overflow-x:auto; padding:4px; }
+  .project-canvas .catalog-card { flex:0 0 116px; }
+  .project-canvas .catalog-sample { display:none; }
+}
