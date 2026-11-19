@@ -52,7 +52,7 @@ for (const width of [1440, 390]) {
 
     const strict = page.getByRole('button', { name: 'Строгий DS Renderer', exact: true });
     await strict.click();
-    const renderer = page.locator('[data-renderer-valid="true"]');
+    const renderer = page.locator('.canvas-paper [data-renderer-valid="true"]');
     await expect(renderer.locator('.wdr-host-slot')).toHaveCount(3);
     await expect(renderer.getByRole('button', { name: 'Готово', exact: true })).toBeVisible();
     const pending = page.waitForEvent('download');
