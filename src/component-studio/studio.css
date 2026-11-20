@@ -1,0 +1,58 @@
+.button-studio {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin-block-start: 24px;
+  padding-block-start: 18px;
+  border-top: 1px solid var(--ui-border);
+  color: var(--ui-text);
+  font-size: 14px;
+}
+
+.button-studio :is(h3, h4, p) { margin: 0; }
+.button-studio h4 { margin-block-start: 12px; color: var(--ui-text); font-size: 14px; }
+.button-studio p { font-size: 13px; line-height: 1.55; color: var(--ui-muted); }
+.button-studio :is(code, li) { overflow-wrap: anywhere; }
+.button-studio ul { margin: 6px 0; padding-inline-start: 18px; }
+
+.studio-stage {
+  overflow-x: auto;
+  padding: 6px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.studio-motion-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.button-studio textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: var(--ui-subtle);
+  color: var(--ui-text);
+  font: 12px/1.55 ui-monospace, monospace;
+  overflow-wrap: anywhere;
+  resize: vertical;
+}
+
+.button-studio > button { justify-self: start; }
+.studio-copy-status:empty { block-size: 0; overflow: hidden; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .studio-stage[data-motion="true"] .wdr-button {
+    transition: background-color 160ms ease-out, transform 160ms ease-out;
+  }
+
+  .studio-stage[data-motion="true"] .wdr-button:not(:disabled):is(:active, [data-state="pressed"]) {
+    transform: translateY(1px);
+  }
+}
