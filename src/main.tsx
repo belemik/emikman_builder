@@ -17,6 +17,7 @@ import './renderer/styles.css';
 import { AccountButton, type User, type LogoutActions } from './account';
 import { ApplicationShell } from './application/ApplicationShell';
 import './workspace/workspace.css';
+import './ux-pilot/pilot.css';
 
 function LegacyBuilder({ user, onDemoExit, logoutActions }: { user: User; onDemoExit?: () => void; logoutActions?: LogoutActions }) {
   const storageKey = isDemo ? DEMO_STORAGE_KEY : `wdeaf.canvas.v1.${user.id}`;
