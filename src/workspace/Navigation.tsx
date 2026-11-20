@@ -43,9 +43,9 @@ function ProfileMenu({ onSettings, onHelp, onTechnical, user, accountAction, onD
   </div>;
 }
 
-export function Sidebar({ mobile, allProjects, recentIds, currentProject, onHome, onAll, onProject, onToggle, onSettings, onHelp, onTechnical, user, accountAction, onDemoExit }: {
+export function Sidebar({ mobile, allProjects, recentIds, currentProject, onHome, onAll, onHistory, onLibraries, onPersonal, onProject, onToggle, onSettings, onHelp, onTechnical, user, accountAction, onDemoExit }: {
   mobile: boolean; allProjects: readonly MockProject[]; recentIds: readonly string[]; currentProject: string | null;
-  onHome: () => void; onAll: () => void; onProject: (id: string) => void; onToggle: () => void;
+  onHome: () => void; onAll: () => void; onHistory: () => void; onLibraries: () => void; onPersonal?: () => void; onProject: (id: string) => void; onToggle: () => void;
   onSettings: () => void; onHelp: () => void; onTechnical: () => void; user?: User; accountAction?: ReactNode; onDemoExit?: () => void;
 }) {
   return <div className="z-side-content">
@@ -55,8 +55,11 @@ export function Sidebar({ mobile, allProjects, recentIds, currentProject, onHome
     <button type="button" className="z-new-chat" onClick={onHome}><Icon name="plus" />Новый чат</button>
     <nav className="z-side-scroll" aria-label="Проекты и недавние">
       <SidebarSection title="Проекты"><button type="button" onClick={onAll}>Все проекты</button>
+        {onPersonal && <button type="button" onClick={onPersonal}>Мои проекты</button>}
         {allProjects.map(project => <button type="button" key={project.id} aria-current={currentProject === project.id ? 'page' : undefined} onClick={() => onProject(project.id)}>{project.name}<small>mock</small></button>)}
       </SidebarSection>
+      <button type="button" className="z-button z-text-button" onClick={onHistory}>История</button>
+      <button type="button" className="z-button z-text-button" onClick={onLibraries}>Дизайн-системы</button>
       <SidebarSection title="Недавние"><p className="z-side-note">Примеры и открытия в этой демосессии</p>
         {recentIds.map(id => allProjects.find(project => project.id === id)).filter((item): item is MockProject => !!item).map(project => <button type="button" key={project.id} onClick={() => onProject(project.id)}>{project.name}<small>mock</small></button>)}
       </SidebarSection>
