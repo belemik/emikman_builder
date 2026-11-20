@@ -335,3 +335,66 @@ test('P2.1 account switch discards the previous account’s personal project', a
     await expect(page.getByText('Проект только первого аккаунта')).toHaveCount(0);
   } finally { await server.close(); }
 });
+
+for (const width of [1440, 390]) test(`P2.3 ${width}px: choose the login template, edit it and export v3`, async ({ page }, info) => {
+  test.setTimeout(60000);
+  await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
+  const server = await disposableServer();
+  try {
+    await login(page, server.origin);
+    const unexpectedRequests: string[] = [];
+    page.on('request', request => {
+      const url = new URL(request.url());
+      if (url.pathname.startsWith('/api/') && url.pathname !== '/api/me') unexpectedRequests.push(url.pathname);
+    });
+    const storageBefore = await page.evaluate(() => ({ ...localStorage }));
+    await page.getByRole('button', { name: 'Создать проект', exact: true }).click();
+    await page.getByLabel('Название проекта').fill('Форма входа');
+    const blank = page.getByRole('radio', { name: 'Пустой Canvas', exact: true });
+    const loginTemplate = page.getByRole('radio', { name: 'Шаблон «Форма входа»', exact: true });
+    await expect(blank).toBeChecked();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await expect(blank).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await expect(loginTemplate).toBeFocused();
+    await expect(loginTemplate).toBeChecked();
+    await info.attach('starter options', { body: await page.screenshot({ path: info.outputPath('starter-options.png') }), contentType: 'image/png' });
+    await page.keyboard.press('Tab');
+    const open = page.getByRole('button', { name: 'Открыть Canvas' });
+    await expect(open).toBeFocused();
+    await page.keyboard.press('Enter');
+
+    await expect(page.getByRole('heading', { name: 'Форма входа', exact: true })).toBeFocused();
+    await expect(page.getByText('Тестовый проект — не сохраняется после обновления страницы.')).toBeVisible();
+    await expect(page.getByText(/Макет формы входа\. Поле пароля изначально отключено/)).toBeVisible();
+    const items = page.locator('.element-select');
+    await expect(items).toHaveText(['01 Input', '02 Input', '03 Checkbox', '04 Button']);
+    await expect(page.locator('.canvas-paper').getByRole('textbox', { name: 'Пароль (макет)' })).toBeDisabled();
+    await items.nth(0).focus();
+    await page.keyboard.press('Enter');
+    await page.locator('.inspector-fields label').filter({ has: page.getByText('label', { exact: true }) })
+      .getByRole('textbox').fill('Логин команды');
+
+    await page.getByRole('button', { name: 'Проверить документ' }).click();
+    await expect(page.getByRole('status')).toHaveText('Документ прошёл строгую проверку.');
+    const renderer = page.locator('[data-renderer-valid="true"]');
+    await expect(renderer.getByRole('textbox', { name: 'Логин команды', exact: true })).toBeVisible();
+    await expect(renderer.getByRole('textbox', { name: 'Пароль (макет)' })).toBeDisabled();
+    await expect(renderer.getByRole('checkbox', { name: 'Запомнить меня' })).toBeVisible();
+    await renderer.getByRole('button', { name: 'Войти', exact: true }).click();
+    await info.attach('starter canvas', { body: await page.screenshot({ path: info.outputPath('starter-canvas.png') }), contentType: 'image/png' });
+
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Экспорт JSON' }).click();
+    const exported = JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+    expect(exported.schemaVersion).toBe(3);
+    expect(exported).not.toHaveProperty('start');
+    expect(exported.elements.map((item: { component: string }) => item.component)).toEqual(['input', 'input', 'checkbox', 'button']);
+    expect(exported.elements[0].editorProps.label).toBe('Логин команды');
+    expect(exported.elements[1].variantProps.state).toBe('disabled default');
+    expect(await page.evaluate(() => ({ ...localStorage }))).toEqual(storageBefore);
+    expect(unexpectedRequests).toEqual([]);
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+  } finally { await server.close(); }
+});

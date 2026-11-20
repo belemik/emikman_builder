@@ -207,3 +207,12 @@
   .project-canvas .catalog-card { flex:0 0 116px; }
   .project-canvas .catalog-sample { display:none; }
 }
+
+.zarya .z-starter-create { padding:clamp(16px, 4vw, 28px); }
+.zarya .z-starter-options { display:grid; gap:8px; margin:0; padding:12px; min-inline-size:0; border:1px solid var(--line); border-radius:8px; }
+.zarya .z-starter-options legend { padding-inline:4px; font-weight:600; }
+.zarya .z-personal .z-starter-option { display:flex; gap:10px; align-items:center; margin:0; padding:8px; min-height:44px; font-size:inherit; color:var(--text); cursor:pointer; }
+.zarya .z-personal .z-starter-option input[type="radio"] {
+  flex:0 0 16px; width:16px; height:16px; min-height:0; margin:0; padding:0; accent-color:var(--accent);
+}
+.zarya .z-starter-options p { color:var(--sub); }
