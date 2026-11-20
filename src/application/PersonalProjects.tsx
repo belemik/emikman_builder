@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CanvasEditor } from '../canvas/CanvasEditor';
-import { emptyDocument, type CanvasDocument } from '../canvas/model';
+import type { CanvasDocument } from '../canvas/model';
+import { createStarterDocument, type ProjectStart } from './starter-templates';
 import { acceptEditorDocument, strictDocument } from '../renderer/boundary';
 import { exportDocument } from '../storage';
 
@@ -9,6 +10,7 @@ export const PROJECT_WARNING = 'Тестовый проект — не сохр�
 export type PersonalProject = {
   name: string;
   type: 'web-application';
+  start: ProjectStart;
   document: CanvasDocument;
 };
 
@@ -25,20 +27,47 @@ export function PersonalProjects({ mode, project, onCreate, onNavigate }: {
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
   const [name, setName] = useState('');
+  const [start, setStart] = useState<ProjectStart>('blank');
+  const [templateError, setTemplateError] = useState(false);
+  const chooseStart = (choice: ProjectStart) => {
+    setStart(choice);
+    setTemplateError(false);
+  };
   useEffect(() => { heading.current?.focus(); }, [mode]);
 
   if (mode === 'create' && !project) {
-    return <main className="z-project z-personal">
+    return <main className="z-project z-personal z-starter-create">
       <h1 ref={heading} tabIndex={-1}>Новый проект</h1>
       <p>{PROJECT_WARNING}.</p>
       <form onSubmit={event => {
         event.preventDefault();
         if (!name.trim()) return;
-        onCreate({ name: name.trim(), type: 'web-application', document: emptyDocument() });
+        let document: CanvasDocument;
+        try {
+          document = createStarterDocument(start);
+        } catch {
+          setTemplateError(true);
+          return;
+        }
+        onCreate({ name: name.trim(), type: 'web-application', start, document });
       }}>
         <label>Название проекта<input value={name} onChange={event => setName(event.target.value)} required maxLength={100} /></label>
         <label>Тип проекта<select name="type" defaultValue="web-application"><option value="web-application">Веб-приложение</option></select></label>
         <p>Дизайн-система: WDeaf PRO 2.0</p>
+        <fieldset className="z-starter-options">
+          <legend>Начало работы</legend>
+          <label className="z-starter-option">
+            <input type="radio" name="starter" value="blank" checked={start === 'blank'} onChange={() => chooseStart('blank')} />
+            Пустой Canvas
+          </label>
+          <label className="z-starter-option">
+            <input type="radio" name="starter" value="login" checked={start === 'login'} onChange={() => chooseStart('login')}
+              aria-describedby="login-template-note" />
+            Шаблон «Форма входа»
+          </label>
+          <p id="login-template-note">Поле пароля — визуальный макет. Используйте только демонстрационные данные.</p>
+        </fieldset>
+        {templateError && <p role="alert">Не удалось открыть шаблон. Выберите пустой Canvas.</p>}
         <div className="z-personal-actions">
           <button type="submit" className="z-button z-primary" disabled={!name.trim()}>Открыть Canvas</button>
           <button type="button" className="z-button" onClick={() => onNavigate('list')}>Отмена</button>
@@ -87,6 +116,9 @@ export function PersonalProjectEditor({ project, onChange, onBack }: {
       <p>{PROJECT_WARNING}.</p>
       <button type="button" onClick={download}>Экспорт JSON</button>
     </header>
+    {project.start === 'login' && <p className="notice">
+      Макет формы входа. Поле пароля изначально отключено. При включении поля ввод будет виден. Используйте только демонстрационные данные.
+    </p>}
     {error && <p className="notice" role="alert">{error}</p>}
     <CanvasEditor project title={project.name} document={project.document} setDocument={setDocument} strict={strict}
       setStrict={setStrict} selected={selected} setSelected={setSelected} />
