@@ -269,3 +269,44 @@ test('Undo clears matching dirty state and Redo restores the unapplied differenc
   expect((await warning).message()).toContain('Inspector');
   await expect(input).toHaveValue(original);
 });
+
+for (const width of [1440, 320]) {
+  test(`Workspace keeps the Pilot draft independent of WebPage at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const { inspector, dirty } = await openEditor(page);
+    const text = inspector.getByRole('textbox', { name: 'Текст' });
+    const draft = 'Черновик только для EMIKMAN';
+    await text.fill(draft);
+
+    const back = page.getByRole('button', { name: 'К Workspace' });
+    const warning = page.waitForEvent('dialog');
+    page.once('dialog', dialog => dialog.dismiss());
+    await back.press('Enter');
+    expect((await warning).message()).toContain('Inspector');
+    await expect(text).toHaveValue(draft);
+    await expect(dirty).toBeVisible();
+
+    page.once('dialog', dialog => dialog.accept());
+    await back.press('Enter');
+    const entry = page.getByRole('button', { name: 'Страница события', exact: true });
+    await entry.press('Enter');
+    const canvas = page.getByRole('region', { name: 'Canvas WebPage' });
+    const preview = page.getByRole('region', { name: 'Preview WebPage' });
+    const webInspector = page.getByRole('complementary', { name: 'Inspector WebPage' });
+    await canvas.getByRole('button', { name: 'Выбрать Hero' }).press('Enter');
+    await webInspector.getByLabel('Заголовок', { exact: true }).fill('Вечер в мастерской');
+    await webInspector.getByLabel('Основной текст', { exact: true }).fill('Обновлённый текст события');
+    await webInspector.getByRole('button', { name: 'Подтвердить локальную правку' }).press('Enter');
+    for (const view of [canvas, preview]) {
+      await expect(view.getByRole('heading', { name: 'Вечер в мастерской' })).toBeVisible();
+      await expect(view.getByText('Обновлённый текст события')).toBeVisible();
+    }
+
+    await back.press('Enter');
+    await expect(entry).toBeFocused();
+    await openEditor(page, false);
+    await expect(text).toHaveValue(draft);
+    await expect(dirty).toBeVisible();
+    expect((await readExport(page)).hero).toEqual(initialDocument.hero);
+  });
+}
