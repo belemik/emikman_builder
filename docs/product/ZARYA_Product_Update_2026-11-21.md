@@ -62,7 +62,7 @@
 
 ## 5. Архитектурные границы
 
-- Не менять `Screen Schema v3`, WDeaf строгий Validator и Renderer ради компонентов страницы или икон-паков. Для веб-страниц — отдельный будущий **WebPage Contract** и адаптеры, только после Owner Decision.
+- Не менять `Screen Schema v3`, WDeaf строгий Validator и Renderer ради компонентов страницы или икон-паков. Отдельный **WebPage Contract v0.1** принят 21 ноября 2026 в [PR #29](https://github.com/belemik/emikman_builder/pull/29). Полноценная интеграция Web Studio, Site Storage и Repo-to-Canvas остаётся **PLANNED**. Действующие ограничения ADR и граница T5 для Apply одного Document сохраняются.
 - Сохранять `Project → Work → Document → Revision`. Контекст revision закрепляет snapshot, mapping, runtime и evidence вне payload Screen Schema v3. Candidate строится в разрешённом Scope. Validator проверяет полную копию, ScopeDiff независимо сравнивает её с закреплённой базой. Human Approval привязывается к точной ревизии и digest проверенного diff. CAS Apply с receipt и аудитом требует готовности Storage и отдельного разрешения записи. При неопределённом исходе использовать сверку receipt.
 - Внешняя синхронизация начинается с read-only scan и proposal. Политика публикации новой версии Registry согласуется отдельно от Apply одного Document. Закреплённые документы остаются на своих версиях до явной операции миграции в разрешённом scope. Protected Core сохраняется.
 - Не допускать произвольный AI-generated JS, скрипты импортированного репозитория, автоматический push/merge/deploy и раскрытие секретов.
@@ -87,7 +87,7 @@
 
 ## 7. Приоритизация и условия запуска
 
-- **Зависимости будущей интеграции.** Линия Editor ведётся через отдельные решения по Inspector v0.3 и Image Editing v0.4. Project Storage развивается параллельно с WebPage Contract Decision Gate. Сохраняемые WebPage revisions потребуют принятого WebPage Contract и допущенного Storage. Полная интеграция Repo-to-Canvas / Component Board зависит от этих условий и отдельного допуска. Синтетические пилоты могут обсуждаться раньше.
+- **Зависимости будущей интеграции.** Линия Editor ведётся через отдельные решения по Inspector v0.3 и Image Editing v0.4. Project Storage развивается параллельно с WebPage Contract Decision Gate. WebPage Contract v0.1 принят. Для интеграции сохраняемых WebPage revisions требуется допуск Site Storage. Полная интеграция Repo-to-Canvas / Component Board зависит от этих условий и отдельного допуска. Синтетические пилоты могут обсуждаться раньше.
 - **Отдельный дизайн/архитектурный прототип:** Component Board UX + `Add Only` на синтетических fixtures, без Figma API и без записи в production.
 - **Следующий независимый пилот:** Icon Studio с локальным разрешённым набором и UI выбора, без автоматической смены DS и без network imports.
 - **Позже.** Авторизованная Figma Selective Sync с тестами dedupe, changed/deleted/renamed, stable identity, collisions и восстановления требует отдельного Owner Decision.
