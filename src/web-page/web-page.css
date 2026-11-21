@@ -1,0 +1,78 @@
+.zwp-editor {
+  width: 100%;
+  overflow-y: auto;
+  max-width: 64rem;
+  min-width: 0;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.zwp-controls, .zwp-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.zwp-fields {
+  flex-direction: column;
+  max-width: 32rem;
+}
+
+.zwp-fields input, .zwp-fields textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  font: inherit;
+}
+
+.zwp-fields button {
+  align-self: flex-start;
+}
+
+.zwp-viewport {
+  container-type: inline-size;
+  margin-block-start: 0.75rem;
+  max-width: 100%;
+}
+
+.zwp-viewport[data-viewport='Mobile'] {
+  width: 24rem;
+}
+
+.zwp-page {
+  --accent: #173d74;
+  background: #fff;
+  color: #191f29;
+  padding: clamp(0.75rem, 3cqi, 2rem);
+  border-radius: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.zwp-page h3, .zwp-page h4 {
+  margin-block: 0 0.5rem;
+}
+
+.zwp-hero {
+  display: grid;
+  gap: 1rem;
+  align-items: center;
+}
+
+@container (min-width: 36rem) {
+  .zwp-hero[data-layout='split'] {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+.zwp-page .zwp-cta {
+  display: inline-block;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.5rem;
+  color: #173d74;
+  background: #eaf0ff;
+}
+
+.zwp-program {
+  margin-block-start: 1.25rem;
+  scroll-margin-block-start: 1rem;
+}
