@@ -1,0 +1,15 @@
+{
+  "version": "0.1",
+  "hero": {
+    "layout": "stack",
+    "heading": "Мастерские",
+    "body": { "text": "Программа мероприятия" },
+    "image": { "assetId": "missing-from-catalog", "alt": "Знак мероприятия" },
+    "cta": { "label": "Программа", "targetId": "program" }
+  },
+  "program": {
+    "id": "program",
+    "heading": "Программа",
+    "items": [{ "text": "Открытие" }]
+  }
+}
