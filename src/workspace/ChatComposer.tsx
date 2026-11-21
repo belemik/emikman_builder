@@ -3,9 +3,10 @@ import { Icon } from '../ui';
 import { Popover } from './Overlays';
 import type { MockMessage } from './model';
 
+const directions = ['Web Design', 'Product Design', 'Creative Studio', 'AI Visual QC', 'Knowledge Library'];
 const sources = ['Прикрепить файл', 'Добавить макет Figma', 'Выбрать дизайн-систему', 'Добавить ссылку на сайт', 'Добавить референс'] as const;
-export function ChatComposer({ draft, onDraft, onSend, onSource, context, compact = false }: {
-  draft: string; onDraft: (value: string) => void; onSend: () => void; onSource: (source: string) => void; context?: string; compact?: boolean;
+export function ChatComposer({ draft, onDraft, onSend, onSource, context, onDirection, compact = false }: {
+  draft: string; onDraft: (value: string) => void; onSend: () => void; onSource: (source: string) => void; context?: string; onDirection?: (value: string) => void; compact?: boolean;
 }) {
   const id = useId(); const area = useRef<HTMLTextAreaElement>(null); const trigger = useRef<HTMLButtonElement>(null);
   const [sourcesOpen, setSourcesOpen] = useState(false);
@@ -21,13 +22,13 @@ export function ChatComposer({ draft, onDraft, onSend, onSource, context, compac
   };
   return <form className={`z-composer ${compact ? 'z-composer-compact' : ''}`} onSubmit={event => { event.preventDefault(); if (draft.trim()) onSend(); }}>
     <label className="z-sr" htmlFor={id}>{compact ? 'Сообщение к макету' : 'Запрос'}</label>
-    <textarea id={id} ref={area} value={draft} maxLength={4000} rows={compact ? 2 : 3} placeholder="Опишите, что хотите создать…" onChange={event => onDraft(event.target.value)} onKeyDown={keyboard} aria-describedby={`${id}-note`} />
+    <textarea id={id} ref={area} value={draft} maxLength={4000} rows={2} placeholder="Опишите, что хотите создать…" onChange={event => onDraft(event.target.value)} onKeyDown={keyboard} aria-describedby={`${id}-note`} />
     <div className="z-composer-tools"><div className="z-source-anchor">
       <button type="button" className="z-button z-icon" data-source-trigger aria-label="Добавить источник" aria-haspopup="dialog" aria-expanded={sourcesOpen} ref={trigger} onClick={() => setSourcesOpen(!sourcesOpen)}><Icon name="plus" /></button>
       {sourcesOpen && <Popover label="Добавление источников" trigger={trigger} onClose={() => setSourcesOpen(false)}>{sources.map(source => <button type="button" key={source} onClick={() => { setSourcesOpen(false); onSource(source); }}>{source}</button>)}<p className="z-muted">Все подключения пока недоступны. Откроется объяснение, без импорта.</p></Popover>}
-    </div><span className="z-composer-hint">Enter — отправить · Shift+Enter — строка</span>
+    </div>{onDirection && <label className="zs-direction-label"><span>Направление</span><select className="zs-direction" aria-label="Направление работы" value={context} onChange={event => onDirection(event.target.value)}>{directions.map(name => <option key={name}>{name}</option>)}</select></label>}<span className="z-composer-hint">Enter — отправить · Shift+Enter — строка</span>
       <button className="z-button z-primary z-icon" type="submit" aria-label="Отправить mock-сообщение" disabled={!draft.trim()}><Icon name="arrow-up" /></button>
-    </div><p id={`${id}-note`} className="z-composer-note">{context && <>Контекст: {context}. Остановка недоступна, модель не подключена. </>}Mock-диалог · без модели, генерации и сохранения</p>
+    </div><p id={`${id}-note`} className="z-composer-note">Демо-чат · модель не подключена</p>
   </form>;
 }
 export function Thread({ messages }: { messages: readonly MockMessage[] }) {

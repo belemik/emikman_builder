@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
 export const THEME_STORAGE_KEY = 'zarya-workspace-theme';
 
@@ -23,9 +23,11 @@ export function isThemeMode(value: string | null): value is ThemeMode {
 export function readThemeMode(storage: ThemeStorage | null): ThemeMode {
   try {
     const stored = storage?.getItem(THEME_STORAGE_KEY) ?? null;
-    return isThemeMode(stored) ? stored : 'system';
+    if (isThemeMode(stored)) return stored;
+    const legacy = storage?.getItem('wdeaf.appearance') ?? null;
+    return isThemeMode(legacy) ? legacy : 'dark';
   } catch {
-    return 'system';
+    return 'dark';
   }
 }
 
@@ -67,22 +69,32 @@ export function systemPrefersDark(): boolean {
   }
 }
 
-export function useWorkspaceTheme() {
+export function useThemePreference() {
   const [mode, setMode] = useState<ThemeMode>(() => readThemeMode(browserStorage()));
   const [systemDark, setSystemDark] = useState(systemPrefersDark);
   const scheme = resolvedScheme(mode, systemDark);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-    return watchSystemScheme(media, () => mode, next => {
-      setSystemDark(media.matches);
-      document.documentElement.dataset.zaryaScheme = next;
-    });
-  }, [mode]);
+    const stopWatching = watchSystemScheme(media, () => 'system', next => setSystemDark(next === 'dark'));
+    const preferenceChanged = (event: StorageEvent) => {
+      if (event.storageArea === browserStorage() &&
+          (event.key === THEME_STORAGE_KEY || event.key === 'wdeaf.appearance' || event.key === null)) {
+        setMode(readThemeMode(browserStorage()));
+      }
+    };
+    window.addEventListener('storage', preferenceChanged);
+    return () => {
+      stopWatching();
+      window.removeEventListener('storage', preferenceChanged);
+    };
+  }, []);
 
-  useEffect(() => {
-    document.documentElement.dataset.zaryaMode = mode;
-    document.documentElement.dataset.zaryaScheme = scheme;
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    root.dataset.zaryaMode = mode;
+    root.dataset.zaryaScheme = scheme;
+    root.dataset.appearance = scheme;
   }, [mode, scheme]);
 
   const choose = (next: ThemeMode) => {

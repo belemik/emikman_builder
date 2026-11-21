@@ -150,7 +150,7 @@ test('editor warns on project navigation, exit and reload while keeping a cancel
   await page.getByRole('button', { name: 'Открыть меню' }).click();
   const nav = page.getByRole('complementary', { name: 'Разделы Workspace' });
   page.once('dialog', dialog => dialog.dismiss());
-  await nav.getByRole('button', { name: 'Все проекты' }).click();
+  await nav.getByRole('button', { name: 'Проекты', exact: true }).click();
   await expect(dirty).toBeVisible();
   page.once('dialog', dialog => dialog.accept());
   await back.click();
@@ -270,14 +270,27 @@ test('Undo clears matching dirty state and Redo restores the unapplied differenc
   await expect(input).toHaveValue(original);
 });
 
-for (const width of [1440, 320]) {
+for (const width of [1440, 390, 320]) {
   test(`Workspace keeps the Pilot draft independent of WebPage at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    const { inspector, dirty } = await openEditor(page);
+    const { inspector, layers, dirty } = await openEditor(page);
     const text = inspector.getByRole('textbox', { name: 'Текст' });
     const draft = 'Черновик только для EMIKMAN';
     await text.fill(draft);
-
+    await layers.getByRole('button', { name: 'Header', exact: true }).press('Enter');
+    await layers.getByRole('button', { name: 'Hero / Text' }).press('Enter');
+    for (const theme of ['light', 'dark']) {
+      await page.getByLabel('Тема оболочки').selectOption(theme);
+      await expect(text).toHaveValue(draft);
+      const create = page.getByRole('button', { name: 'Новый проект', exact: true });
+      const warning = page.waitForEvent('dialog');
+      page.once('dialog', dialog => dialog.dismiss());
+      await create.press('Enter');
+      expect((await warning).message()).toContain('Inspector');
+      await expect(create).toBeFocused();
+      await expect(text).toHaveValue(draft);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    }
     const back = page.getByRole('button', { name: 'К Workspace' });
     const warning = page.waitForEvent('dialog');
     page.once('dialog', dialog => dialog.dismiss());
@@ -291,17 +304,17 @@ for (const width of [1440, 320]) {
     const entry = page.getByRole('button', { name: 'Страница события', exact: true });
     await entry.press('Enter');
     const canvas = page.getByRole('region', { name: 'Canvas WebPage' });
-    const preview = page.getByRole('region', { name: 'Preview WebPage' });
-    const webInspector = page.getByRole('complementary', { name: 'Inspector WebPage' });
-    await canvas.getByRole('button', { name: 'Выбрать Hero' }).press('Enter');
-    await webInspector.getByLabel('Заголовок', { exact: true }).fill('Вечер в мастерской');
-    await webInspector.getByLabel('Основной текст', { exact: true }).fill('Обновлённый текст события');
-    await webInspector.getByRole('button', { name: 'Подтвердить локальную правку' }).press('Enter');
-    for (const view of [canvas, preview]) {
-      await expect(view.getByRole('heading', { name: 'Вечер в мастерской' })).toBeVisible();
-      await expect(view.getByText('Обновлённый текст события')).toBeVisible();
-    }
-
+    await canvas.locator('.zwp-hero h3').click();
+    const field = page.getByRole('textbox', { name: /^Заголовок/ });
+    await field.fill('Вечер в мастерской');
+    await page.getByRole('textbox', { name: /^Основной текст/ }).fill('Обновлённый текст события');
+    await page.getByRole('button', { name: 'Применить', exact: true }).press('Enter');
+    if (width < 800) await page.getByRole('button', { name: 'На холст' }).press('Enter');
+    await expect(canvas.locator('h3')).toHaveText('Вечер в мастерской');
+    await expect(canvas.getByText('Обновлённый текст события')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Preview', exact: true }).press('Enter');
+    await expect(page.getByRole('region', { name: 'Preview WebPage' }).locator('h3')).toHaveText('Вечер в мастерской');
+    await expect(page.getByRole('region', { name: 'Preview WebPage' }).getByText('Обновлённый текст события')).toBeVisible();
     await back.press('Enter');
     await expect(entry).toBeFocused();
     await openEditor(page, false);

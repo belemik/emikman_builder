@@ -12,11 +12,10 @@ for (const width of [1440, 768, 390]) {
     });
     await page.goto('./');
     await page.getByRole('button', { name: 'Открыть демоверсию' }).click();
-    const directions = page.getByRole('complementary', { name: 'Направление работы' });
-    await directions.getByRole('button', { name: 'Product Design' }).click();
-    await expect(directions.getByRole('status')).toContainText('Product Design');
-    await expect(page.locator('.z-composer-note')).toContainText('Product Design');
-    await expect(page.locator('.z-composer-note')).toContainText('Остановка недоступна');
+    const directions = page.getByRole('combobox', { name: 'Направление работы' });
+    await directions.selectOption('Product Design');
+    await expect(directions).toHaveValue('Product Design');
+    await expect(page.locator('.z-composer-note')).toContainText('модель не подключена');
     const entry = page.getByRole('button', { name: 'Открыть визуальный пилот EMIKMAN' });
     if (width === 1440) {
       await page.evaluate(() => document.fonts.ready);

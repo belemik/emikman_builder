@@ -26,8 +26,8 @@ for (const width of [1440, 1280, 800, 390, 375]) {
       await workspace(page, mode);
       await expect(page.locator('.zarya')).toHaveAttribute('data-zarya-scheme', mode);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-      expect(await page.locator('.z-scenario').first().evaluate(el => getComputedStyle(el).backgroundColor))
-        .toBe(mode === 'dark' ? 'rgb(26, 33, 48)' : 'rgb(255, 255, 255)');
+      expect(await page.locator('.z-scenario').first().evaluate(el => getComputedStyle(el.closest('.zs-platform')!).backgroundColor))
+        .toBe(mode === 'dark' ? 'rgb(20, 21, 23)' : 'rgb(245, 244, 241)');
       await page.screenshot({ path: info.outputPath(`workspace-${width}-${mode}.png`), fullPage: true });
       if (width <= 800) {
         await page.getByRole('button', { name: 'Открыть меню' }).click();
@@ -46,12 +46,10 @@ for (const width of [1440, 1280, 800, 390, 375]) {
 test('Workspace desktop: collapsible sidebar sections, logo/home and mock switching', async ({ page }) => {
   await workspace(page);
   const nav = page.getByRole('navigation', { name: 'Проекты и недавние' });
-  const projects = nav.getByRole('button', { name: 'Проекты', exact: true });
-  await projects.click(); await expect(projects).toHaveAttribute('aria-expanded', 'false');
-  await expect(nav.getByRole('button', { name: /Северный свет/ })).toHaveCount(1);
   const recents = nav.getByRole('button', { name: 'Недавние', exact: true });
   await recents.click(); await expect(recents).toHaveAttribute('aria-expanded', 'false');
-  await projects.click(); await nav.getByRole('button', { name: /Городские маршруты/ }).click();
+  await expect(nav.getByRole('button', {name: /Городские маршруты/})).toBeHidden();
+  await recents.click(); await nav.getByRole('button', { name: /Городские маршруты/ }).click();
   await expect(page.getByRole('heading', { name: 'Городские маршруты', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Открыть Canvas', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Поиск рейса', exact: true })).toBeVisible();
@@ -71,12 +69,12 @@ test('Workspace desktop: middle navigation and content scroll independently of h
   test.setTimeout(60000);
   await page.setViewportSize({ width: 1280, height: 700 }); await workspace(page);
   for (let i = 0; i < 12; i++) {
-    if (i) await page.getByRole('button', { name: 'Новый чат', exact: true }).click();
+    if (i) await page.getByRole('button', { name: 'Главная', exact: true }).click();
     await createMock(page, `Локальный проект ${i}`);
   }
   const before = await page.locator('.z-profile-trigger').boundingBox();
   const head = await page.locator('.z-side-head').boundingBox();
-  await page.getByRole('button', { name: 'Все проекты' }).click();
+  await page.getByRole('button', { name: 'Проекты', exact: true }).click();
   await page.locator('.z-content').evaluate(el => { el.scrollTop = 500; });
   expect(await page.locator('.z-content').evaluate(el => el.scrollTop)).toBeGreaterThan(0);
   await page.locator('.z-side-scroll').evaluate(el => { el.scrollTop = el.scrollHeight; });
@@ -107,7 +105,7 @@ test('Workspace mobile: focus trap, Escape, scroll lock/restoration and navigati
   await page.keyboard.press('Escape'); await expect(nav).not.toBeVisible(); await expect(trigger).toBeFocused();
   expect(await content.evaluate(el => el.scrollTop)).toBe(top);
   expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
-  await trigger.click(); await nav.getByRole('button', { name: 'Все проекты' }).click();
+  await trigger.click(); await nav.getByRole('button', { name: 'Проекты', exact: true }).click();
   await expect(nav).not.toBeVisible(); await expect(page.getByRole('heading', { name: 'Проекты', exact: true })).toBeVisible();
 });
 
@@ -133,7 +131,7 @@ test('Workspace profile/settings: honest demo, end-demo action, system theme and
   const dialog = await settings(page);
   await dialog.getByRole('button', { name: 'Тёмная', exact: true }).click();
   await expect(page.locator('.zarya')).toHaveAttribute('data-zarya-scheme', 'dark');
-  expect(await dialog.evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(26, 33, 48)');
+  expect(await dialog.evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(27, 28, 30)');
   await dialog.getByRole('button', { name: 'Системная', exact: true }).click();
   await page.emulateMedia({ colorScheme: 'dark' }); await expect(page.locator('.zarya')).toHaveAttribute('data-zarya-scheme', 'dark');
   await page.emulateMedia({ colorScheme: 'light' }); await expect(page.locator('.zarya')).toHaveAttribute('data-zarya-scheme', 'light');
@@ -180,10 +178,10 @@ test('Workspace full path: New chat → form → mock project → Canvas → Lay
   expect(await page.getByTestId('workspace-artboard').evaluate(el => getComputedStyle(el).backgroundColor)).toBe(before);
   await page.getByRole('button', { name: 'Вернуться к проектам' }).click(); await expect(page.getByRole('heading', { name: 'Проект для проверки' })).toBeVisible();
   await page.getByRole('button', { name: 'Новый чат', exact: true }).click();
-  await page.getByRole('button', { name: 'Все проекты' }).click(); await expect(page.locator('.z-project-grid').getByRole('button', { name: /Проект для проверки/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Проекты', exact: true }).click(); await expect(page.locator('.z-project-grid').getByRole('button', { name: /Проект для проверки/ })).toBeVisible();
   expect(requests).toEqual([]);
   expect(await page.evaluate(() => Object.keys(localStorage).filter(key => key !== 'zarya-workspace-theme'))).toEqual([]);
-  await page.reload(); await page.getByRole('button', { name: 'Все проекты' }).click(); await expect(page.getByRole('button', { name: /Проект для проверки/ })).toHaveCount(0);
+  await page.reload(); await page.getByRole('button', { name: 'Проекты', exact: true }).click(); await expect(page.getByRole('button', { name: /Проект для проверки/ })).toHaveCount(0);
 });
 
 for (const [name, description] of [['По макету Figma', 'Описание ожидаемой реализации'], ['Редизайн сайта', 'Что требуется изменить'], ['Прототип приложения', 'Описание сценария']] as const) {
