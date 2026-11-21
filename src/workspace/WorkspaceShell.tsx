@@ -11,6 +11,7 @@ import { ProjectCreationFlow } from './ProjectCreationFlow';
 import { Editor, Libraries, ProjectPage } from './ProjectViews';
 import { changePilot, initialHistory } from '../ux-pilot/model';
 import { PilotEditor } from '../ux-pilot/PilotEditor';
+import { WebPageEditor } from '../web-page/WebPageEditor';
 
 const directions = ['Web Design', 'Product Design', 'Creative Studio', 'AI Visual QC', 'Knowledge Library'];
 import { PersonalProjects, PersonalProjectEditor, type PersonalProjectsState } from '../application/PersonalProjects';
@@ -19,6 +20,9 @@ export function WorkspaceShell({ initial = initialWorkspaceState, active = true,
   const [state, dispatch] = useReducer(workspaceReducer, initial);
   const [pilot, dispatchPilot] = useReducer(changePilot, initialHistory);
   const [pilotOpen, setPilotOpen] = useState(false);
+  const [webPageOpen, setWebPageOpen] = useState(false);
+  const webPageOpener = useRef<HTMLButtonElement>(null);
+  const restoreWebPageFocus = useRef(false);
   const [pilotNavOpen, setPilotNavOpen] = useState(false);
   const [direction, setDirection] = useState(directions[0]);
   const opener = useRef<HTMLButtonElement>(null);
@@ -53,6 +57,12 @@ export function WorkspaceShell({ initial = initialWorkspaceState, active = true,
       opener.current?.focus({ preventScroll: true });
     }
   }, [pilotOpen]);
+  useEffect(() => {
+    if (!webPageOpen && restoreWebPageFocus.current) {
+      restoreWebPageFocus.current = false;
+      webPageOpener.current?.focus();
+    }
+  }, [webPageOpen]);
   const toggleDesktop = () => pilotOpen ? setPilotNavOpen(value => !value) : dispatch({ type: 'toggle-sidebar' });
   const sidebar = (mobile: boolean) => <Sidebar mobile={mobile} allProjects={allProjects} recentIds={state.recentProjectIds} currentProject={state.view === 'projects' || state.view === 'editor' ? project.id : null}
     onHome={newChat} onAll={() => { setPilotOpen(false); setPersonalView(null); dispatch({ type: 'navigate', view: 'projects' }); }}
@@ -61,6 +71,11 @@ export function WorkspaceShell({ initial = initialWorkspaceState, active = true,
     }}
     onPersonal={personalProjects ? () => showPersonal('list') : undefined} onProject={onProject}
     onToggle={mobile ? closeNav : toggleDesktop} onSettings={() => openModal('settings')} onHelp={() => openModal('help')} onTechnical={() => openModal('technical')} user={user} accountAction={accountAction} onDemoExit={onDemoExit} />;
+  if (webPageOpen) {
+    return <div className="zarya" style={workspaceTokens} data-zarya-mode={theme.mode} data-zarya-scheme={theme.scheme}>
+      <WebPageEditor onBack={() => { restoreWebPageFocus.current = true; setWebPageOpen(false); }} />
+    </div>;
+  }
   if (personalView === 'canvas' && personalProjects?.project) {
     return <div style={workspaceTokens} data-zarya-mode={theme.mode} data-zarya-scheme={theme.scheme}>
       <PersonalProjectEditor project={personalProjects.project} onChange={personalProjects.setProject} onBack={() => showPersonal('list')} />
@@ -91,6 +106,8 @@ export function WorkspaceShell({ initial = initialWorkspaceState, active = true,
           </button></div>}
           {onDemoExit && <p className="z-home-note"><a className="z-button" href={applicationHref('laboratory')} onClick={onLaboratory}>Попробовать редактор</a></p>}
           <p className="z-home-note">Без подключения LLM, импорта и сохранения проектов</p>
+          <p className="z-home-note"><button ref={webPageOpener} className="z-button" type="button"
+            onClick={() => { closeNav(); setWebPageOpen(true); }}>Страница события</button></p>
           <p className="z-home-note"><button ref={opener} className="z-button" type="button" onClick={() => {
             closeNav(); setPilotNavOpen(false); setPilotOpen(true);
           }}>Открыть визуальный пилот EMIKMAN</button></p>
