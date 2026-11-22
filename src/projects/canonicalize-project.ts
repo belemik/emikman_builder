@@ -4,6 +4,8 @@ import type { CanonicalizationDiagnostic, CanonicalizationDiagnosticCode,
   CanonicalizationFailure, CanonicalizationScope, JcsCanonicalizationResult,
   ProjectCanonicalizationResult, TrustedOwnedJcsData } from './canonicalization.types';
 
+import { WEB_PAGE_MANIFEST_PROFILE } from './web-page-repository.dto';
+
 const profile = 'zarya.project-manifest.jcs/v1';
 const restrictions = Object.freeze({ executionPermission: 'NOT_GRANTED',
   semanticAdmission: 'NOT_EVALUATED', trustedAdmission: 'NOT_IMPLEMENTED',
@@ -137,11 +139,11 @@ function timestamp(value: unknown): boolean {
   return year >= 1 && month >= 1 && month <= 12 && day >= 1 && day <= days[month - 1]
     && Number(value.slice(11, 13)) < 24 && Number(value.slice(14, 16)) < 60 && Number(value.slice(17, 19)) < 60;
 }
-function inspectManifest(value: TrustedOwnedJcsData): CanonicalizationDiagnostic | null {
+function inspectManifest(value: TrustedOwnedJcsData, version: typeof profile | typeof WEB_PAGE_MANIFEST_PROFILE): CanonicalizationDiagnostic | null {
   const root = closed(value, ['modelId', 'modelVersion', 'canonicalizationProfile', 'projectId', 'revision', 'content'], '$');
   if ('error' in root) return root.error;
   const r = root.fields;
-  if (r.get('modelId') !== MODEL_ID || r.get('modelVersion') !== MODEL_VERSION || r.get('canonicalizationProfile') !== profile) {
+  if (r.get('modelId') !== MODEL_ID || r.get('modelVersion') !== MODEL_VERSION || r.get('canonicalizationProfile') !== version) {
     return diagnostic('S1B_VERSION', '$', 'Exact model and canonicalization profile versions are required.');
   }
   const projectId = r.get('projectId');
@@ -170,6 +172,11 @@ function inspectManifest(value: TrustedOwnedJcsData): CanonicalizationDiagnostic
     if (!Array.isArray(region)) return diagnostic('S1B_DATA_SHAPE', `$/content/${field}`, 'Explicit empty array is required.');
     const snapshot = array(region, `$/content/${field}`);
     if ('error' in snapshot) return snapshot.error;
+    if (field === 'documentHeads' && version === WEB_PAGE_MANIFEST_PROFILE) {
+      const error = inspectDocumentHeads(snapshot.items);
+      if (error) return error;
+      continue;
+    }
     if (snapshot.items.length !== 0) return diagnostic('S1B_UNSUPPORTED_REGION', `$/content/${field}`, 'Nonempty region is outside metadata-only S1b.');
   }
   if (content.fields.get('designDefaultsRef') !== null) return diagnostic('S1B_UNSUPPORTED_REGION', '$/content/designDefaultsRef', 'Design defaults are outside metadata-only S1b.');
@@ -187,11 +194,49 @@ function inspectManifest(value: TrustedOwnedJcsData): CanonicalizationDiagnostic
   return null;
 }
 /** Full explicit internal manifest only, NOT P02 DTO projection or production admission. */
-export function canonicalizeProjectManifest(trustedOwnedManifestCandidate: TrustedOwnedJcsData): ProjectCanonicalizationResult {
-  const error = inspectManifest(trustedOwnedManifestCandidate);
-  if (error) return failure('PROJECT_MANIFEST_METADATA_ONLY', error);
-  const result = encode(trustedOwnedManifestCandidate, true);
-  return 'error' in result ? failure('PROJECT_MANIFEST_METADATA_ONLY', result.error)
-    : Object.freeze({ ...restrictions, kind: 'canonicalized', scope: 'PROJECT_MANIFEST_METADATA_ONLY',
-      canonicalizationProfile: profile, canonicalText: result.text });
+export function canonicalizeProjectManifest(
+  candidate: TrustedOwnedJcsData,
+  version: typeof profile | typeof WEB_PAGE_MANIFEST_PROFILE = profile,
+): ProjectCanonicalizationResult {
+  const scope = version === WEB_PAGE_MANIFEST_PROFILE
+    ? 'PROJECT_MANIFEST_WEB_PAGE_TEST_ONLY' : 'PROJECT_MANIFEST_METADATA_ONLY';
+  if (version !== profile && version !== WEB_PAGE_MANIFEST_PROFILE) {
+    return failure(scope, diagnostic('S1B_VERSION', '$', 'Unsupported canonicalization profile.'));
+  }
+  const error = inspectManifest(candidate, version);
+  if (error) return failure(scope, error);
+  const result = encode(candidate, true);
+  return 'error' in result ? failure(scope, result.error)
+    : Object.freeze({ ...restrictions, kind: 'canonicalized', scope,
+      canonicalizationProfile: version, canonicalText: result.text });
+}
+
+function inspectDocumentHeads(items: readonly unknown[]): CanonicalizationDiagnostic | null {
+  let previous = '';
+  const works = new Set<string>();
+  const revisions = new Set<string>();
+  for (const [index, item] of items.entries()) {
+    const path = `$/content/documentHeads/${index}`;
+    const head = closed(item, ['workId', 'documentId', 'revisionId', 'sha256', 'contract',
+      'validator', 'renderer', 'assetCatalog'], path);
+    if ('error' in head) return head.error;
+    const { fields } = head;
+    const doc = fields.get('documentId'), work = fields.get('workId'), revision = fields.get('revisionId');
+    if (typeof doc !== 'string' || !hasEntityIdShape(doc, 'document') || doc <= previous
+      || typeof work !== 'string' || !hasEntityIdShape(work, 'work') || works.has(work)
+      || typeof revision !== 'string' || !hasEntityIdShape(revision, 'document-revision') || revisions.has(revision)) {
+      return diagnostic('S1B_ID', path, 'Expected unique and ordered document heads with issued ID shapes.');
+    }
+    previous = doc;
+    works.add(work);
+    revisions.add(revision);
+    if (fields.get('contract') !== '0.1') return diagnostic('S1B_VERSION', path, 'Unsupported WebPage contract.');
+    for (const name of ['sha256', 'validator', 'renderer', 'assetCatalog']) {
+      const value = fields.get(name);
+      if (typeof value !== 'string' || value.length !== 64 || !/^[0-9a-f]{64}$/.test(value)) {
+        return diagnostic('S1B_DATA_SHAPE', path, 'Expected lowercase SHA-256 digests.');
+      }
+    }
+  }
+  return null;
 }

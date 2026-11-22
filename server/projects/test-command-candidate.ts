@@ -5,49 +5,91 @@ import { hasEntityIdShape } from '../../src/projects/compatibility';
 import { MODEL_ID, MODEL_VERSION, REGISTRY_ID, REGISTRY_VERSION } from '../../src/projects/definitions';
 import { REPOSITORY_DTO_VERSION } from '../../src/projects/repository.dto';
 import type { RepositoryOperation, RequestRecord, RequestJson } from '../../src/projects/repository.dto';
+import type { ProjectCommandInspection } from './ingest-profile';
 import { createOwnedHandoffTestOnly, takeOwnedHandoffTestOnly } from './decode-project-command';
+import { READ_WEB_PAGE, SAVE_WEB_PAGE, WEB_PAGE_COMMAND_VERSION, type WebPageOperation } from '../../src/projects/web-page-repository.dto';
+export type BOperation = RepositoryOperation | WebPageOperation;
+
 export const TEST_CANDIDATE_PROFILE = 'zarya.p04.r2.command.test/v0';
 export const TEST_QUERY_PROFILE = 'zarya.p04.r5.query.test/v0';
 const operations = new Set(['create-project','read-project','list-projects','update-metadata','list-revisions',
   'read-revision','create-revision','restore-project','soft-delete-project']);
 function operation(value: string): value is RepositoryOperation { return operations.has(value); }
-export interface TestCommandCandidate {
-  readonly profile: typeof TEST_CANDIDATE_PROFILE; readonly operation: RepositoryOperation;
-  readonly decoderProfile: string; readonly dtoVersion: typeof REPOSITORY_DTO_VERSION;
+type CandidateVersion = typeof REPOSITORY_DTO_VERSION | typeof WEB_PAGE_COMMAND_VERSION;
+export interface TestCommandCandidate<Op extends BOperation = RepositoryOperation,
+  Version extends CandidateVersion = typeof REPOSITORY_DTO_VERSION> {
+  readonly profile: typeof TEST_CANDIDATE_PROFILE; readonly operation: Op;
+  readonly decoderProfile: string; readonly dtoVersion: Version;
   readonly rawSha256: string; readonly fingerprint: string;
   readonly productionAuthority: 'NOT_GRANTED';
 }
-type Snapshot = Readonly<{ data: RequestRecord; operation: RepositoryOperation; decoderProfile: string;
+type Snapshot<Op extends BOperation = BOperation> = Readonly<{ data: RequestRecord; operation: Op; decoderProfile: string;
   fingerprint: string; rawSha256: string }>;
 const candidates = new WeakMap<object, Snapshot>();
+const extendedCandidates = new WeakSet<object>();
 const hash = (domain: string, value: RequestJson): string => {
   const canonical = canonicalizeJcsData(value);
   if (canonical.kind !== 'canonicalized') throw Error('TEST_CANONICALIZATION_FAILED');
   return createHash('sha256').update(domain,'ascii').update(Buffer.from([0])).update(canonical.canonicalText,'utf8').digest('hex');
 };
-function mint(op: RepositoryOperation, decoderProfile: string, data: RequestRecord, raw: Uint8Array): TestCommandCandidate {
+function mint<Op extends BOperation, Version extends CandidateVersion>(
+  op: Op, dtoVersion: Version, decoderProfile: string, data: RequestRecord, raw: Uint8Array, extended = false,
+): TestCommandCandidate<Op, Version> {
   const pending: RequestJson[] = [data];
   while (pending.length) { const v=pending.pop()!; if(v!==null&&typeof v==='object'){pending.push(...Object.values(v));Object.freeze(v);} }
   const rawSha256=createHash('sha256').update(raw).digest('hex');
   const fingerprint=hash(TEST_CANDIDATE_PROFILE,{profile:TEST_CANDIDATE_PROFILE,decoderProfile,
-    dtoVersion:REPOSITORY_DTO_VERSION,operation:op,request:data});
+    dtoVersion,operation:op,request:data});
   const handle=Object.freeze({profile:TEST_CANDIDATE_PROFILE,operation:op,decoderProfile,
-    dtoVersion:REPOSITORY_DTO_VERSION,rawSha256,fingerprint,productionAuthority:'NOT_GRANTED'} as const);
-  candidates.set(handle,Object.freeze({data,operation:op,decoderProfile,rawSha256,fingerprint}));return handle;
+    dtoVersion,rawSha256,fingerprint,productionAuthority:'NOT_GRANTED'} as const);
+  candidates.set(handle,Object.freeze({data,operation:op,decoderProfile,rawSha256,fingerprint}));
+  if (extended) extendedCandidates.add(handle);
+  return handle;
 }
 /** Only owned bytes inspected in the SAME R1 pass enter mint; never JSON.parse/cast/caller DTO. */
 export function createTestCommandCandidate(op: string, bytes: Uint8Array) {
-  const handoff=createOwnedHandoffTestOnly(op,bytes);
+  return createCandidate(op, bytes, false);
+}
+
+/** Explicit opt-in for the versioned P04 WebPage profile, including its project revision references. */
+export function createWebPageRepositoryCandidate(op: string, bytes: Uint8Array) {
+  return createCandidate(op, bytes, true);
+}
+
+type Rejected = { readonly kind: 'rejected'; readonly report: ProjectCommandInspection; readonly missingGuard: boolean };
+type CandidateResult<Op extends BOperation, Version extends CandidateVersion> =
+  Rejected | { readonly kind: 'candidate'; readonly candidate: TestCommandCandidate<Op, Version> };
+
+function createCandidate(op: string, bytes: Uint8Array, extended: false):
+  CandidateResult<RepositoryOperation, typeof REPOSITORY_DTO_VERSION>;
+function createCandidate(op: string, bytes: Uint8Array, extended: true):
+  CandidateResult<BOperation, CandidateVersion>;
+function createCandidate(op: string, bytes: Uint8Array, extended: boolean):
+  CandidateResult<BOperation, CandidateVersion> {
+  const handoff=createOwnedHandoffTestOnly(op,bytes,extended);
   if(!handoff.handle)return {kind:'rejected' as const,report:handoff.report,missingGuard:handoff.missingGuard};
   const owned=takeOwnedHandoffTestOnly(handoff.handle);
-  if(!owned||!operation(owned.operation))throw Error('TEST_HANDOFF_UNAVAILABLE');
-  const candidate=mint(owned.operation,owned.profileId,owned.data,owned.bytes);
-  return Object.freeze({kind:'candidate' as const,candidate});
+  if (!owned) throw Error('TEST_HANDOFF_UNAVAILABLE');
+  const { operation: opName, profileId, data, bytes: copied } = owned;
+  if (operation(opName)) {
+    const candidate = mint(opName, REPOSITORY_DTO_VERSION, profileId, data, copied, extended);
+    return Object.freeze({ kind: 'candidate', candidate });
+  }
+  if (!extended || (opName !== SAVE_WEB_PAGE && opName !== READ_WEB_PAGE)) throw Error('TEST_HANDOFF_UNAVAILABLE');
+  const candidate = mint(opName, WEB_PAGE_COMMAND_VERSION, WEB_PAGE_COMMAND_VERSION, data, copied, true);
+  return Object.freeze({ kind: 'candidate', candidate });
 }
 /** Server-test-module access only. Registry identity, not public fields/TS casts, is authority.
  * Returns only immutable data. No raw byte view is retained/exposed after fingerprint construction.
  */
-export function inspectTestCandidate(handle: object): Snapshot | null {
+export function inspectTestCandidate(handle: object): Snapshot<RepositoryOperation> | null {
+  const snap = candidates.get(handle);
+  return snap && !extendedCandidates.has(handle) && isLegacySnapshot(snap) ? snap : null;
+}
+function isLegacySnapshot(snap: Snapshot): snap is Snapshot<RepositoryOperation> {
+  return operation(snap.operation);
+}
+export function inspectWebPageRepositoryCandidate(handle: object): Snapshot | null {
   return candidates.get(handle) ?? null;
 }
 export function discardTestCandidate(handle: object): void { candidates.delete(handle); }
@@ -64,5 +106,5 @@ export function createTestReadCandidate(op: 'read-project'|'list-projects'|'list
   if(projectId!==null)data.projectId=projectId;
   if(op!=='read-project')data.cursor=null;
   if(inspectProjectRequest(op,data).kind!=='dto-shape-recognized')throw Error('TEST_QUERY_DTO');
-  return mint(op,TEST_QUERY_PROFILE,data,new TextEncoder().encode(rawTarget));
+  return mint(op,REPOSITORY_DTO_VERSION,TEST_QUERY_PROFILE,data,new TextEncoder().encode(rawTarget));
 }

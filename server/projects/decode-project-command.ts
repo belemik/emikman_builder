@@ -4,6 +4,9 @@ import type { RequestJson, RequestRecord } from '../../src/projects/repository.d
 import { PROJECT_INGEST_TEST_PROFILE as limits } from './ingest-profile';
 import type { ProjectCommandInspection, ProjectDecodeCode, ProjectDecodeCounters } from './ingest-profile';
 
+import { isWebPageCommand } from './b-test-web-page-command';
+import { READ_WEB_PAGE, SAVE_WEB_PAGE, WEB_PAGE_MANIFEST_PROFILE } from '../../src/projects/web-page-repository.dto';
+
 const typedArray = Object.getPrototypeOf(Uint8Array.prototype);
 const byteLength = Object.getOwnPropertyDescriptor(typedArray, 'byteLength')!.get!;
 const bufferOf = Object.getOwnPropertyDescriptor(typedArray, 'buffer')!.get!;
@@ -56,14 +59,32 @@ function closedShape(operation: string, root: RequestJson): void {
     }
   }
 }
-function inspectClosedDto(operation: string, root: RequestJson): void {
-  closedShape(operation, root);
-  if (inspectProjectRequest(operation, root).kind !== 'dto-shape-recognized') deny('R1_DTO');
-    if (dataRecord(root) && Object.hasOwn(root, 'idempotencyKey')) {
-      const key = root.idempotencyKey;
-      if (typeof key !== 'string' || key.length > limits.idempotencyKeyCharacters
-        || !/^[\x20-\x7e]+$/.test(key) || !/[^ ]/.test(key)) deny('R1_IDEMPOTENCY_KEY');
+function inspectClosedDto(operation: string, root: RequestJson, extended: boolean): void {
+  const webPage = operation === SAVE_WEB_PAGE || operation === READ_WEB_PAGE;
+  if (webPage) {
+    if (!extended || !isWebPageCommand(operation, root)) deny('R1_DTO');
+  } else {
+    closedShape(operation, root);
+    let candidate = root;
+    if (extended && dataRecord(root)) {
+      // Apply the existing shape rules to both reference domains. Preserve the actual
+      // domain in the owned command; the repository must compare it exactly in CAS.
+      const projection = { ...root };
+      for (const field of ['revision', 'expectedRevision', 'sourceRevision']) {
+        const ref = root[field];
+        if (dataRecord(ref) && dataRecord(ref.integrity) && ref.integrity.byteDomain === WEB_PAGE_MANIFEST_PROFILE) {
+          projection[field] = { ...ref, integrity: { ...ref.integrity, byteDomain: 'zarya.project-manifest.jcs/v1' } };
+        }
+      }
+      candidate = projection;
     }
+    if (inspectProjectRequest(operation, candidate).kind !== 'dto-shape-recognized') deny('R1_DTO');
+  }
+  if (dataRecord(root) && Object.hasOwn(root, 'idempotencyKey')) {
+    const key = root.idempotencyKey;
+    if (typeof key !== 'string' || key.length > limits.idempotencyKeyCharacters
+      || !/^[\x20-\x7e]+$/.test(key) || !/[^ ]/.test(key)) deny('R1_IDEMPOTENCY_KEY');
+  }
 }
 /** NO-IO TEST ONLY. Input: trusted internal, non-shared Uint8Array/Buffer byte view.
  * No iterable, callback, caller property or serializer is used to obtain bytes. Intrinsic
@@ -71,7 +92,7 @@ function inspectClosedDto(operation: string, root: RequestJson): void {
  * intrinsics; this is not a sandbox for a hostile same-realm program that patches builtins.
  * Own bytes are copied before decoding. No bytes/tree/DTO/candidate escape in either result.
  */
-function inspectOwned(operation: string, input: Uint8Array, handoff?: { data?: RequestRecord; bytes?: Uint8Array; missingGuard?: boolean }): ProjectCommandInspection {
+function inspectOwned(operation: string, input: Uint8Array, handoff?: { data?: RequestRecord; bytes?: Uint8Array; missingGuard?: boolean }, extended = false): ProjectCommandInspection {
   let bodyBytes: number | null = null, decodedLength: number | null = null, i = 0;
   const counters = { nodes: 0, properties: 0, arrayItems: 0, maxContainerDepth: 0,
     maxKeyScalars: 0, maxStringScalars: 0, maxRawStringTokenBytes: 0 };
@@ -82,7 +103,8 @@ function inspectOwned(operation: string, input: Uint8Array, handoff?: { data?: R
     trustedAdmission: 'NOT_IMPLEMENTED' as const, performance: 'UNKNOWN' as const,
     bodyBytes, counters: Object.freeze({ ...counters }) satisfies ProjectDecodeCounters });
   try {
-    if (typeof operation !== 'string' || !operations.has(operation)) deny('R1_OPERATION');
+    if (typeof operation !== 'string'
+      || (!operations.has(operation) && !(extended && (operation === SAVE_WEB_PAGE || operation === READ_WEB_PAGE)))) deny('R1_OPERATION');
     if (!types.isUint8Array(input)) deny('R1_INPUT');
     const backing: ArrayBufferLike = bufferOf.call(input);
     if (types.isSharedArrayBuffer(backing)) deny('R1_INPUT');
@@ -209,7 +231,7 @@ function inspectOwned(operation: string, input: Uint8Array, handoff?: { data?: R
     whitespace(); if (i !== text.length) deny('R1_SYNTAX');
     if (unsupportedValues) deny('R1_DTO');
     if (handoff && dataRecord(root) && ['update-metadata','create-revision','restore-project','soft-delete-project'].includes(operation) && !Object.hasOwn(root,'expectedRevision')) handoff.missingGuard=true;
-    inspectClosedDto(operation, root);
+    inspectClosedDto(operation, root, extended);
     if (handoff) {
       if (!dataRecord(root)) deny('R1_INTERNAL');
       const pending: RequestJson[] = [root];
@@ -245,9 +267,9 @@ const ownedHandoffs = new WeakMap<object, OwnedHandoff>();
  * Handle identity is checked in a private registry. No callback or second parse of caller bytes.
  * Consuming transfers sole ownership of bytes; the receiver must not expose their mutable view.
  */
-export function createOwnedHandoffTestOnly(operation: string, input: Uint8Array) {
+export function createOwnedHandoffTestOnly(operation: string, input: Uint8Array, extended = false) {
   const transfer: { data?: RequestRecord; bytes?: Uint8Array; missingGuard?: boolean } = {};
-  const report = inspectOwned(operation, input, transfer);
+  const report = inspectOwned(operation, input, transfer, extended);
   if (report.kind !== 'test-dto-inspected' || !transfer.data || !transfer.bytes) return { report, handle: null, missingGuard: transfer.missingGuard === true };
   const handle = Object.freeze({ scope: 'R1_INTERNAL_HANDOFF_TEST_ONLY' });
   ownedHandoffs.set(handle, Object.freeze({ operation, profileId: limits.id, data: transfer.data, bytes: transfer.bytes }));

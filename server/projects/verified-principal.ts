@@ -1,5 +1,6 @@
 import { types } from 'node:util';
-import type { RepositoryOperation } from '../../src/projects/repository.dto';
+import { READ_WEB_PAGE, SAVE_WEB_PAGE } from '../../src/projects/web-page-repository.dto';
+import type { BOperation } from './test-command-candidate';
 import { A_TEST_RESTRICTIONS,isTestFoundationPolicy } from './server-foundation-policy';
 
 /** Trusted synchronous fixture bootstrap ports. NOT a real guard, network DTO or production issuer API.
@@ -22,10 +23,10 @@ export interface TestPrincipalBoundary {
   authorize(principal:unknown,operation:unknown,resources:unknown,phase:unknown):TestAuthorization;
   canDeliver(delivery:unknown,currentSessionKey:unknown):boolean;
 }
-const operations:readonly RepositoryOperation[]=['create-project','read-project','list-projects','update-metadata',
-  'list-revisions','read-revision','create-revision','restore-project','soft-delete-project'];
+const operations:readonly BOperation[]=['create-project','read-project','list-projects','update-metadata',
+  'list-revisions','read-revision','create-revision','restore-project','soft-delete-project',SAVE_WEB_PAGE,READ_WEB_PAGE];
 const opSet=new Set<string>(operations);
-function isOperation(value:unknown):value is RepositoryOperation {return typeof value==='string'&&opSet.has(value);}
+function isOperation(value:unknown):value is BOperation {return typeof value==='string'&&opSet.has(value);}
 function object(value:unknown):value is object {return typeof value==='object'&&value!==null&&!types.isProxy(value);}
 /** Limited same-realm defensive inspection, not a JSON decoder or sandbox for hostile intrinsics. */
 function record(value:unknown,keys:readonly string[]):Record<string,unknown>|null {
@@ -53,13 +54,13 @@ function references(value:unknown):readonly TestResourceReference[]|null {
   }
   return Object.freeze(result);
 }
-function shape(op:RepositoryOperation,refs:readonly TestResourceReference[],phase:Phase):boolean {
-  const write=['create-project','update-metadata','create-revision','restore-project','soft-delete-project'].includes(op);
+function shape(op:BOperation,refs:readonly TestResourceReference[],phase:Phase):boolean {
+  const write=[SAVE_WEB_PAGE,'create-project','update-metadata','create-revision','restore-project','soft-delete-project'].includes(op);
   if(phase==='replay'&&!write)return false;
   if(op==='create-project')return phase==='dispatch'?refs.length===0:refs.length===1&&refs[0].kind==='receipt'&&refs[0].projectId===null;
   if(op==='list-projects')return refs.length===0;
   const project=refs[0];if(!project||project.kind!=='project'||project.projectId!==null)return false;
-  const needsRevision=op==='read-revision'||op==='restore-project';
+  const needsRevision=op==='read-revision'||op==='restore-project'||op===READ_WEB_PAGE;
   const expected=1+(needsRevision?1:0)+(phase==='replay'?1:0);if(refs.length!==expected)return false;
   if(needsRevision&&(refs[1].kind!=='revision'||refs[1].projectId!==project.id))return false;
   return phase!=='replay'||refs[refs.length-1].kind==='receipt'&&refs[refs.length-1].projectId===project.id;
@@ -77,7 +78,7 @@ export function createTestPrincipalBoundary(policy:unknown,ports:TestBoundaryPor
   // Capture bootstrap functions once; later replacement of caller's port properties has no effect.
   const now=p.now,resolveSession=p.resolveSession,resolveResource=p.resolveResource;
   type Session={key:object;identity:object;accountId:string;generation:number;expiresAt:number};
-  type Delivery={session:Session;op:RepositoryOperation;refs:readonly TestResourceReference[];phase:Phase};
+  type Delivery={session:Session;op:BOperation;refs:readonly TestResourceReference[];phase:Phase};
   const principals=new WeakMap<object,Session>(),deliveries=new WeakMap<object,Delivery>();
   function session(key:unknown):Session|null {
     if(!object(key))return null;
@@ -91,7 +92,7 @@ export function createTestPrincipalBoundary(policy:unknown,ports:TestBoundaryPor
     const current=session(saved.key);
     try{return current!==null&&current.identity===saved.identity&&current.accountId===saved.accountId&&current.generation===saved.generation&&now()<saved.expiresAt;}catch{return false;}
   }
-  function check(saved:Session,op:RepositoryOperation,refs:readonly TestResourceReference[],phase:Phase):boolean {
+  function check(saved:Session,op:BOperation,refs:readonly TestResourceReference[],phase:Phase):boolean {
     if(!live(saved)||!shape(op,refs,phase))return false;
     try {
       for(const ref of refs) {
