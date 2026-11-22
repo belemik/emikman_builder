@@ -17,7 +17,11 @@ export function containDialogTab(event: KeyboardEvent<HTMLDialogElement>) {
   }
 }
 
-export function Modal({ title, open, onClose, children, returnFocusSelector = '[data-profile-trigger], [data-menu-trigger]' }: { title: string; open: boolean; onClose: () => void; children: ReactNode; returnFocusSelector?: string }) {
+type ModalProps = {
+  title: string; open: boolean; onClose: () => void; children: ReactNode;
+  dismissLabel?: string; returnFocusRef?: RefObject<HTMLElement | null>; returnFocusSelector?: string;
+};
+export function Modal({ title, open, onClose, children, dismissLabel, returnFocusRef, returnFocusSelector = '[data-profile-trigger], [data-menu-trigger]' }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const id = useId();
   useEffect(() => {
@@ -30,12 +34,15 @@ export function Modal({ title, open, onClose, children, returnFocusSelector = '[
     dialog.showModal();
     return () => {
       dialog.close(); document.body.style.overflow = overflow;
-      if (previous?.isConnected) previous.focus({ preventScroll: true });
+      if (returnFocusRef?.current?.isConnected) returnFocusRef.current.focus({ preventScroll: true });
+      else if (previous?.isConnected) previous.focus({ preventScroll: true });
       else (document.querySelector<HTMLElement>(returnFocusSelector) ?? document.querySelector<HTMLElement>('[data-menu-trigger]'))?.focus({ preventScroll: true });
     };
-  }, [open, returnFocusSelector]);
+  }, [open, returnFocusRef, returnFocusSelector]);
   return <dialog className="z-modal" ref={ref} aria-labelledby={id} onKeyDown={containDialogTab} onCancel={event => { event.preventDefault(); onClose(); }}>
-    <div className="z-modal-head"><h2 id={id}>{title}</h2><CloseButton label={`Закрыть: ${title}`} onClick={onClose} /></div>
+    <div className="z-modal-head"><h2 id={id}>{title}</h2>{dismissLabel
+      ? <button type="button" className="z-button" onClick={onClose}>{dismissLabel}</button>
+      : <CloseButton label={`Закрыть: ${title}`} onClick={onClose} />}</div>
     {open && children}
   </dialog>;
 }
@@ -64,11 +71,11 @@ export function Popover({ label, trigger, onClose, children }: { label: string; 
 }
 
 export function WorkspaceSettings({ mode, onTheme }: { mode: ThemeMode; onTheme: (mode: ThemeMode) => void }) {
-  return <section className="z-modal-body"><h3>Внешний вид</h3><p>Оформление оболочки. Артборд Canvas сохраняет собственную тему.</p>
+  return <section className="z-modal-body"><h3>Внешний вид</h3><p>Выберите тему Workspace и панелей Editor.</p>
     <div className="z-theme-options" role="group" aria-label="Оформление">{([
       ['light', 'Светлая'], ['dark', 'Тёмная'], ['system', 'Системная'],
     ] as const).map(([id, label]) => <button type="button" className="z-button" key={id} aria-pressed={mode === id} onClick={() => onTheme(id)}>{label}</button>)}</div>
-    <p className="z-muted">Сохраняется только настройка темы в этом браузере. Проекты не сохраняются.</p>
+    <p className="z-muted">Настройка темы действует в этом браузере.</p>
   </section>;
 }
 
@@ -76,8 +83,8 @@ export function WorkspaceHelp() {
   return <div className="z-modal-body z-help">
     <section><h3>Как создать проект</h3><p>Откройте «Новый чат», выберите сценарий и заполните форму. Результат — локальный mock, исчезающий после обновления страницы.</p></section>
     <section><h3>Как подключить дизайн-систему</h3><p>Подключение источников пока недоступно. WDeaf PRO 2.0 в форме — метаданные демонстрации, не live-подключение.</p></section>
-    <section><h3>Как использовать Canvas</h3><p>Откройте работу проекта, выберите элемент на макете или в Layers. Inspector показывает описание, без применения свойств.</p></section>
+    <section><h3>Как использовать Canvas</h3><p>Откройте «Страница события» и выберите Hero на холсте. Измените текст в Inspector, нажмите «Применить» и откройте Preview.</p></section>
     <section><h3>Горячие клавиши</h3><p>Enter отправляет mock-сообщение; Shift+Enter добавляет строку. Escape закрывает меню и диалоги. Tab перемещает фокус.</p></section>
-    <section><h3>Ограничения демонстрационного режима</h3><p>Нет LLM, импорта Figma, записи проектов, Trusted Admission или Apply. На Pages нет серверной сессии. На сервере вход подтверждает существующий AccountGate; выход доступен через меню профиля ЗАРЯ Workspace и существующий профиль лаборатории.</p></section>
+    <section><h3>Ограничения демонстрационного режима</h3><p>Чат использует демонстрационный ответ. Правки страницы события действуют в текущей сессии. На Pages нет серверной сессии. На сервере вход подтверждает существующий AccountGate; выход доступен через меню профиля ЗАРЯ Workspace и существующий профиль лаборатории.</p></section>
   </div>;
 }

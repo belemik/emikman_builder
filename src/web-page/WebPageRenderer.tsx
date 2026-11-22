@@ -14,7 +14,7 @@ export function WebPageRenderer({ page }: { page: WebPageV01 }) {
         <p>{hero.body.text}</p>
         <a className="zwp-cta" href={'#' + programId}>{hero.cta.label}</a>
       </div>
-      <img src={assetUrl(WEB_PAGE_ASSETS[hero.image.assetId])} alt={hero.image.alt} width={72} height={72} />
+      <div className="zwp-poster"><img src={assetUrl(WEB_PAGE_ASSETS[hero.image.assetId])} alt={hero.image.alt} width={72} height={72} /></div>
     </header>
     <section id={programId} className="zwp-program" tabIndex={-1}>
       <h4>{program.heading}</h4>

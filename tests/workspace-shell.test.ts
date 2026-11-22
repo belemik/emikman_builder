@@ -100,7 +100,7 @@ test('workspace demo does not call the builder document API', () => {
   assert.equal(model.includes('localStorage'), false);
   assert.match(theme, new RegExp(THEME_STORAGE_KEY));
   assert.match(htmlEntry, new RegExp(THEME_STORAGE_KEY));
-  assert.match(htmlEntry, /view !== null && view !== 'workspace'/);
+  assert.match(htmlEntry, /setAttribute\('data-appearance', scheme\)/);
   assert.match(entry, /<ApplicationShell/);
   const application = readFileSync(new URL('../src/application/ApplicationShell.tsx', import.meta.url), 'utf8');
   assert.match(application, /return isDemo/);
@@ -108,15 +108,15 @@ test('workspace demo does not call the builder document API', () => {
   assert.match(entry, /setDocument/);
 });
 
-test('theme follows the system until a manual choice is stored', () => {
+test('theme defaults to dark and supports explicit system and manual preferences', () => {
   const page = html();
   // W-02 moves appearance into Settings; preserve the same theme contract.
   const settings = renderToStaticMarkup(createElement(WorkspaceSettings, { mode: 'system', onTheme: () => {} }));
   assert.match(settings, /Оформление/);
   assert.match(settings, /aria-pressed="true">Системная/);
   assert.match(page, /Демо-профиль/);
-  assert.match(page, /data-zarya-mode="system"/);
-  assert.equal(readThemeMode(null), 'system');
+  assert.match(page, /data-zarya-mode="dark"/);
+  assert.equal(readThemeMode(null), 'dark');
   assert.equal(resolvedScheme('system', true), 'dark');
   assert.equal(resolvedScheme('light', true), 'light');
   assert.equal(resolvedScheme('dark', false), 'dark');
@@ -132,7 +132,7 @@ test('theme follows the system until a manual choice is stored', () => {
     getItem() { throw new Error('denied'); },
     setItem() { throw new Error('denied'); },
   };
-  assert.equal(readThemeMode(denied), 'system');
+  assert.equal(readThemeMode(denied), 'dark');
   assert.doesNotThrow(() => writeThemeMode(denied, 'dark'));
 
   let mode: ThemeMode = 'system';
@@ -185,7 +185,7 @@ test('W02 scenarios enter an explicit preparation flow rather than sending a ran
     const page = html(state);
     assert.match(page, /Название проекта/);
     assert.match(page, /Дизайн-система/);
-    assert.match(page, /React state/);
+    assert.match(page, /до перезагрузки страницы/);
     if (scenario.id === 'figma') assert.match(page, /Ссылка на Figma/);
     if (scenario.id === 'redesign') assert.match(page, /URL существующего сайта/);
     if (scenario.id === 'prototype') assert.match(page, /Платформа/);

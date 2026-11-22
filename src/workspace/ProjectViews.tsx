@@ -1,17 +1,22 @@
 import { useId, useRef } from 'react';
+import { workspaceTokens } from './presentation';
+import { Glyph } from '../studio/Controls';
 import { ChatComposer, Thread } from './ChatComposer';
 import { libraries, projectChatFor, type InspectorTab, type MockElement, type MockProject, type MockWork, type ProjectSection, type WorkspaceState } from './model';
 
 const sections: readonly [ProjectSection, string][] = [['canvas', 'Canvas'], ['sources', 'Источники'], ['libraries', 'Дизайн-системы'], ['files', 'Файлы'], ['references', 'Референсы'], ['history', 'История'], ['settings', 'Настройки проекта']];
-export function ProjectPage({ project, allProjects, state, onProject, onSection, onOpen, onLibrary }: {
-  project: MockProject; allProjects: readonly MockProject[]; state: WorkspaceState; onProject: (id: string) => void;
+export function ProjectPage({ project, allProjects, state, onProject, onSection, onOpen, onLibrary, covers }: {
+  covers?: React.ReactNode; project: MockProject; allProjects: readonly MockProject[]; state: WorkspaceState; onProject: (id: string) => void;
   onSection: (section: ProjectSection) => void; onOpen: (projectId: string, workId: string) => void; onLibrary: (id: string) => void;
 }) {
   const firstWork = project.works[0];
   if (state.projectListOpen) return <section className="z-page z-project-page">
-    <div className="z-page-heading"><p className="z-eyebrow">Локальная демонстрация</p><h1>Проекты</h1><p className="z-muted">Примеры и черновики этой сессии. После перезагрузки новые mock-проекты исчезнут.</p></div>
-    <div className="z-project-grid">{allProjects.map(item => <button type="button" className="z-project-card" key={item.id} aria-current={item.id === project.id ? 'true' : undefined} onClick={() => onProject(item.id)}>
-      <span className="z-card-preview" aria-hidden="true"><span/><span/><span/></span><strong>{item.name}</strong><small>{item.client}</small><span className="z-card-caption">mock · {item.works.length} работ</span>
+    <div className="z-page-heading"><h1>Проекты</h1><p className="z-muted">Шаблоны и проекты текущей сессии.</p></div>
+    {covers}
+    <h2 className="zs-list-heading">Проекты сессии</h2>
+    {!state.mockProjects.length && <p className="zs-list-empty">Вы ещё не создали проект в этой сессии. Ниже — примеры для знакомства с Canvas.</p>}
+    <div className="z-project-grid">{allProjects.map(item => <button type="button" className="z-project-card" key={item.id} onClick={() => onProject(item.id)}>
+      <span className="zs-project-icon"><Glyph name="folder" /></span><span><strong>{item.name}</strong><small>{item.client}</small></span><span className="z-card-caption">Работы · {item.works.length}</span>
     </button>)}</div>
   </section>;
   return <section className="z-page z-project-page">
@@ -34,11 +39,13 @@ function Unavailable({ title, reason, children }: { title: string; reason: strin
 export function Libraries({ libraryId, onSelect, embedded = false }: { libraryId: string; onSelect: (id: string) => void; embedded?: boolean }) {
   const selected = libraries.find(item => item.id === libraryId) ?? libraries[0];
   return <section className={embedded ? 'z-libraries' : 'z-page z-libraries'}>
-    <h2>Дизайн-системы</h2><p className="z-muted">Каталог подключённых библиотек: компонентов, токенов, вариантов и источников. Подключение библиотек пока не реализовано. Пока доступен только демонстрационный список: источники не опрашиваются и не синхронизируются. Лаборатория компонентов — отдельный технический инструмент.</p>
-    <div className="z-table-wrap"><table><caption className="z-sr">Примеры дизайн-систем</caption><thead><tr><th>Название</th><th>Версия</th><th>Компоненты</th><th>Источник</th><th>Статус</th></tr></thead><tbody>{libraries.map(item => <tr key={item.id} data-selected={selected.id === item.id}>
-      <td><button type="button" className="z-button z-text-button" aria-pressed={selected.id === item.id} onClick={() => onSelect(item.id)}>{item.name}</button><small>{item.note}</small></td><td>{item.version}</td><td>{item.components}</td><td>{item.source}</td><td>{item.status}</td>
-    </tr>)}</tbody></table></div><p className="z-notice">{selected.note}</p>
-    <button className="z-button" type="button" disabled title="Пока недоступно: интеграция источников не реализована.">Подключить источник</button>
+    <h2>Дизайн-системы</h2><p className="z-muted">Библиотеки и референсы пользовательских проектов.</p>
+    <div className="zs-libgrid"><div role="group" aria-label="Библиотеки проектов">{libraries.map(item =>
+      <button key={item.id} aria-pressed={selected.id === item.id} onClick={() => onSelect(item.id)}><Glyph name="layers" /><span>{item.name}</span></button>)}</div>
+      <section aria-label="Сведения о библиотеке"><h3>{selected.name}</h3><p>{selected.note}</p>
+        <dl>{[['Версия', selected.version], ['Компоненты', selected.components], ['Источник', selected.source], ['Статус', selected.status]].map(([label, value]) =>
+          <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+        <button className="z-button" type="button" disabled title="Подключение источников запланировано">Подключить источник</button></section></div>
   </section>;
 }
 
@@ -87,7 +94,7 @@ function Inspector({ element, tab, onTab }: { element: MockElement; tab: Inspect
 function Canvas({ work, viewport, selected, onElement }: { work: MockWork; viewport: 'desktop' | 'mobile'; selected: string; onElement: (id: string) => void }) {
   const selection = (id: string) => selected === id ? 'z-selected' : '';
   const registration = work.elements.some(item => item.id === 'password');
-  return <div className={`z-frame ${viewport}`} data-testid="workspace-artboard" aria-label="Макет, только выбор элементов">
+  return <div style={workspaceTokens} className={`z-frame ${viewport}`} data-testid="workspace-artboard" aria-label="Макет, только выбор элементов">
     <div className="z-site-top"><b>nexa.</b><span>Помощь · RU</span></div>
     {registration ? <div className="z-site"><h2><button type="button" className={`z-artboard-heading ${selection('heading')}`} onClick={() => onElement('heading')}>Создайте аккаунт</button></h2><p>Начните работать с командой за несколько минут</p>
       <label className={selection('email')}>Рабочий email<input className="wdeaf-input" readOnly value="name@company.ru" onFocus={() => onElement('email')} onClick={() => onElement('email')} /></label>

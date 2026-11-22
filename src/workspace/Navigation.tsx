@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { BrandMark, Glyph } from '../studio/Controls';
 import type { User } from '../account';
 import { Avatar, CloseButton, Icon } from '../ui';
 import { Popover, containDialogTab } from './Overlays';
@@ -43,25 +44,27 @@ function ProfileMenu({ onSettings, onHelp, onTechnical, user, accountAction, onD
   </div>;
 }
 
-export function Sidebar({ mobile, allProjects, recentIds, currentProject, onHome, onAll, onHistory, onLibraries, onPersonal, onProject, onToggle, onSettings, onHelp, onTechnical, user, accountAction, onDemoExit }: {
+export function Sidebar({ mobile, allProjects, recentIds, currentProject, section, onChat, onNewChat, onHome, onAll, onHistory, onLibraries, onPersonal, onProject, onToggle, onSettings, onHelp, onTechnical, user, accountAction, onDemoExit }: {
   mobile: boolean; allProjects: readonly MockProject[]; recentIds: readonly string[]; currentProject: string | null;
-  onHome: () => void; onAll: () => void; onHistory: () => void; onLibraries: () => void; onPersonal?: () => void; onProject: (id: string) => void; onToggle: () => void;
+  section: string; onChat: () => void; onNewChat: () => void; onHome: () => void; onAll: () => void; onHistory: () => void; onLibraries: () => void; onPersonal?: () => void; onProject: (id: string) => void; onToggle: () => void;
   onSettings: () => void; onHelp: () => void; onTechnical: () => void; user?: User; accountAction?: ReactNode; onDemoExit?: () => void;
 }) {
   return <div className="z-side-content">
-    <div className="z-side-head"><button type="button" className="z-brand" aria-label="ЗАРЯ — главная Workspace" onClick={onHome}>ЗАРЯ<span>demo</span></button>
+    <div className="z-side-head"><button type="button" className="z-brand" aria-label="ЗАРЯ — главная Workspace" onClick={onHome}><BrandMark />ЗАРЯ</button>
       {mobile ? <CloseButton size="l" label="Закрыть меню" onClick={onToggle} /> : <button className="z-icon z-button" type="button" aria-label="Скрыть меню" onClick={onToggle}><Icon name="arrow-down" /></button>}
     </div>
-    <button type="button" className="z-new-chat" onClick={onHome}><Icon name="plus" />Новый чат</button>
+    <button type="button" className="z-new-chat" onClick={onNewChat}><Icon name="plus" />Новый чат</button>
     <nav className="z-side-scroll" aria-label="Проекты и недавние">
-      <SidebarSection title="Проекты"><button type="button" onClick={onAll}>Все проекты</button>
-        {onPersonal && <button type="button" onClick={onPersonal}>Мои проекты</button>}
-        {allProjects.map(project => <button type="button" key={project.id} aria-current={currentProject === project.id ? 'page' : undefined} onClick={() => onProject(project.id)}>{project.name}<small>mock</small></button>)}
-      </SidebarSection>
-      <button type="button" className="z-button z-text-button" onClick={onHistory}>История</button>
-      <button type="button" className="z-button z-text-button" onClick={onLibraries}>Дизайн-системы</button>
-      <SidebarSection title="Недавние"><p className="z-side-note">Примеры и открытия в этой демосессии</p>
-        {recentIds.map(id => allProjects.find(project => project.id === id)).filter((item): item is MockProject => !!item).map(project => <button type="button" key={project.id} onClick={() => onProject(project.id)}>{project.name}<small>mock</small></button>)}
+      <div className="zs-nav-links">
+        <button aria-current={section === 'Главная' ? 'page' : undefined} onClick={onHome}><Glyph name="home" />Главная</button>
+        <button aria-current={section === 'Проекты' ? 'page' : undefined} onClick={onAll}><Glyph name="folder" />Проекты</button>
+        <button aria-current={section === 'AI-чат' ? 'page' : undefined} onClick={onChat}><Glyph name="chat" />AI-чат</button>
+        <button aria-current={section === 'Дизайн-системы' ? 'page' : undefined} onClick={onLibraries}><Glyph name="grid" />Дизайн-системы</button>
+        <button onClick={onHistory}><Glyph name="history" />История</button>
+        {onPersonal && <button aria-current={section === 'Мои проекты' ? 'page' : undefined} onClick={onPersonal}><Glyph name="folder" />Мои проекты</button>}
+      </div>
+      <SidebarSection title="Недавние"><p className="z-sr">Примеры и открытия в этой демосессии</p>
+        {recentIds.map(id => allProjects.find(project => project.id === id)).filter((item): item is MockProject => !!item).map(project => <button type="button" key={project.id} aria-current={currentProject === project.id ? 'page' : undefined} onClick={() => onProject(project.id)}><Glyph name="page" />{project.name}</button>)}
       </SidebarSection>
     </nav>
     <ProfileMenu onSettings={onSettings} onHelp={onHelp} onTechnical={onTechnical} user={user} accountAction={accountAction} onDemoExit={onDemoExit} />

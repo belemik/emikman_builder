@@ -10,6 +10,8 @@ for(const name of ['tags','chips','menu'])test(`${name}: reviewed states and ori
  if(name==='chips'){const chip=renderer.locator('[data-ds-component=chip]:not(:disabled)').first();const prior=await chip.getAttribute('aria-pressed');await chip.click();await expect(chip).toHaveAttribute('aria-pressed',prior==='true'?'false':'true');}
 });
 test('compositions, Select mouse and keyboard interaction, reload and lossless JSON export',async({page})=>{
+ // The accepted board crop includes the light stage behind its rounded corners.
+ await page.addInitScript(() => localStorage.setItem('zarya-workspace-theme','light'));
  await open(page,'composition');const renderer=page.locator('.wdeaf-renderer');await expect(renderer).toHaveScreenshot('composition.png');
  const select=renderer.getByRole('combobox');await select.click();await expect(renderer.getByRole('listbox')).toBeVisible();await expect(page.locator('.canvas-paper')).toHaveScreenshot('select-open.png');
  await renderer.getByRole('option',{name:'Beta',exact:true}).click();await expect(select).toContainText('Beta');await expect(select).toHaveAttribute('aria-expanded','false');

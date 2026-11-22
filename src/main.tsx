@@ -13,11 +13,16 @@ import './styles.css';
 import './appearance/appearance.css';
 import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/500.css';
+import '@fontsource/manrope/600.css';
+import '@fontsource/manrope/700.css';
+import '@fontsource/manrope/800.css';
 import './renderer/styles.css';
 import { AccountButton, type User, type LogoutActions } from './account';
+import { ThemeProvider } from './studio/Theme';
 import { ApplicationShell } from './application/ApplicationShell';
 import './workspace/workspace.css';
 import './ux-pilot/pilot.css';
+import './studio/studio.css';
 import './web-page/web-page.css';
 
 function LegacyBuilder({ user, onDemoExit, logoutActions }: { user: User; onDemoExit?: () => void; logoutActions?: LogoutActions }) {
@@ -92,4 +97,4 @@ function LegacyBuilder({ user, onDemoExit, logoutActions }: { user: User; onDemo
     <dialog ref={dialogRef} onCancel={() => setPromptOpen(false)} onClose={() => setPromptOpen(false)}><div className="dialog-heading"><div><h2>Задание для AI-редактора</h2><p className="muted">Codex · Cursor · Claude Code</p></div><CloseButton label="Закрыть промпт" onClick={() => setPromptOpen(false)} /></div><textarea aria-label="Сгенерированный промпт" readOnly value={prompt} /><div className="dialog-footer"><span className="muted" role="status">{copied ? 'Текст скопирован' : 'Генерация локальная, без обращения к AI'}</span><button className="primary" onClick={async () => { try { await navigator.clipboard.writeText(prompt); setCopied(true); } catch { setCopied(false); setMessage('Буфер обмена недоступен. Выделите текст промпта и нажмите ⌘C.'); dialogRef.current?.querySelector('textarea')?.select(); } }}>Скопировать текст</button></div></dialog>
   </>;
 }
-createRoot(window.document.getElementById('root')!).render(<React.StrictMode><ApplicationShell renderLaboratory={(user, exit, logoutActions) => <LegacyBuilder key={user.id} user={user} onDemoExit={exit} logoutActions={logoutActions} />} /></React.StrictMode>);
+createRoot(window.document.getElementById('root')!).render(<React.StrictMode><ThemeProvider><ApplicationShell renderLaboratory={(user, exit, logoutActions) => <LegacyBuilder key={user.id} user={user} onDemoExit={exit} logoutActions={logoutActions} />} /></ThemeProvider></React.StrictMode>);
