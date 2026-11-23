@@ -78,8 +78,13 @@ export function verifyPassword(password, hash) {
   const actual = scryptSync(password, salt, 64);
   return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
+const windows = process.platform === 'win32';
 /** @param {import('node:fs').Stats} info */
-const privateDirectory = info => info.isDirectory() && info.uid === process.getuid?.() && (info.mode & 0o7777) === 0o700;
+const ownedByCurrentUser = info => windows || info.uid === process.getuid?.();
+/** @param {import('node:fs').Stats} info */
+const privateDirectory = info => info.isDirectory() && ownedByCurrentUser(info) && (windows || (info.mode & 0o7777) === 0o700);
+/** @param {import('node:fs').Stats} info */
+const privateFile = info => info.isFile() && ownedByCurrentUser(info) && (windows || (info.mode & 0o7777) === 0o600);
 /** @param {import('node:fs').Stats} a @param {import('node:fs').Stats} b */
 const sameInode = (a, b) => a.dev === b.dev && a.ino === b.ino;
 const unsafeAccounts = () => new Error('Недопустимый файл аккаунтов.');
@@ -108,18 +113,17 @@ export async function users() {
     try {
       const info = await file.stat();
       if (!info.isFile() || (info.nlink !== 0 && info.nlink !== 1)) throw unsafeAccounts();
-      if (expected && (!sameInode(info, expected.replacement) ||
-          info.uid !== process.getuid?.() || (info.mode & 0o7777) !== 0o600)) throw unsafeAccounts();
+      if (expected && (!sameInode(info, expected.replacement) || !privateFile(info))) throw unsafeAccounts();
       if (info.nlink === 1) return JSON.parse(await file.readFile('utf8'));
-      if (attempt === 2 || !privateDirectory(parent) || info.uid !== process.getuid?.()) throw unsafeAccounts();
+      if (attempt === 2 || !privateDirectory(parent) || !ownedByCurrentUser(info)) throw unsafeAccounts();
       // Only a different, private regular inode at the SAME trusted binding is
       // a confirmed replacement in the cooperating-local-writer threat model.
       const currentPath = await legacyAccountPath();
       const currentParent = await lstat(dirname(path));
       const replacement = await lstat(path);
       if (currentPath !== path || !privateDirectory(currentParent) || !sameInode(parent, currentParent) ||
-          !replacement.isFile() || replacement.nlink !== 1 || replacement.uid !== process.getuid?.() ||
-          (replacement.mode & 0o7777) !== 0o600 || replacement.dev !== info.dev || sameInode(info, replacement)) {
+          !privateFile(replacement) || replacement.nlink !== 1 ||
+          replacement.dev !== info.dev || sameInode(info, replacement)) {
         throw unsafeAccounts();
       }
       expected = { path, parent, replacement };
@@ -147,7 +151,7 @@ class AccountWriteError extends Error {
 }
 
 /**
- * The writer requires pre-provisioned, owned 0700 directories and trusted stable
+ * The writer requires pre-provisioned private directories and trusted stable
  * local ancestors. It does not provision DATA_DIR or claim power-loss proof.
  * @param {string} path
  */
@@ -157,7 +161,7 @@ async function syncPrivateDirectory(path) {
   const handle = await open(path, constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
   try {
     if (!sameInode(info, await handle.stat())) throw unsafeAccounts();
-    await handle.sync();
+    if (!windows) await handle.sync();
   } finally {
     await handle.close();
   }
@@ -216,7 +220,7 @@ async function publishAccount(username, password) {
     const file = await open(temporary, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, 0o600);
     try {
       const info = await file.stat();
-      if (!info.isFile() || info.nlink !== 1 || info.uid !== process.getuid?.() || (info.mode & 0o7777) !== 0o600) throw unsafeAccounts();
+      if (!privateFile(info) || info.nlink !== 1) throw unsafeAccounts();
       await file.writeFile(JSON.stringify(list, null, 2));
       await file.sync();
     } catch (error) {
@@ -236,7 +240,7 @@ async function publishAccount(username, password) {
     const directory = await open(dirname(destination), constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
     try {
       if (!sameInode(parent, await directory.stat())) throw unsafeAccounts();
-      await directory.sync();
+      if (!windows) await directory.sync();
       phase = 'COMMITTED';
     } catch (error) {
       failure = { cause: error };throw error;
