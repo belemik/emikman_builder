@@ -7,11 +7,14 @@ import {inspectTestCandidate,inspectWebPageRepositoryCandidate,type BOperation} 
 import type {TestPrincipalBoundary,TestResourceReference} from './verified-principal';
 import {assertBTestVolume,createBTestFile,type BVolume} from './b-test-volume';
 import {BTestLedger,text,number,type BRow} from './b-test-ledger';
-import { READ_WEB_PAGE, SAVE_WEB_PAGE, WEB_PAGE_MANIFEST_PROFILE, type WebPageDocumentHead } from '../../src/projects/web-page-repository.dto';
-import { BTestWebPageRecords, isWebPageStore, verifyWebPageContext, webPageSchema } from './b-test-web-page';
+import {
+ CREATE_WEB_PAGE_PROJECT, LIST_WEB_PAGE_DOCUMENTS, READ_WEB_PAGE, SAVE_WEB_PAGE, WEB_PAGE_DOCUMENT_LIMIT,
+ WEB_PAGE_MANIFEST_PROFILE, isWebPageOperation, isWebPageWorkspaceOperation, type WebPageDocumentHead, type WebPageDocumentSummary,
+} from '../../src/projects/web-page-repository.dto';
+import { BTestWebPageRecords, isWebPageStore, verifyWebPageContext, webPageSchema, type BWebPageProfile } from './b-test-web-page';
 
 type BReceipt = CommitReceipt | (Omit<CommitReceipt,'operation'> & {
-  readonly operation: typeof SAVE_WEB_PAGE;
+  readonly operation: typeof SAVE_WEB_PAGE | typeof CREATE_WEB_PAGE_PROJECT;
   readonly document: WebPageDocumentHead;
 });
 type BManifest = CanonicalProjectManifestV1 | (Omit<CanonicalProjectManifestV1,'canonicalizationProfile'|'content'> & {
@@ -26,9 +29,10 @@ const boundary={scope:'B_TEST_ONLY',productionAuthority:'NOT_GRANTED',persistenc
 export type BResult=typeof boundary&({kind:'committed';receipt:BReceipt;operationId:string;operationStatus:'COMMITTED'}|
  {kind:'denied'|'invalid'|'unavailable'|'unknown-outcome'}|{kind:'conflict';reason:'EXPECTED_REVISION_MISMATCH'|'IDEMPOTENCY_KEY_REUSED'}|
  {kind:'project';project:ProjectMetadataSnapshot;recoveryState:string}|{kind:'project-page';projects:readonly ProjectMetadataSnapshot[];nextCursor:null;recoveryState:string}|
+ {kind:'web-page-list';documents:readonly WebPageDocumentSummary[];truncated:boolean}|
  {kind:'web-page';projectRevision:ProjectRevisionReferenceDTO;document:WebPageDocumentHead & {payload:Uint8Array};recoveryState:string}|
  {kind:'revision';revision:ProjectRevisionView;recoveryState:string}|{kind:'revision-page';revisions:readonly ProjectRevisionView[];nextCursor:null;recoveryState:string});
-export type BFault='after-snapshot'|'after-intent'|'before-main'|'after-web-page-payload'|'after-revision'|'after-head'|'after-receipt'|'after-status'|'after-audit'|'before-commit'|'after-main-commit'|'after-ledger-commit';
+export type BFault='after-snapshot'|'after-intent'|'before-main'|'after-web-project'|'after-web-page-payload'|'after-revision'|'after-head'|'after-receipt'|'after-status'|'after-audit'|'before-commit'|'after-main-commit'|'after-ledger-commit';
 const fail=(kind:'denied'|'invalid'|'unavailable'|'unknown-outcome'):BResult=>({...boundary,kind});
 const conflict=(reason:'EXPECTED_REVISION_MISMATCH'|'IDEMPOTENCY_KEY_REUSED'):BResult=>({...boundary,kind:'conflict',reason});
 function isRecord(v:RequestJson):v is RequestRecord {return v!==null&&typeof v==='object'&&!Array.isArray(v);}
@@ -41,11 +45,12 @@ function fingerprint(accountId:string,operation:string,scopeProject:string,reque
  return createHash('sha256').update(B_FINGERPRINT_PROFILE).update(Buffer.from([0])).update(j.canonicalText).digest('hex');
 }
 function time(clock:()=>number):number {const t=clock();if(!Number.isSafeInteger(t)||t<0||t>Number.MAX_SAFE_INTEGER-limits.receiptWindowMs)throw Error('B_CLOCK');return t;}
+const accountScoped = (op: BOperation) => op==='create-project'||op==='list-projects'||op===CREATE_WEB_PAGE_PROJECT||op===LIST_WEB_PAGE_DOCUMENTS;
 export class BTestRepository {
  readonly database:DatabaseSync;#ids=createServerIdIssuer();
  private readonly webPages: BTestWebPageRecords | null;
  constructor(readonly volume:BVolume,readonly ledger:BTestLedger,private readonly auth:TestPrincipalBoundary,private readonly clock:()=>number,private readonly fault?:(stage:BFault)=>void,
-   options: { readonly webPageProfile?: true } = {}) {
+   private readonly options: { readonly webPageProfile?: BWebPageProfile } = {}) {
   assertBTestVolume(volume);if(volume.role!=='main'||volume.directory===ledger.volume.directory)throw Error('B_MAIN_ROLE');
   if(options.webPageProfile)verifyWebPageContext();
   const fresh=!existsSync(volume.databasePath),meta=ledger.meta();
@@ -55,7 +60,7 @@ export class BTestRepository {
   try {
    this.database.exec('PRAGMA busy_timeout=600;PRAGMA synchronous=FULL;PRAGMA foreign_keys=ON;');
    ledger.locked(()=>{
-    if(fresh){this.database.exec('PRAGMA journal_mode=WAL;BEGIN IMMEDIATE;');try{const schema=readFileSync(new URL('./b-test-schema.sql',import.meta.url),'utf8');this.database.exec(this.webPages?webPageSchema(schema):schema);this.database.prepare('INSERT INTO b_meta VALUES(?,?)').run(text(meta,'store_id'),number(meta,'generation'));this.database.exec('COMMIT');}catch(e){this.database.exec('ROLLBACK');throw e;}}
+    if(fresh){this.database.exec('PRAGMA journal_mode=WAL;BEGIN IMMEDIATE;');try{const schema=readFileSync(new URL('./b-test-schema.sql',import.meta.url),'utf8');this.database.exec(options.webPageProfile?webPageSchema(schema,options.webPageProfile):schema);this.database.prepare('INSERT INTO b_meta VALUES(?,?)').run(text(meta,'store_id'),number(meta,'generation'));this.database.exec('COMMIT');}catch(e){this.database.exec('ROLLBACK');throw e;}}
     const b=this.binding();if(text(b,'store_id')!==text(meta,'store_id'))throw Error('B_STORE_ID');
     if(text(meta,'path')===''){if(this.database.prepare('SELECT count(*) n FROM revisions').get()?.n!==0)throw Error('B_UNBOUND_HISTORY');ledger.database.prepare('UPDATE meta SET path=?').run(volume.databasePath);}
     if(!this.current())throw Error('B_BINDING');this.verifyMain();
@@ -63,7 +68,7 @@ export class BTestRepository {
    });
   }catch(e){this.database.close();throw e;}
  }
- binding():BRow {const version=this.database.prepare('PRAGMA user_version').get()?.user_version, profile=this.database.prepare('SELECT profile FROM store_profile').get()?.profile;if(!(this.webPages?isWebPageStore(version,profile):version===1&&profile===B_TEST_PROFILE)||this.database.prepare('PRAGMA journal_mode').get()?.journal_mode!=='wal')throw Error('B_SCHEMA');const r=this.database.prepare('SELECT * FROM b_meta').get();if(!r)throw Error('B_META');return r;}
+ binding():BRow {const version=this.database.prepare('PRAGMA user_version').get()?.user_version, profile=this.database.prepare('SELECT profile FROM store_profile').get()?.profile;if(!(this.options.webPageProfile?isWebPageStore(version,profile,this.options.webPageProfile):version===1&&profile===B_TEST_PROFILE)||this.database.prepare('PRAGMA journal_mode').get()?.journal_mode!=='wal')throw Error('B_SCHEMA');const r=this.database.prepare('SELECT * FROM b_meta').get();if(!r)throw Error('B_META');return r;}
  current():boolean {const a=this.ledger.meta(),b=this.binding();return text(a,'store_id')===text(b,'store_id')&&number(a,'generation')===number(b,'generation')&&text(a,'path')===this.volume.databasePath;}
  ownership(kind:'project'|'revision'|'receipt',id:string):Readonly<{accountId:string;projectId:string|null}>|null {
   const row=kind==='project'?this.database.prepare('SELECT account,NULL AS scope FROM projects WHERE id=?').get(id):kind==='revision'?this.database.prepare('SELECT account,project_id AS scope FROM revisions WHERE id=?').get(id):this.database.prepare('SELECT account,scope_project AS scope FROM receipts WHERE id=?').get(id);
@@ -92,7 +97,7 @@ export class BTestRepository {
  private view(r:BRow):ProjectRevisionView {return {revision:this.ref(r),metadata:this.meta(r),parentRevisionId:r.parent_id===null?null:text(r,'parent_id'),restoredFromRevisionId:r.restore_id===null?null:text(r,'restore_id'),sequence:number(r,'sequence'),createdAt:text(r,'created_at')};}
  private projectSnapshot(r:BRow):ProjectMetadataSnapshot {const lifecycle=r.lifecycle;if(lifecycle!=='active'&&lifecycle!=='soft-deleted')throw Error('B_LIFECYCLE');return {projectId:text(r,'project_id'),revision:this.ref(r),metadata:this.meta(r),lifecycle};}
  private refs(op:BOperation,d:RequestRecord,replay?:BRow):TestResourceReference[] {
-  const list:TestResourceReference[]=[];const project=op==='create-project'||op==='list-projects'?null:str(d.projectId);
+  const list:TestResourceReference[]=[];const project=accountScoped(op)?null:str(d.projectId);
   if(project!==null)list.push({kind:'project',id:project,projectId:null});
   if(op==='read-revision'||op===READ_WEB_PAGE||op==='restore-project')list.push({kind:'revision',id:expected(op==='restore-project'?d.sourceRevision:d.revision).id,projectId:project});
   if(replay)list.push({kind:'receipt',id:text(replay,'id'),projectId:project});return list;
@@ -100,7 +105,7 @@ export class BTestRepository {
  private authorize(principal:unknown,op:BOperation,d:RequestRecord,replay?:BRow):string|null {const r=this.auth.authorize(principal,op,this.refs(op,d,replay),replay?'replay':'dispatch');return r.kind==='test-authorized'?r.accountId:null;}
  private committed(r:BRow,replayed:boolean):BResult {
   const revision=this.revisionRow(text(r,'account'),text(r,'project_id'),text(r,'revision_id'));if(!revision)throw Error('B_RECEIPT_REVISION');
-  const op=r.operation;if(op!=='create-project'&&op!=='update-metadata'&&op!=='create-revision'&&op!=='restore-project'&&op!=='soft-delete-project'&&op!==SAVE_WEB_PAGE)throw Error('B_OPERATION');
+  const op=r.operation;if(op!=='create-project'&&op!=='update-metadata'&&op!=='create-revision'&&op!=='restore-project'&&op!=='soft-delete-project'&&op!==SAVE_WEB_PAGE&&op!==CREATE_WEB_PAGE_PROJECT)throw Error('B_OPERATION');
   const status=this.database.prepare('SELECT * FROM operation_status WHERE op_id=? AND account=?').get(text(r,'op_id'),text(r,'account'));
   const audit=this.database.prepare('SELECT * FROM audit WHERE op_id=? AND account=?').get(text(r,'op_id'),text(r,'account'));
   if(!status||!audit||status.receipt_id!==r.id||status.fingerprint!==r.fingerprint||status.state!=='COMMITTED'||audit.project_id!==r.project_id||audit.revision_id!==r.revision_id||audit.operation!==op||revision.operation!==op)throw Error('B_RECEIPT_LINK');
@@ -108,7 +113,7 @@ export class BTestRepository {
   const common={projectId:text(r,'project_id'),revision:v.revision,parentRevisionId:v.parentRevisionId,
     restoredFromRevisionId:v.restoredFromRevisionId,idempotencyKey:text(r,'key'),replayed};
   let receipt:BReceipt;
-  if(op===SAVE_WEB_PAGE) {
+  if(op===SAVE_WEB_PAGE||op===CREATE_WEB_PAGE_PROJECT) {
    if(!this.webPages)throw Error('B_WEB_PROFILE');
    receipt={...common,operation:op,document:this.webPages.receiptHead(text(r,'account'),common.projectId,v.revision.id)};
   }else receipt={...common,operation:op};
@@ -140,12 +145,13 @@ export class BTestRepository {
  private run(principal:unknown,handle:object,statusOnly:boolean):BResult {try{return this.ledger.exclusive(()=>this.runOwned(principal,handle,statusOnly));}catch{return fail('unavailable');}}
  private runOwned(principal:unknown,handle:object,statusOnly:boolean):BResult {
   const snap=this.webPages?inspectWebPageRepositoryCandidate(handle):inspectTestCandidate(handle);if(!snap)return fail('invalid');const d=snap.data,op=snap.operation;
-  if((op===SAVE_WEB_PAGE||op===READ_WEB_PAGE)&&!this.webPages)return fail('invalid');
+  if(isWebPageOperation(op)&&!this.webPages)return fail('invalid');
+  if(isWebPageWorkspaceOperation(op)&&this.options.webPageProfile!=='workspace-v1')return fail('invalid');
   let account:string|null=null,scope='',key='',fp='',opId='';
   try {
    account=this.authorize(principal,op,d);if(!account)return fail('denied');
-   scope=op==='create-project'||op==='list-projects'?'':str(d.projectId);
-   const read=['read-project','list-projects','list-revisions','read-revision',READ_WEB_PAGE].includes(op);
+   scope=accountScoped(op)?'':str(d.projectId);
+   const read=['read-project','list-projects','list-revisions','read-revision',READ_WEB_PAGE,LIST_WEB_PAGE_DOCUMENTS].includes(op);
    if(read)return statusOnly?fail('invalid'):this.ledger.locked(()=>this.read(principal,account!,op,d));
    key=str(d.idempotencyKey);fp=fingerprint(account,op,scope,d,snap.decoderProfile);this.fault?.('after-snapshot');
    const early=this.ledger.locked<BResult|null>(()=>{
@@ -185,7 +191,8 @@ export class BTestRepository {
   if(head&&head.lifecycle==='soft-deleted'&&op!=='restore-project')return fail('invalid');
   const source=op==='restore-project'?this.revisionRow(account,scope,expected(d.sourceRevision).id):undefined;
   if(op==='restore-project'&&(!source||source.lifecycle!=='active'||!this.matches(expected(d.sourceRevision),source)))return fail('denied');
-  const m=d.metadata!==undefined?metadata(d.metadata):source?this.meta(source):head?this.meta(head):null;if(!m)return fail('invalid');
+  const atomicCreate=op===CREATE_WEB_PAGE_PROJECT;
+  const m=atomicCreate?{name:'Тестовая страница события',description:'',defaultProductRef:null}:d.metadata!==undefined?metadata(d.metadata):source?this.meta(source):head?this.meta(head):null;if(!m)return fail('invalid');
   if(Buffer.byteLength(m.name)+Buffer.byteLength(m.description)+(m.defaultProductRef?Buffer.byteLength(m.defaultProductRef.id)+Buffer.byteLength(m.defaultProductRef.definitionVersion):0)>limits.metadataBytes)return fail('invalid');
   if(!head&&Number(this.database.prepare('SELECT count(*) n FROM projects WHERE account=?').get(account)?.n)>=limits.projects)return fail('invalid');
   if(head&&Number(this.database.prepare('SELECT count(*) n FROM revisions WHERE project_id=?').get(scope)?.n)>=limits.revisions)return fail('invalid');
@@ -193,9 +200,15 @@ export class BTestRepository {
   const manifest:CanonicalProjectManifestV1={modelId:'zarya.project-envelope',modelVersion:'1.0.0',canonicalizationProfile:'zarya.project-manifest.jcs/v1',projectId,revision:{id,parentId:head?text(head,'id'):null,restoreOf:source?text(source,'id'):null,sequence:head?number(head,'sequence')+1:1,createdAt:new Date(time(this.clock)).toISOString(),actorRef:account},content:{metadata:{name:m.name,description:m.description,defaultProjectType:m.defaultProductRef},permittedSourceRefs:[],designDefaultsRef:null,works:[],documentHeads:[]}};
   const inherited=source??head;
   let heads=inherited&&this.webPages?this.webPages.heads(account,projectId,text(inherited,'id')):[];
-  if(op===SAVE_WEB_PAGE) {
-   if(!this.webPages||!head)return fail('invalid');
-   const documentId=d.documentId===null?null:str(d.documentId);
+  if(atomicCreate) {
+   // The project-to-revision FK is deferred. The document FK needs its
+   // owning project now, inside this same primary transaction.
+   this.database.prepare('INSERT INTO projects VALUES(?,?,?,?)').run(account,projectId,id,'active');
+   this.fault?.('after-web-project');
+  }
+  if(op===SAVE_WEB_PAGE||atomicCreate) {
+   if(!this.webPages||(!head&&!atomicCreate))return fail('invalid');
+   const documentId=atomicCreate||d.documentId===null?null:str(d.documentId);
    if(documentId!==null&&!heads.some(item=>item.documentId===documentId))return fail('denied');
    const saved=this.webPages.append(account,projectId,id,documentId,Buffer.from(str(d.payload),'utf8'),heads,this.#ids);
    this.fault?.('after-web-page-payload');
@@ -203,7 +216,7 @@ export class BTestRepository {
      .sort((a,b)=>a.documentId<b.documentId?-1:a.documentId>b.documentId?1:0);
   }
   const hash=this.integrity(this.withDocumentHeads(manifest,heads));if(hash.kind!=='manifest-integrity')return fail('invalid');const rev=manifest.revision,lifecycle=op==='soft-delete-project'?'soft-deleted':'active';
-  if(!head)this.database.prepare('INSERT INTO projects VALUES(?,?,?,?)').run(account,projectId,id,lifecycle);
+  if(!head&&!atomicCreate)this.database.prepare('INSERT INTO projects VALUES(?,?,?,?)').run(account,projectId,id,lifecycle);
   this.database.prepare('INSERT INTO revisions VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(id,account,projectId,rev.parentId,rev.restoreOf,rev.sequence,rev.createdAt,account,m.name,m.description,m.defaultProductRef?.id??null,m.defaultProductRef?.definitionVersion??null,lifecycle,op,hash.canonicalText,hash.integrity.value);this.webPages?.saveHeads(account,projectId,id,heads);this.fault?.('after-revision');
   if(head&&this.database.prepare('UPDATE projects SET head=?,lifecycle=? WHERE account=? AND id=? AND head=?').run(id,lifecycle,account,projectId,text(head,'id')).changes!==1)throw Error('B_CAS');this.fault?.('after-head');
   this.database.prepare('INSERT INTO receipts(account,scope_project,operation,key,project_id,revision_id,fingerprint,id,op_id,generation,expires_ms) VALUES(?,?,?,?,?,?,?,?,?,?,?)').run(account,scope,op,key,projectId,id,text(intent,'fingerprint'),receiptId,opId,number(intent,'generation'),number(intent,'expires_ms'));this.fault?.('after-receipt');
@@ -213,6 +226,17 @@ export class BTestRepository {
  }
  private read(principal:unknown,account:string,op:BOperation,d:RequestRecord):BResult {
   if(!this.current())return fail('unknown-outcome');if(this.authorize(principal,op,d)!==account)return fail('denied');const recoveryState=text(this.ledger.meta(),'mode');
+  if(op===LIST_WEB_PAGE_DOCUMENTS){
+   if(!this.webPages||recoveryState!=='ACTIVE')return fail('unknown-outcome');
+   const listed=this.webPages.listCurrent(account,WEB_PAGE_DOCUMENT_LIMIT);
+   const documents=listed.documents.map(({projectId,snapshot,head,title})=>{
+    const row=this.revisionRow(account,projectId,snapshot);
+    if(!row)throw Error('B_WEB_LIST_HEAD');
+    return {title,revision:this.ref(row),documentId:head.documentId,revisionId:head.revisionId,sha256:head.sha256};
+   });
+   if(this.authorize(principal,op,d)!==account)return fail('denied');
+   return {...boundary,kind:'web-page-list',documents,truncated:listed.truncated};
+  }
   if(op==='list-projects'){if(d.cursor!==null)return fail('invalid');return {...boundary,kind:'project-page',projects:this.database.prepare("SELECT r.* FROM projects p JOIN revisions r ON r.id=p.head WHERE p.account=? AND p.lifecycle='active' ORDER BY p.id").all(account).map(r=>this.projectSnapshot(r)),nextCursor:null,recoveryState};}
   const project=str(d.projectId),head=this.head(account,project);if(!head)return fail('denied');
   if(op==='read-project')return {...boundary,kind:'project',project:this.projectSnapshot(head),recoveryState};
@@ -238,7 +262,7 @@ export async function restoreBTestSnapshot(snapshot:BVolume,target:BVolume,ledge
  const source=new DatabaseSync(snapshot.databasePath,{readOnly:true});
  try {
   const version=source.prepare('PRAGMA user_version').get()?.user_version, profile=source.prepare('SELECT profile FROM store_profile').get()?.profile;
-  if(!(version===1&&profile===B_TEST_PROFILE||isWebPageStore(version,profile))||source.prepare('SELECT store_id FROM b_meta').get()?.store_id!==ledger.meta().store_id)throw Error('B_SNAPSHOT_PROFILE');
+  if(!(version===1&&profile===B_TEST_PROFILE||isWebPageStore(version,profile,true)||isWebPageStore(version,profile,'workspace-v1'))||source.prepare('SELECT store_id FROM b_meta').get()?.store_id!==ledger.meta().store_id)throw Error('B_SNAPSHOT_PROFILE');
   const generation=ledger.locked(()=>{const g=number(ledger.meta(),'generation')+1;if(!Number.isSafeInteger(g))throw Error('B_GENERATION');ledger.database.prepare("UPDATE meta SET generation=?,path=?,mode='FENCED'").run(g,target.databasePath);return g;});
   await backup(source,target.databasePath);chmodSync(target.databasePath,0o600);const db=new DatabaseSync(target.databasePath);try{db.exec('PRAGMA journal_mode=WAL;PRAGMA synchronous=FULL;');db.prepare('UPDATE b_meta SET generation=?').run(generation);}finally{db.close();}
  }finally{source.close();}

@@ -49,9 +49,9 @@ function saved(result: BResult) {
   return receipt;
 }
 
-function start(t: TestContext, fault?: (stage: BFault) => void) {
-  const env = environment({ webPageProfile: true, fault });
-  const paths = { main: env.main.directory, ledger: env.volume.directory };
+function start(t: TestContext, fault?: (stage: BFault) => void, profile: true | 'workspace-v1' = true) {
+  const env = environment({ webPageProfile: profile, fault });
+  const paths = { main: env.main.directory, ledger: env.volume.directory, profile };
   let closed = false;
   const close = () => { if (!closed) { closed = true; env.close(); } };
   t.after(() => {
@@ -62,9 +62,9 @@ function start(t: TestContext, fault?: (stage: BFault) => void) {
   return { ...env, paths, close };
 }
 
-function worker(paths: { main: string; ledger: string }, op: string, body: object,
+function worker(paths: { main: string; ledger: string; profile: true | 'workspace-v1' }, op: string, body: object,
   stage?: BFault) {
-  const child = fork(workerPath, [paths.main, paths.ledger, op, encode(body).toString('base64'), stage ?? ''],
+  const child = fork(workerPath, [paths.main, paths.ledger, op, encode(body).toString('base64'), stage ?? '', String(paths.profile)],
     { execArgv: ['--import', 'tsx'], serialization: 'advanced', stdio: ['ignore', 'ignore', 'pipe', 'ipc'] });
   let result: BResult | undefined;
   let stderr = '';
@@ -100,8 +100,9 @@ function rows(env: ReturnType<typeof environment>) {
     env.repo.database.prepare('SELECT count(*) AS count FROM ' + table).get()?.count);
 }
 
-test('WebPage create → edit Hero → exit → reopen exact confirmed bytes, hash, pins and revision', async t => {
-  const env = start(t);
+const profiles = [['v2', true], ['v3', 'workspace-v1']] as const;
+for (const [label, profile] of profiles) test(`WebPage ${label} preserves exact bytes, pins and revision across process restarts`, async t => {
+  const env = start(t, undefined, profile);
   const project = createProject(env);
   const initial = saved(env.repo.execute(env.principal, command(SAVE_WEB_PAGE, save(project.revision, null, 'initial-page', fixture))));
   assert.equal(initial.document.contract, '0.1');
@@ -128,7 +129,7 @@ test('WebPage create → edit Hero → exit → reopen exact confirmed bytes, ha
   const { contract, validator, renderer, assetCatalog } = descriptor;
   assert.deepEqual({ contract, validator, renderer, assetCatalog }, WEB_PAGE_CONTEXT);
 
-  const check = environment({ ...env.paths, webPageProfile: true });
+  const check = environment({ main: env.paths.main, ledger: env.paths.ledger, webPageProfile: profile });
   try {
     const previous = check.repo.execute(check.principal, command(READ_WEB_PAGE, read(initial.revision, initial.document.documentId)));
     assert.equal(previous.kind, 'web-page');
@@ -183,8 +184,8 @@ test('WebPage same key replays original receipt after head moves, and changed by
   assert.deepEqual(rows(env), before);
 });
 
-test('WebPage concurrent workers on different documents share one CAS; explicit fresh save works', async t => {
-  const env = start(t);
+for (const [label, profile] of profiles) test(`WebPage ${label} concurrent workers on different documents share one CAS; explicit fresh save works`, async t => {
+  const env = start(t, undefined, profile);
   const project = createProject(env);
   const a = saved(env.repo.execute(env.principal, command(SAVE_WEB_PAGE, save(project.revision, null, 'doc-a'))));
   const b = saved(env.repo.execute(env.principal, command(SAVE_WEB_PAGE, save(a.revision, null, 'doc-b'))));

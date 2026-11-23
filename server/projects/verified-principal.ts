@@ -1,5 +1,5 @@
 import { types } from 'node:util';
-import { READ_WEB_PAGE, SAVE_WEB_PAGE } from '../../src/projects/web-page-repository.dto';
+import { CREATE_WEB_PAGE_PROJECT, LIST_WEB_PAGE_DOCUMENTS, READ_WEB_PAGE, SAVE_WEB_PAGE } from '../../src/projects/web-page-repository.dto';
 import type { BOperation } from './test-command-candidate';
 import { A_TEST_RESTRICTIONS,isTestFoundationPolicy } from './server-foundation-policy';
 
@@ -24,7 +24,7 @@ export interface TestPrincipalBoundary {
   canDeliver(delivery:unknown,currentSessionKey:unknown):boolean;
 }
 const operations:readonly BOperation[]=['create-project','read-project','list-projects','update-metadata',
-  'list-revisions','read-revision','create-revision','restore-project','soft-delete-project',SAVE_WEB_PAGE,READ_WEB_PAGE];
+  'list-revisions','read-revision','create-revision','restore-project','soft-delete-project',SAVE_WEB_PAGE,READ_WEB_PAGE,CREATE_WEB_PAGE_PROJECT,LIST_WEB_PAGE_DOCUMENTS];
 const opSet=new Set<string>(operations);
 function isOperation(value:unknown):value is BOperation {return typeof value==='string'&&opSet.has(value);}
 function object(value:unknown):value is object {return typeof value==='object'&&value!==null&&!types.isProxy(value);}
@@ -55,10 +55,10 @@ function references(value:unknown):readonly TestResourceReference[]|null {
   return Object.freeze(result);
 }
 function shape(op:BOperation,refs:readonly TestResourceReference[],phase:Phase):boolean {
-  const write=[SAVE_WEB_PAGE,'create-project','update-metadata','create-revision','restore-project','soft-delete-project'].includes(op);
+  const write=[CREATE_WEB_PAGE_PROJECT,SAVE_WEB_PAGE,'create-project','update-metadata','create-revision','restore-project','soft-delete-project'].includes(op);
   if(phase==='replay'&&!write)return false;
-  if(op==='create-project')return phase==='dispatch'?refs.length===0:refs.length===1&&refs[0].kind==='receipt'&&refs[0].projectId===null;
-  if(op==='list-projects')return refs.length===0;
+  if(op==='create-project'||op===CREATE_WEB_PAGE_PROJECT)return phase==='dispatch'?refs.length===0:refs.length===1&&refs[0].kind==='receipt'&&refs[0].projectId===null;
+  if(op==='list-projects'||op===LIST_WEB_PAGE_DOCUMENTS)return refs.length===0;
   const project=refs[0];if(!project||project.kind!=='project'||project.projectId!==null)return false;
   const needsRevision=op==='read-revision'||op==='restore-project'||op===READ_WEB_PAGE;
   const expected=1+(needsRevision?1:0)+(phase==='replay'?1:0);if(refs.length!==expected)return false;
