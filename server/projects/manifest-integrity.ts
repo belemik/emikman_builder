@@ -2,16 +2,26 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { canonicalizeProjectManifest } from '../../src/projects/canonicalize-project';
 import type { TrustedOwnedJcsData } from '../../src/projects/canonicalization.types';
 import type { DeclaredIntegrity } from '../../src/projects/envelope.types';
+import { WEB_PAGE_MANIFEST_PROFILE } from '../../src/projects/web-page-repository.dto';
 const domain='zarya.project-manifest.jcs/v1';
 /** Platform SHA only. Domain is fixed, no IO/clock/RNG. Reuses the approved S1b wrapper.
  * Caller-owned internal data only; not a decoder, admission or authentication proof. */
 export function computeManifestIntegrity(manifest: TrustedOwnedJcsData) {
   const result=canonicalizeProjectManifest(manifest);
-  if (result.kind!=='canonicalized') return result;
-  const value=createHash('sha256').update(domain,'ascii').update(Buffer.from([0]))
+  return result.kind==='canonicalized'?hashManifest(result):result;
+}
+export function computeWebPageManifestIntegrity(manifest: TrustedOwnedJcsData) {
+  const result=canonicalizeProjectManifest(manifest, WEB_PAGE_MANIFEST_PROFILE);
+  return result.kind==='canonicalized'?hashManifest(result):result;
+}
+type Canonical = Extract<ReturnType<typeof canonicalizeProjectManifest>, { kind: 'canonicalized' }>;
+function hashManifest(result:Canonical) {
+  const byteDomain=result.canonicalizationProfile;
+  const value=createHash('sha256').update(byteDomain,'ascii').update(Buffer.from([0]))
     .update(result.canonicalText,'utf8').digest('hex');
-  const integrity: DeclaredIntegrity=Object.freeze({algorithm:'sha256',encoding:'hex-lower',byteDomain:domain,value});
-  return Object.freeze({...result,kind:'manifest-integrity' as const,integrity});
+  const integrity: DeclaredIntegrity=Object.freeze({algorithm:'sha256',encoding:'hex-lower',byteDomain,value});
+  const { kind: _kind, ...canonical } = result;
+  return Object.freeze({...canonical,kind:'manifest-integrity' as const,integrity});
 }
 /** Declaration must exactly match computed domain and bytes. A correct digest grants no access. */
 export function verifyManifestIntegrity(manifest: TrustedOwnedJcsData, declared: DeclaredIntegrity) {

@@ -1,4 +1,5 @@
 import type { NoExecutionAdmission } from './envelope.types';
+import type { WEB_PAGE_MANIFEST_PROFILE } from './web-page-repository.dto';
 
 /** Internal caller-owned, bounded, acyclic plain data ONLY. Readonly is not proof of
  * ownership. No Proxy, accessors, custom prototypes/serializers or concurrent aliases.
@@ -33,7 +34,7 @@ export type CanonicalProjectManifestV1 = {
     readonly documentHeads: readonly [];
   };
 };
-export type CanonicalizationScope = 'JCS_DATA_ONLY' | 'PROJECT_MANIFEST_METADATA_ONLY';
+export type CanonicalizationScope = 'JCS_DATA_ONLY' | 'PROJECT_MANIFEST_METADATA_ONLY' | 'PROJECT_MANIFEST_WEB_PAGE_TEST_ONLY';
 export type CanonicalizationDiagnosticCode = 'S1B_DATA_SHAPE' | 'S1B_UNICODE'
   | 'S1B_NUMBER' | 'S1B_CYCLE' | 'S1B_MISSING_FIELD' | 'S1B_UNKNOWN_FIELD'
   | 'S1B_VERSION' | 'S1B_ID' | 'S1B_TIMESTAMP' | 'S1B_LINEAGE'
@@ -55,9 +56,10 @@ export type JcsCanonicalizationResult = CanonicalizationFailure<'JCS_DATA_ONLY'>
   readonly scope: 'JCS_DATA_ONLY';
   readonly canonicalText: string;
 });
-export type ProjectCanonicalizationResult = CanonicalizationFailure<'PROJECT_MANIFEST_METADATA_ONLY'> | (Restrictions & {
+type ManifestScope = Exclude<CanonicalizationScope, 'JCS_DATA_ONLY'>;
+export type ProjectCanonicalizationResult = CanonicalizationFailure<ManifestScope> | (Restrictions & {
   readonly kind: 'canonicalized';
-  readonly scope: 'PROJECT_MANIFEST_METADATA_ONLY';
-  readonly canonicalizationProfile: 'zarya.project-manifest.jcs/v1';
+  readonly scope: ManifestScope;
+  readonly canonicalizationProfile: 'zarya.project-manifest.jcs/v1' | typeof WEB_PAGE_MANIFEST_PROFILE;
   readonly canonicalText: string;
 });
