@@ -110,7 +110,7 @@
 .zs-platform button.zs-project:hover { border-color: var(--accent)!important; }
 .zs-cover { display: flex; align-items: center; justify-content: center; position: relative; height: clamp(90px,10vw,150px); overflow: hidden; isolation: isolate; }
 .zs-event { background: #ece1c8; color: #2a2924; justify-content: start; padding: 8%; }
-.zs-event::after, .zwp-poster::before { content: ''; position: absolute; inset: 0; background: repeating-radial-gradient(ellipse at 96% 110%, transparent 0 8px,#9553354a 9px 10px,transparent 11px 14px); z-index: -1; }
+.zs-event::after { content: ''; position: absolute; inset: 0; background: repeating-radial-gradient(ellipse at 96% 110%, transparent 0 8px,#9553354a 9px 10px,transparent 11px 14px); z-index: -1; }
 .zs-event b { font-size: clamp(17px,2vw,30px); line-height: .95; letter-spacing: -.08em; transform: rotate(-5deg); }
 .zs-event img { position: absolute; width: 32%; right: -1%; transform: rotate(-18deg); }
 .zs-emik { background: #202725; color: #e1f995; }

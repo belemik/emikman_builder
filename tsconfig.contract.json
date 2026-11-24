@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "include": [
     "src/design-system",
+    "tests/web-page-export.test.ts",
     "scripts/ds-validate.ts",
     "tests/design-system.test.ts",
     "tests/design-system.types.ts",
