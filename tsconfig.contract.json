@@ -10,6 +10,7 @@
     "src/vite-env.d.ts",
     "playwright.config.ts",
     "tests/visual",
-    "tests/library.test.ts"
+    "tests/library.test.ts",
+    "tests/ai-gateway.test.ts"
   ]
 }
