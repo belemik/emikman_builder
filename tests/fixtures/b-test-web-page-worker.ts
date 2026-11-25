@@ -3,9 +3,9 @@ import { join } from 'node:path';
 import { environment } from './b-test-support';
 import { createWebPageRepositoryCandidate } from '../../server/projects/test-command-candidate';
 
-const [main, ledger, op, encoded, stage] = process.argv.slice(2);
+const [main, ledger, op, encoded, stage, profile] = process.argv.slice(2);
 const env = environment({
-  main, ledger, webPageProfile: true,
+  main, ledger, webPageProfile: profile === 'workspace-v1' ? 'workspace-v1' : true,
   fault: current => {
     if (current === stage) {
       writeFileSync(join(main, 'web-fault-observed'), current);

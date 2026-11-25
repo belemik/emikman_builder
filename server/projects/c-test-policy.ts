@@ -7,5 +7,8 @@ export const isCWrite=(op:RepositoryOperation)=>['create-project','update-metada
 export class CFailure extends Error {constructor(readonly status:number,readonly code:string){super(code);}}
 export function cFail(status:number,code:string):never {throw new CFailure(status,code);}
 export function cRecord(v:unknown):v is Record<string,unknown>{return typeof v==='object'&&v!==null&&!Array.isArray(v);}
-export interface CJob {readonly main:string;readonly ledger:string;readonly account:string;readonly expires:number;readonly state:SharedArrayBuffer;readonly operation:RepositoryOperation;readonly mode:'command'|'reconcile'|'read';readonly bytes:Uint8Array;readonly project:string|null;readonly target:string;readonly fault:'none'|'spin'|'revoke-after-commit';}
-export interface CReply {readonly kind:'c-reply';readonly body:string;readonly refs:readonly TestResourceReference[];}
+import type { BWebPageProfile } from './b-test-web-page';
+import type { CWebOperation } from './c-test-web-page-policy';
+
+export interface CJob {readonly main:string;readonly ledger:string;readonly account:string;readonly expires:number;readonly state:SharedArrayBuffer;readonly operation:RepositoryOperation|CWebOperation;readonly webPageProfile?:BWebPageProfile;readonly mode:'command'|'reconcile'|'read';readonly bytes:Uint8Array;readonly project:string|null;readonly target:string;readonly fault:'none'|'spin'|'revoke-after-commit'|'before-web-commit';}
+export interface CReply {readonly kind:'c-reply';readonly body:string;readonly refs:readonly TestResourceReference[];readonly webPageEdit?:boolean;}
