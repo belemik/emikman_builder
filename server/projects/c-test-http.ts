@@ -5,7 +5,7 @@ import {createBTestVolume,adoptBTestVolume} from './b-test-volume';import {BTest
 import {createTestPrincipalBoundary} from './verified-principal';import {inspectTestFoundationPolicy,FOUNDATION_TEST_PROFILE} from './server-foundation-policy';import {PROJECT_INGEST_TEST_PROFILE} from './ingest-profile';
 import { LIST_WEB_PAGE_DOCUMENTS, READ_WEB_PAGE, SAVE_WEB_PAGE, WEB_PAGE_DOCUMENT_LIMIT } from '../../src/projects/web-page-repository.dto';
 import {
- WEB_PAGE_HTTP_SCOPE, WEB_PAGE_WORKSPACE_HTTP_SCOPE, WEB_PAGE_WORKSPACE_OUTPUT_BYTES,
+ WEB_PAGE_HTTP_SCOPE, WEB_PAGE_WORKSPACE_HTTP_PATH, WEB_PAGE_WORKSPACE_HTTP_SCOPE, WEB_PAGE_WORKSPACE_OUTPUT_BYTES,
  isCWebOperation, isCWebWrite, webDecoder,
 } from './c-test-web-page-policy';
 
@@ -14,13 +14,14 @@ export interface CWebAsset {
  readonly body: Buffer;
 }
 
-export interface CTestOptions {readonly main?:string;readonly ledger?:string;readonly sessions?:CTestSessions;readonly beforeDispatch?:()=>Promise<void>;readonly beforeDelivery?:()=>Promise<void>;readonly fault?:()=>CJob['fault'];readonly dropCommittedOnce?:boolean;readonly webPageProfile?:{readonly assets?:ReadonlyMap<string,CWebAsset>;readonly dropEditResponseOnce?:boolean;readonly port?:number;readonly workspace?:true};}
+export interface CTestOptions {readonly main?:string;readonly ledger?:string;readonly sessions?:CTestSessions;readonly beforeDispatch?:()=>Promise<void>;readonly beforeDelivery?:()=>Promise<void>;readonly fault?:()=>CJob['fault'];readonly dropCommittedOnce?:boolean;readonly webPageProfile?:{readonly assets?:ReadonlyMap<string,CWebAsset>;readonly dropEditResponseOnce?:boolean;readonly port?:number;readonly workspace?:true;readonly browserAccess?:{readonly claim:(code:string)=>string|null;readonly resolve:(handle:string)=>string|null};};}
 /** No real auth, API routes or DATA_DIR: explicit disposable TEST bootstrap and loopback only. */
 export async function startCTestHttp(options:CTestOptions={}) {
  const web=options.webPageProfile;
  const port=web?.port??0;
  if(port!==0&&(!Number.isInteger(port)||port<1024||port>65535))throw Error('C_LOOPBACK_PORT');
  const workspace=web?.workspace===true;
+ const browserAccess=workspace?web?.browserAccess:undefined;
  const profile=workspace?'workspace-v1':web?true:undefined;
  const scope=workspace?WEB_PAGE_WORKSPACE_HTTP_SCOPE:web?WEB_PAGE_HTTP_SCOPE:'C_TEST_ONLY';
  const main=options.main?adoptBTestVolume(options.main):createBTestVolume('main'),volume=options.ledger?adoptBTestVolume(options.ledger):createBTestVolume('ledger'),ledger=new BTestLedger(volume),sessions=options.sessions??new CTestSessions();
@@ -38,17 +39,41 @@ export async function startCTestHttp(options:CTestOptions={}) {
  async function wait(hook:(()=>Promise<void>)|undefined,signal:AbortSignal){if(signal.aborted)cFail(504,'C_TIMEOUT');if(!hook)return;let abort=()=>{};try{await Promise.race([hook(),new Promise<never>((_,reject)=>{abort=()=>reject(new CFailure(504,'C_TIMEOUT'));signal.addEventListener('abort',abort,{once:true});})]);}finally{signal.removeEventListener('abort',abort);}if(signal.aborted)cFail(504,'C_TIMEOUT');}
  const send=(res:ServerResponse,status:number,body:string)=>{if(res.destroyed||res.writableEnded)return;res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Connection':'close'});res.end(body);};
  const error=(res:ServerResponse,status:number,code:string)=>send(res,status,JSON.stringify({scope,error:code,outcome:'UNKNOWN_OUTCOME'}));
+ async function readBody(req:IncomingMessage,controller:AbortController,limit:number){
+  const chunks:Buffer[]=[];let size=0;
+  const ingress=setTimeout(()=>{controller.abort();req.destroy();},P.ingressMs);
+  try{
+   for await(const part of req){
+    const chunk=Buffer.from(part);size+=chunk.byteLength;if(size>limit)cFail(413,'C_BODY');chunks.push(chunk);
+   }
+   return Buffer.concat(chunks,size);
+  }finally{clearTimeout(ingress);}
+ }
  async function handle(req:IncomingMessage,res:ServerResponse){
   const controller=new AbortController(),signal=controller.signal;controllers.add(controller);const timer=setTimeout(()=>controller.abort(),P.totalMs);req.pause();req.once('aborted',()=>controller.abort());res.once('close',()=>{if(!res.writableFinished)controller.abort();});let leave:(()=>void)|undefined;
   try{
    const seen=new Set<string>();for(let i=0;i<req.rawHeaders.length;i+=2){const name=req.rawHeaders[i].toLowerCase();if(seen.has(name))cFail(400,'C_HEADER');seen.add(name);}
    if(req.headers.host!==origin.slice(7)||req.headers.forwarded||Object.keys(req.headers).some(k=>k.startsWith('x-forwarded-'))||req.headers.origin&&req.headers.origin!==origin)cFail(403,'C_ORIGIN');
    const target=req.url??'';let query:CQuery|null=null,mode:CJob['mode']='command',operation:CJob['operation'];
+   if(browserAccess&&target===WEB_PAGE_WORKSPACE_HTTP_PATH+'/session/claim'){
+    if(req.method!=='POST')cFail(405,'C_METHOD');
+    if(req.headers.origin!==origin)cFail(403,'C_ORIGIN');
+    if(req.headers['content-type']!=='text/plain'||req.headers['content-encoding']||req.headers['transfer-encoding'])cFail(415,'C_MEDIA');
+    if(req.headers['content-length']!=='35')cFail(400,'C_CLAIM_LENGTH');
+    leave=await acquire(signal);
+    const code=(await readBody(req,controller,35)).toString('latin1');
+    if(signal.aborted)cFail(504,'C_TIMEOUT');
+    if(!/^zc_[0-9a-f]{32}$/.test(code))cFail(401,'C_SESSION');
+    const handle=browserAccess.claim(code);
+    if(!handle)cFail(401,'C_SESSION');
+    send(res,200,JSON.stringify({scope,handle}));return;
+   }
    const asset=web&&req.method==='GET'?web.assets?.get(target):undefined;
    if(asset){
     if(req.headers['transfer-encoding']||req.headers['content-length']&&req.headers['content-length']!=='0')cFail(400,'C_GET_BODY');
     res.writeHead(200,{'Content-Type':asset.mediaType,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',
-     'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+     'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; "
+      +(browserAccess?"font-src 'self'; ":"")+"connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
      'Referrer-Policy':'no-referrer','X-Frame-Options':'DENY','Cross-Origin-Resource-Policy':'same-origin','Connection':'close'});
     res.end(asset.body);return;
    }
@@ -74,10 +99,15 @@ export async function startCTestHttp(options:CTestOptions={}) {
     if(req.headers.origin!==origin)cFail(403,'C_ORIGIN');if(req.headers['x-test-decoder-profile']!==decoder)cFail(422,'C_PROFILE');if(!['application/json','application/json; charset=utf-8'].includes(String(req.headers['content-type']))||req.headers['content-encoding']&&req.headers['content-encoding']!=='identity')cFail(415,'C_MEDIA');
     const length=req.headers['content-length'];if(length!==undefined&&(!/^(0|[1-9][0-9]*)$/.test(length)||Number(length)>P.bodyBytes))cFail(413,'C_BODY');if(req.headers['transfer-encoding']&&req.headers['transfer-encoding']!=='chunked')cFail(400,'C_FRAMING');
    }else cFail(405,'C_METHOD');
-   const bearer=req.headers.authorization;if(typeof bearer!=='string'||!/^Bearer ct_[0-9a-f]{32}$/.test(bearer))cFail(401,'C_SESSION');const token=bearer.slice(7),lease=sessions.get(token);if(!lease)cFail(401,'C_SESSION');const captured=boundary.capture(lease.key);if(captured.kind!=='test-principal-captured')cFail(401,'C_SESSION');
+   const bearer=req.headers.authorization;
+   const pattern=browserAccess?/^Bearer zb_[0-9a-f]{32}$/:/^Bearer ct_[0-9a-f]{32}$/;
+   if(typeof bearer!=='string'||!pattern.test(bearer))cFail(401,'C_SESSION');
+   const token=browserAccess?browserAccess.resolve(bearer.slice(7)):bearer.slice(7);
+   if(!token)cFail(401,'C_SESSION');
+   const lease=sessions.get(token);if(!lease)cFail(401,'C_SESSION');
+   const captured=boundary.capture(lease.key);if(captured.kind!=='test-principal-captured')cFail(401,'C_SESSION');
    leave=await acquire(signal);if(!sessions.current(token,lease))cFail(401,'C_SESSION');
-   let bytes=new Uint8Array(0);
-   if(mode!=='read'){const chunks:Buffer[]=[];let size=0;const ingress=setTimeout(()=>{controller.abort();req.destroy();},P.ingressMs);try{for await(const part of req){const chunk=Buffer.from(part);size+=chunk.byteLength;if(size>P.bodyBytes)cFail(413,'C_BODY');chunks.push(chunk);}bytes=Buffer.concat(chunks,size);}finally{clearTimeout(ingress);}}
+   const bytes=mode==='read'?new Uint8Array(0):await readBody(req,controller,P.bodyBytes);
    await wait(options.beforeDispatch,signal);if(!sessions.current(token,lease))cFail(401,'C_SESSION');if(signal.aborted)cFail(504,'C_TIMEOUT');
    if(web&&(!repository.current()||ledger.meta().mode!=='ACTIVE'))cFail(503,'C_RECOVERY');
    const reply=await runCTestWorker({main:main.directory,ledger:volume.directory,account:lease.account,expires:lease.expires,state:lease.state,operation,mode,bytes,project:query?.project??null,target:query?.target??'',fault:options.fault?.()??'none',webPageProfile:profile},signal);

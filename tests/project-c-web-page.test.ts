@@ -208,3 +208,45 @@ test('C Workspace v2 rechecks list ownership and session before delivery', async
   assert.doesNotMatch(await result.text(), new RegExp(receipt.projectId));
   assert.deepEqual(counts(h), [1, 1, 1, 1, 1, 1, 1]);
 });
+
+test('C Workspace browser claim is opt-in, one-time and cannot deliver a revoked lease', async t => {
+  const { createBrowserAccess } = await import('../pilot/web-page/browser-access');
+  const sessions = new CTestSessions();
+  const access = createBrowserAccess(sessions);
+  let token: string | null = null;
+  let revoke = false;
+  const h = await startCTestHttp({
+    sessions, webPageProfile: { workspace: true, browserAccess: access },
+    beforeDelivery: async () => { if (revoke && token) sessions.revoke(token); },
+  });
+  t.after(async () => {
+    await h.close();
+    for (const volume of [h.main, h.volume]) rmSync(volume.directory, { recursive: true });
+  });
+  const { h: plain } = await useHarness(t, undefined, true);
+  const code = access.issue('a'.repeat(32));
+  const claim = (url: string, origin: string) => fetch(url + WEB_PAGE_WORKSPACE_HTTP_PATH + '/session/claim', {
+    method: 'POST', body: code, headers: { Origin: origin, 'Content-Type': 'text/plain' },
+  });
+  assert.equal((await claim(plain.url, plain.url)).status, 400);
+  assert.equal((await claim(h.url, 'http://wrong.invalid')).status, 403);
+  const accepted = await claim(h.url, h.url);
+  assert.equal(accepted.status, 200);
+  const { handle } = await accepted.json();
+  assert.equal(typeof handle === 'string' && /^zb_[0-9a-f]{32}$/.test(handle), true);
+  assert.equal((await claim(h.url, h.url)).status, 401);
+  token = access.resolve(handle);
+  assert.ok(token);
+  const list = (bearer: string) => fetch(h.url + WEB_PAGE_WORKSPACE_HTTP_PATH + '/commands/' + LIST_WEB_PAGE_DOCUMENTS, {
+    method: 'POST', body: JSON.stringify(documentList),
+    headers: { Origin: h.url, Authorization: 'Bearer ' + bearer,
+      'Content-Type': 'application/json', 'x-test-decoder-profile': WEB_PAGE_WORKSPACE_COMMAND_VERSION },
+  });
+  assert.equal((await list(token)).status, 401);
+  assert.equal((await list(handle)).status, 200);
+  revoke = true;
+  const denial = await list(handle);
+  assert.equal(denial.status, 401);
+  assert.equal(Object.hasOwn(await denial.json(), 'result'), false);
+  assert.equal((await list(handle)).status, 401);
+});

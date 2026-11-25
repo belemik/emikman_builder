@@ -1,0 +1,20 @@
+body { margin: 0; }
+.zs-live-workspace .z-header { display: flex; justify-content: space-between; }
+.zs-live-workspace .zs-home { gap: 20px; }
+.live-access, .live-reference form { display: grid; gap: 8px; max-width: 32rem; }
+.live-actions { margin-block: 12px; }
+.live-document-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,210px),1fr)); list-style: none; padding: 0; gap: 12px; }
+.live-document-cards button { min-height: 72px; width: 100%; text-align: start; overflow-wrap: anywhere; }
+.live-save { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; flex: none; min-width: 0; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--card); }
+.live-save .z-button { min-height: 36px; }
+.live-save details[open] { flex-basis: 100%; }
+.live-save :is(form,dl) { display: grid; gap: 4px; max-width: 30rem; margin: 6px 0; }
+.live-save dd { margin: 0; overflow-wrap: anywhere; }
+.live-save textarea { width: 100%; height: 52px; }
+.live-save summary { cursor: pointer; }
+.live-conflict { flex-basis: 100%; min-width: 0; }
+.live-conflict > p { margin: 0 0 6px; }
+.live-conflict details[open] { max-height: 35dvh; overflow: auto; }
+.live-conflict-field { display: grid; gap: 4px; justify-items: start; max-width: 30rem; margin-block: 8px; }
+.live-conflict-field textarea { height: 100px; }
+.live-conflict-field p { margin: 0; }
