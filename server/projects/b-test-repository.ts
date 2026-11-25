@@ -32,6 +32,7 @@ export type BResult=typeof boundary&({kind:'committed';receipt:BReceipt;operatio
  {kind:'web-page-list';documents:readonly WebPageDocumentSummary[];truncated:boolean}|
  {kind:'web-page';projectRevision:ProjectRevisionReferenceDTO;document:WebPageDocumentHead & {payload:Uint8Array};recoveryState:string}|
  {kind:'revision';revision:ProjectRevisionView;recoveryState:string}|{kind:'revision-page';revisions:readonly ProjectRevisionView[];nextCursor:null;recoveryState:string});
+export type BSqliteContention = 'SQLITE_BUSY' | 'SQLITE_LOCKED';
 export type BFault='after-snapshot'|'after-intent'|'before-main'|'after-web-project'|'after-web-page-payload'|'after-revision'|'after-head'|'after-receipt'|'after-status'|'after-audit'|'before-commit'|'after-main-commit'|'after-ledger-commit';
 const fail=(kind:'denied'|'invalid'|'unavailable'|'unknown-outcome'):BResult=>({...boundary,kind});
 const conflict=(reason:'EXPECTED_REVISION_MISMATCH'|'IDEMPOTENCY_KEY_REUSED'):BResult=>({...boundary,kind:'conflict',reason});
@@ -50,7 +51,7 @@ export class BTestRepository {
  readonly database:DatabaseSync;#ids=createServerIdIssuer();
  private readonly webPages: BTestWebPageRecords | null;
  constructor(readonly volume:BVolume,readonly ledger:BTestLedger,private readonly auth:TestPrincipalBoundary,private readonly clock:()=>number,private readonly fault?:(stage:BFault)=>void,
-   private readonly options: { readonly webPageProfile?: BWebPageProfile } = {}) {
+   private readonly options: { readonly webPageProfile?: BWebPageProfile; readonly onSqliteContention?: (code: BSqliteContention) => void } = {}) {
   assertBTestVolume(volume);if(volume.role!=='main'||volume.directory===ledger.volume.directory)throw Error('B_MAIN_ROLE');
   if(options.webPageProfile)verifyWebPageContext();
   const fresh=!existsSync(volume.databasePath),meta=ledger.meta();
@@ -142,7 +143,15 @@ export class BTestRepository {
  }
  execute(principal:unknown,candidate:object):BResult {return this.run(principal,candidate,false);}
  reconcile(principal:unknown,candidate:object):BResult {return this.run(principal,candidate,true);}
- private run(principal:unknown,handle:object,statusOnly:boolean):BResult {try{return this.ledger.exclusive(()=>this.runOwned(principal,handle,statusOnly));}catch{return fail('unavailable');}}
+ private observeSqliteContention(error:unknown):void {
+  if (!this.options.onSqliteContention || !(error instanceof Error) || !('errcode' in error) || typeof error.errcode !== 'number') return;
+  const primaryCode = error.errcode & 0xff;
+  try {
+   if (primaryCode === 5) this.options.onSqliteContention('SQLITE_BUSY');
+   if (primaryCode === 6) this.options.onSqliteContention('SQLITE_LOCKED');
+  } catch {/* An observer cannot change fencing or the repository outcome. */}
+ }
+ private run(principal:unknown,handle:object,statusOnly:boolean):BResult {try{return this.ledger.exclusive(()=>this.runOwned(principal,handle,statusOnly));}catch(error){this.observeSqliteContention(error);return fail('unavailable');}}
  private runOwned(principal:unknown,handle:object,statusOnly:boolean):BResult {
   const snap=this.webPages?inspectWebPageRepositoryCandidate(handle):inspectTestCandidate(handle);if(!snap)return fail('invalid');const d=snap.data,op=snap.operation;
   if(isWebPageOperation(op)&&!this.webPages)return fail('invalid');
@@ -176,7 +185,7 @@ export class BTestRepository {
      this.database.exec('COMMIT');committed=true;this.fault?.('after-main-commit');this.ledger.setState(opId,'COMMITTED');return result;
     }catch(e){if(!committed)try{this.database.exec('ROLLBACK');}catch{}throw e;}
    });this.fault?.('after-ledger-commit');return result;
-  }catch{if(opId)try{this.ledger.locked(()=>{if(!this.consistentLedger())this.ledger.database.exec("UPDATE meta SET mode='FENCED'");});}catch{}return opId?fail('unknown-outcome'):fail('unavailable');}
+  }catch(error){this.observeSqliteContention(error);if(opId)try{this.ledger.locked(()=>{if(!this.consistentLedger())this.ledger.database.exec("UPDATE meta SET mode='FENCED'");});}catch{}return opId?fail('unknown-outcome'):fail('unavailable');}
  }
  private replay(principal:unknown,op:BOperation,d:RequestRecord,i:BRow):BResult {
   if(time(this.clock)>=number(i,'expires_ms')||text(this.ledger.meta(),'mode')!=='ACTIVE')return fail('unknown-outcome');
