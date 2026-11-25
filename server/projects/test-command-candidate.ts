@@ -7,7 +7,7 @@ import { REPOSITORY_DTO_VERSION } from '../../src/projects/repository.dto';
 import type { RepositoryOperation, RequestRecord, RequestJson } from '../../src/projects/repository.dto';
 import type { ProjectCommandInspection } from './ingest-profile';
 import { createOwnedHandoffTestOnly, takeOwnedHandoffTestOnly } from './decode-project-command';
-import { READ_WEB_PAGE, SAVE_WEB_PAGE, WEB_PAGE_COMMAND_VERSION, type WebPageOperation } from '../../src/projects/web-page-repository.dto';
+import { isWebPageOperation, webPageCommandVersion, type WebPageOperation } from '../../src/projects/web-page-repository.dto';
 export type BOperation = RepositoryOperation | WebPageOperation;
 
 export const TEST_CANDIDATE_PROFILE = 'zarya.p04.r2.command.test/v0';
@@ -15,7 +15,7 @@ export const TEST_QUERY_PROFILE = 'zarya.p04.r5.query.test/v0';
 const operations = new Set(['create-project','read-project','list-projects','update-metadata','list-revisions',
   'read-revision','create-revision','restore-project','soft-delete-project']);
 function operation(value: string): value is RepositoryOperation { return operations.has(value); }
-type CandidateVersion = typeof REPOSITORY_DTO_VERSION | typeof WEB_PAGE_COMMAND_VERSION;
+type CandidateVersion = typeof REPOSITORY_DTO_VERSION | ReturnType<typeof webPageCommandVersion>;
 export interface TestCommandCandidate<Op extends BOperation = RepositoryOperation,
   Version extends CandidateVersion = typeof REPOSITORY_DTO_VERSION> {
   readonly profile: typeof TEST_CANDIDATE_PROFILE; readonly operation: Op;
@@ -75,8 +75,9 @@ function createCandidate(op: string, bytes: Uint8Array, extended: boolean):
     const candidate = mint(opName, REPOSITORY_DTO_VERSION, profileId, data, copied, extended);
     return Object.freeze({ kind: 'candidate', candidate });
   }
-  if (!extended || (opName !== SAVE_WEB_PAGE && opName !== READ_WEB_PAGE)) throw Error('TEST_HANDOFF_UNAVAILABLE');
-  const candidate = mint(opName, WEB_PAGE_COMMAND_VERSION, WEB_PAGE_COMMAND_VERSION, data, copied, true);
+  if (!extended || !isWebPageOperation(opName)) throw Error('TEST_HANDOFF_UNAVAILABLE');
+  const version = webPageCommandVersion(opName);
+  const candidate = mint(opName, version, version, data, copied, true);
   return Object.freeze({ kind: 'candidate', candidate });
 }
 /** Server-test-module access only. Registry identity, not public fields/TS casts, is authority.

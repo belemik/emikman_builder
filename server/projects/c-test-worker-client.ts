@@ -1,6 +1,6 @@
 import {Worker} from 'node:worker_threads';
 import {C_TEST_PROFILE as P,CFailure,cRecord,type CJob,type CReply} from './c-test-policy';
-function reply(v:unknown):v is CReply {return cRecord(v)&&v.kind==='c-reply'&&typeof v.body==='string'&&Buffer.byteLength(v.body)<=P.internalBytes&&Array.isArray(v.refs)&&v.refs.length<=3&&v.refs.every(r=>cRecord(r)&&['project','revision','receipt'].includes(String(r.kind))&&typeof r.id==='string'&&r.id.length<=128&&(r.projectId===null||typeof r.projectId==='string'));}
+function reply(v:unknown):v is CReply {return cRecord(v)&&v.kind==='c-reply'&&typeof v.body==='string'&&Buffer.byteLength(v.body)<=P.internalBytes&&Array.isArray(v.refs)&&v.refs.length<=3&&(v.webPageEdit===undefined||typeof v.webPageEdit==='boolean')&&v.refs.every(r=>cRecord(r)&&['project','revision','receipt'].includes(String(r.kind))&&typeof r.id==='string'&&r.id.length<=128&&(r.projectId===null||typeof r.projectId==='string'));}
 export async function runCTestWorker(job:CJob,signal:AbortSignal):Promise<CReply> {
  if(signal.aborted)throw new CFailure(504,'C_TIMEOUT');
  const worker=new Worker(new URL('./c-test-worker-bootstrap.mjs',import.meta.url),{workerData:job,resourceLimits:{maxOldGenerationSizeMb:64,maxYoungGenerationSizeMb:16,stackSizeMb:4}});

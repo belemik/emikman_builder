@@ -5,7 +5,7 @@ import { PROJECT_INGEST_TEST_PROFILE as limits } from './ingest-profile';
 import type { ProjectCommandInspection, ProjectDecodeCode, ProjectDecodeCounters } from './ingest-profile';
 
 import { isWebPageCommand } from './b-test-web-page-command';
-import { READ_WEB_PAGE, SAVE_WEB_PAGE, WEB_PAGE_MANIFEST_PROFILE } from '../../src/projects/web-page-repository.dto';
+import { isWebPageOperation, WEB_PAGE_MANIFEST_PROFILE } from '../../src/projects/web-page-repository.dto';
 
 const typedArray = Object.getPrototypeOf(Uint8Array.prototype);
 const byteLength = Object.getOwnPropertyDescriptor(typedArray, 'byteLength')!.get!;
@@ -60,7 +60,7 @@ function closedShape(operation: string, root: RequestJson): void {
   }
 }
 function inspectClosedDto(operation: string, root: RequestJson, extended: boolean): void {
-  const webPage = operation === SAVE_WEB_PAGE || operation === READ_WEB_PAGE;
+  const webPage = isWebPageOperation(operation);
   if (webPage) {
     if (!extended || !isWebPageCommand(operation, root)) deny('R1_DTO');
   } else {
@@ -104,7 +104,7 @@ function inspectOwned(operation: string, input: Uint8Array, handoff?: { data?: R
     bodyBytes, counters: Object.freeze({ ...counters }) satisfies ProjectDecodeCounters });
   try {
     if (typeof operation !== 'string'
-      || (!operations.has(operation) && !(extended && (operation === SAVE_WEB_PAGE || operation === READ_WEB_PAGE)))) deny('R1_OPERATION');
+      || (!operations.has(operation) && !(extended && isWebPageOperation(operation)))) deny('R1_OPERATION');
     if (!types.isUint8Array(input)) deny('R1_INPUT');
     const backing: ArrayBufferLike = bufferOf.call(input);
     if (types.isSharedArrayBuffer(backing)) deny('R1_INPUT');

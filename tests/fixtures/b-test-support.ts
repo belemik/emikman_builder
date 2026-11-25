@@ -1,3 +1,4 @@
+import type { BWebPageProfile } from '../../server/projects/b-test-web-page';
 import assert from 'node:assert/strict';
 import {createBTestVolume,adoptBTestVolume} from '../../server/projects/b-test-volume';
 import {BTestLedger} from '../../server/projects/b-test-ledger';
@@ -8,7 +9,7 @@ import {createTestCommandCandidate} from '../../server/projects/test-command-can
 export {header,createRequest} from './p03-support';
 export function candidate(op:string,body:object){const bytes=new TextEncoder().encode(JSON.stringify(body));const c=createTestCommandCandidate(op,bytes);assert.equal(c.kind,'candidate');if(c.kind!=='candidate')throw Error('candidate');return c.candidate;}
 export function committed(r:BResult){assert.equal(r.kind,'committed');if(r.kind!=='committed')throw Error('commit');return r;}
-export function environment(options:{main?:string;ledger?:string;fault?:(stage:BFault)=>void;webPageProfile?:true}={}){
+export function environment(options:{main?:string;ledger?:string;fault?:(stage:BFault)=>void;webPageProfile?:BWebPageProfile}={}){
  const main=options.main?adoptBTestVolume(options.main):createBTestVolume('main'),volume=options.ledger?adoptBTestVolume(options.ledger):createBTestVolume('ledger'),ledger=new BTestLedger(volume);
  let now=Date.parse('2026-11-14T00:00:00.000Z'),live=true;const key={},otherKey={},identity={},otherIdentity={};let repo:BTestRepository;
  const policy=inspectTestFoundationPolicy(FOUNDATION_TEST_PROFILE);if(policy.kind!=='test-policy-ready')throw Error('policy');

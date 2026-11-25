@@ -5,10 +5,12 @@ import { TextDecoder } from 'node:util';
 import { text, type BRow } from './b-test-ledger';
 import type { WebPageDocumentHead } from '../../src/projects/web-page-repository.dto';
 import type { createServerIdIssuer } from './server-identities';
-import { SAVE_WEB_PAGE } from '../../src/projects/web-page-repository.dto';
+import { CREATE_WEB_PAGE_PROJECT, SAVE_WEB_PAGE } from '../../src/projects/web-page-repository.dto';
 import { WEB_PAGE_VERSION } from '../../src/web-page/contract';
 import { validateWebPage } from '../../src/web-page/validate';
 
+export type BWebPageProfile = true | 'workspace-v1';
+const WORKSPACE_STORE_PROFILE = 'zarya.p04.b.store.web-page-workspace.test/v3';
 export const WEB_PAGE_STORE_PROFILE = 'zarya.p04.b.store.web-page.test/v2';
 export const sha256 = (input: Uint8Array) => createHash('sha256').update(input).digest('hex');
 export const WEB_PAGE_CONTEXT = Object.freeze({
@@ -32,16 +34,21 @@ export function verifyWebPageContext(): void {
   }
 }
 
-export function isWebPageStore(version: unknown, profile: unknown): boolean {
-  return version === 2 && profile === WEB_PAGE_STORE_PROFILE;
+export function isWebPageStore(version: unknown, profile: unknown, mode: BWebPageProfile): boolean {
+  return mode === 'workspace-v1'
+    ? version === 3 && profile === WORKSPACE_STORE_PROFILE
+    : version === 2 && profile === WEB_PAGE_STORE_PROFILE;
 }
 
-export function webPageSchema(v1: string): string {
+export function webPageSchema(v1: string, mode: BWebPageProfile): string {
   const operationCheck = "operation IN('create-project','update-metadata','create-revision','restore-project','soft-delete-project')";
   if (!v1.includes(operationCheck)) throw Error('B_WEB_SCHEMA_BASE');
-  return v1.replaceAll('zarya.p04.b.store.test/v1', WEB_PAGE_STORE_PROFILE)
-    .replace(operationCheck, operationCheck.slice(0, -1) + ",'" + SAVE_WEB_PAGE + "')")
-    + readFileSync(new URL('./b-test-web-page-schema.sql', import.meta.url), 'utf8');
+  const ops = mode === 'workspace-v1' ? [SAVE_WEB_PAGE, CREATE_WEB_PAGE_PROJECT] : [SAVE_WEB_PAGE];
+  const profile = mode === 'workspace-v1' ? WORKSPACE_STORE_PROFILE : WEB_PAGE_STORE_PROFILE;
+  const web = readFileSync(new URL('./b-test-web-page-schema.sql', import.meta.url), 'utf8');
+  return v1.replaceAll('zarya.p04.b.store.test/v1', profile)
+    .replace(operationCheck, operationCheck.slice(0, -1) + ops.map(op => ",'" + op + "'").join('') + ')')
+    + (mode === 'workspace-v1' ? web.replace('PRAGMA user_version=2;', 'PRAGMA user_version=3;') : web);
 }
 
 export class BTestWebPageRecords {
@@ -63,13 +70,12 @@ export class BTestWebPageRecords {
     };
   }
 
-  private verifyPayload(row: BRow): Uint8Array {
+  private checkedPayload(row: BRow) {
     const payload = row.payload;
-    if (!(payload instanceof Uint8Array) || sha256(payload) !== row.sha256
-      || !validateWebPage(new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(payload)).valid) {
-      throw Error('B_WEB_PAGE_PAYLOAD');
-    }
-    return payload;
+    if (!(payload instanceof Uint8Array) || sha256(payload) !== row.sha256) throw Error('B_WEB_PAGE_PAYLOAD');
+    const page = validateWebPage(new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(payload));
+    if (!page.valid) throw Error('B_WEB_PAGE_PAYLOAD');
+    return { payload, page: page.value };
   }
 
   heads(account: string, project: string, snapshot: string): WebPageDocumentHead[] {
@@ -87,7 +93,26 @@ export class BTestWebPageRecords {
       JOIN web_documents d ON d.id=h.document_id
       WHERE h.account=? AND h.project_id=? AND h.project_revision_id=? AND h.document_id=?`)
       .get(account, project, snapshot, documentId);
-    return row ? { ...this.descriptor(row), payload: this.verifyPayload(row) } : null;
+    return row ? { ...this.descriptor(row), payload: this.checkedPayload(row).payload } : null;
+  }
+
+  listCurrent(account: string, limit: number) {
+    const rows = this.db.prepare(`SELECT r.*,d.work_id,p.head AS current_snapshot
+      FROM projects p
+      JOIN revisions s ON s.account=p.account AND s.project_id=p.id AND s.id=p.head
+      JOIN web_snapshot_heads h ON h.account=p.account AND h.project_id=p.id AND h.project_revision_id=p.head
+      JOIN web_revisions r ON r.account=h.account AND r.project_id=h.project_id
+        AND r.document_id=h.document_id AND r.id=h.document_revision_id
+      JOIN web_documents d ON d.account=h.account AND d.project_id=h.project_id AND d.id=h.document_id
+      WHERE p.account=? AND p.lifecycle='active'
+      ORDER BY s.created_at DESC,p.id,h.document_id LIMIT ?`).all(account, limit + 1);
+    return {
+      truncated: rows.length > limit,
+      documents: rows.slice(0, limit).map(row => ({
+        projectId: text(row, 'project_id'), snapshot: text(row, 'current_snapshot'),
+        head: this.descriptor(row), title: this.checkedPayload(row).page.hero.heading,
+      })),
+    };
   }
 
   receiptHead(account: string, project: string, snapshot: string): WebPageDocumentHead {
@@ -96,7 +121,7 @@ export class BTestWebPageRecords {
       JOIN web_snapshot_heads h ON h.project_revision_id=r.project_revision_id AND h.document_revision_id=r.id
       WHERE r.account=? AND r.project_id=? AND r.project_revision_id=?`).get(account, project, snapshot);
     if (!row) throw Error('B_WEB_PAGE_RECEIPT');
-    this.verifyPayload(row);
+    this.checkedPayload(row);
     return this.descriptor(row);
   }
 
@@ -129,10 +154,14 @@ export class BTestWebPageRecords {
       JOIN revisions s ON s.id=r.project_revision_id
       LEFT JOIN web_snapshot_heads h ON h.project_revision_id=s.id AND h.document_id=r.document_id`).all()) {
       this.descriptor(row);
-      this.verifyPayload(row);
-      if (row.operation !== SAVE_WEB_PAGE || row.id !== row.included || row.previous_snapshot === null) {
+      this.checkedPayload(row);
+      const genesis = row.operation === CREATE_WEB_PAGE_PROJECT;
+      if (row.id !== row.included || (genesis
+        ? row.previous_snapshot !== null || row.parent_id !== null
+        : row.operation !== SAVE_WEB_PAGE || row.previous_snapshot === null)) {
         throw Error('B_WEB_PAGE_LINEAGE');
       }
+      if (genesis) continue;
       const prior = this.db.prepare(`SELECT document_revision_id FROM web_snapshot_heads
         WHERE project_revision_id=? AND document_id=?`).get(text(row, 'previous_snapshot'), text(row, 'document_id'));
       if (row.parent_id !== (prior?.document_revision_id ?? null)) throw Error('B_WEB_PAGE_LINEAGE');
