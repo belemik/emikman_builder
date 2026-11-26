@@ -1,3 +1,5 @@
+@import './web-page-content.css';
+
 .ze-shell { width: 100%; height: 100%; min-width: 0; display: flex; flex-direction: column; }
 .ze-toolbar { flex: none; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 6px 12px; border-bottom: 1px solid var(--line); background: var(--card); }
 .ze-identity, .ze-actions, .ze-stagebar, .ze-stagebar>span, .ze-stagebar label, .ze-inspector-title { display: flex; align-items: center; gap: 9px; }
@@ -46,25 +48,6 @@
 .zwp-viewport[data-selection=heading] h3,.zwp-viewport[data-selection=body] .zwp-hero p,
 .zwp-viewport[data-selection=image] .zwp-poster,.zwp-viewport[data-selection=cta] .zwp-cta { outline: 3px solid #b95522; outline-offset: -3px; }
 
-/* The event template owns this palette and typography in both shell themes. */
-.zwp-page { color-scheme: light; color: #292820; background: #faf7ef; font: 500 18px/1.5 Manrope,sans-serif; overflow-wrap: anywhere; }
-.zwp-hero { display: grid; align-items: stretch; background: #eee5d1; }
-.zwp-hero>div:first-child { display: flex; flex-direction: column; gap: 20px; align-items: start; justify-content: center; padding: clamp(26px,5cqi,66px); }
-.zwp-page .zwp-hero h3 { color: #252620; font-size: clamp(42px,6.6cqi,82px); line-height: 1.01; letter-spacing: -.075em; font-weight: 700; }
-.zwp-page .zwp-hero p { color: #4f4b42; font-size: clamp(16px,2.2cqi,23px); max-width: 30em; }
-.zwp-page .zwp-cta { color: #fff8e8; background: #2b2d24; font: 650 16px/1.4 Manrope,sans-serif; border-radius: 6px; padding: 12px 18px; }
-.zwp-poster { position: relative; isolation: isolate; display: grid; place-items: center; min-height: 190px; background: #e59a65; overflow: hidden; }
-.zwp-poster::before { background: repeating-radial-gradient(ellipse at 82% 92%,transparent 0 8px,#663f2c70 9px 10px,transparent 11px 15px); }
-.zwp-poster img { width: clamp(132px,24cqi,278px); height: auto; transform: rotate(-17deg); }
-.zwp-program { padding: clamp(24px,4cqi,48px) clamp(26px,5cqi,66px); }
-.zwp-page .zwp-program h4 { color: #272922; font-size: clamp(24px,3.2cqi,38px); letter-spacing: -.05em; margin: 0 0 16px; }
-.zwp-program ul { list-style: decimal-leading-zero inside; padding: 0; margin: 0; }
-.zwp-program li { border-top: 1px solid #d0cbbc; padding: 12px 0; font-size: clamp(15px,1.9cqi,21px); }
-.zwp-program li::marker { font: 500 13px monospace; color: #635d4c; }
-@container (min-width: 36rem) {
-  .zwp-hero[data-layout=split] { grid-template-columns: 1.45fr 1fr; }
-  .zwp-hero[data-layout=split] .zwp-poster { min-height: 350px; }
-}
 @media (max-width: 800px) {
   .ze-layout { grid-template-columns: minmax(0,1fr); }
   .ze-toolbar { grid-template-columns: minmax(0,1fr) auto auto; gap: 4px 7px; }
