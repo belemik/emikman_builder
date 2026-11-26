@@ -6,6 +6,7 @@ import { registry, definition, figmaUrl } from '../registry';
 import { createElement, moveElement, type CanvasDocument, type CanvasElement } from './model';
 import { Preview } from './Preview';
 import { Inspector } from '../inspector';
+import { ButtonStudio } from '../component-studio/ButtonStudio';
 import { ThemeEditor } from '../theme';
 import { themeStyle } from '../theme/model';
 import { Icon } from '../ui';
@@ -63,7 +64,11 @@ export function CanvasEditor({
         </div><p className="canvas-footnote">{strict ? 'Оригинальная тема Figma · поддержка определяется проверенной матрицей вариантов' : 'Приближённый предпросмотр · пользовательские настройки не являются токенами Figma'}</p>
       </section>
       <aside className="properties panel"><div className="inspector-tabs" role="group" aria-label="Режим инспектора"><button aria-pressed={inspectorMode === 'properties'} onClick={() => setInspectorMode('properties')}>Свойства</button><button aria-pressed={inspectorMode === 'theme'} onClick={() => setInspectorMode('theme')}>Тема</button></div>
-        {inspectorMode === 'properties' ? <Inspector element={selectedElement} onChange={changeElement} /> : <ThemeEditor overrides={document.themeOverrides} onChange={themeOverrides => setDocument(current => ({ ...current, themeOverrides }))} />}
+        {inspectorMode === 'properties' ? <>
+          <Inspector element={selectedElement} onChange={changeElement} />
+          {!project && selectedElement?.component === 'button' &&
+            <ButtonStudio key={selectedElement.id} element={selectedElement} />}
+        </> : <ThemeEditor overrides={document.themeOverrides} onChange={themeOverrides => setDocument(current => ({ ...current, themeOverrides }))} />}
       </aside>
     </main>
   );

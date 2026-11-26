@@ -17,6 +17,7 @@ import '@fontsource/manrope/600.css';
 import '@fontsource/manrope/700.css';
 import '@fontsource/manrope/800.css';
 import './renderer/styles.css';
+import './component-studio/studio.css';
 import { AccountButton, type User, type LogoutActions } from './account';
 import { ThemeProvider } from './studio/Theme';
 import { ApplicationShell } from './application/ApplicationShell';
