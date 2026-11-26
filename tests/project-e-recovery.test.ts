@@ -1,7 +1,46 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {fork} from 'node:child_process';import {once} from 'node:events';
+import type {CRequestDiagnostic} from '../server/projects/c-test-http';
 import {eHost,createRequest,header,dCounts,candidate,get,A,sleep} from './fixtures/e-test-support';import {createBTestVolume} from '../server/projects/b-test-volume';import {inspectEAnswer} from './fixtures/e-test-response';
 test('E server restart between create/read never admits automatically; explicit checks and fresh session required',async()=>{const h=await eHost({admit:true}),c=h.client();const created=await c.send(c.prepareCreate(createRequest().metadata,'e-restart'));assert.ok(created.receipt);const ledger=h.env.volume.directory,id=created.receipt.projectId;await h.close();assert.equal(c.view().phase,'AUTH_REQUIRED');const n=await eHost({ledger});try{const fresh=n.client();assert.equal(n.env.runtime.health().ready,false);assert.equal((await fresh.open(id)).phase,'UNAVAILABLE');assert.equal(n.env.runtime.admit(),true);const read=await fresh.open(id);assert.equal(read.phase,'READY');assert.equal(read.project?.projectId,id);assert.deepEqual(dCounts(n.env),[1,1,1,1,1]);}finally{await n.close();}});
-test('E lost actual HTTP reply retains one snapshot/key; no automatic reexecution; restart reconciles',async()=>{const h=await eHost({admit:true,http:{dropCommittedOnce:true}}),c=h.client(),cmd=c.prepareCreate(createRequest().metadata,'e-lost');const lost=await c.send(cmd);assert.equal(lost.phase,'UNKNOWN_OUTCOME');assert.equal(lost.receipt,null);assert.equal((await c.send(cmd)).phase,'UNKNOWN_OUTCOME');assert.deepEqual(dCounts(h.env),[1,1,1,1,1]);const ledger=h.env.volume.directory;await h.close();const n=await eHost({ledger});try{const fresh=n.client();assert.equal((await fresh.reconcile(cmd)).phase,'UNAVAILABLE');assert.equal(n.env.runtime.admit(),true);const known=await fresh.reconcile(cmd);assert.equal(known.phase,'COMMITTED');assert.equal(known.receipt?.replayed,true);const replay=await fresh.send(cmd);assert.equal(replay.receipt?.replayed,true);assert.deepEqual(dCounts(n.env),[1,1,1,1,1]);}finally{await n.close();}});
+test('E lost actual HTTP reply retains one snapshot/key; no automatic reexecution; restart reconciles', async t => {
+  const trace: CRequestDiagnostic[] = [];
+  const diagnostics = { record: (entry: CRequestDiagnostic) => { trace.push(entry); } };
+  const h = await eHost({ admit: true, http: { dropCommittedOnce: true, diagnostics } });
+  const c = h.client(), cmd = c.prepareCreate(createRequest().metadata, 'e-lost');
+  const ledger = h.env.volume.directory;
+  let revision: unknown;
+  try {
+    const lost = await c.send(cmd);
+    assert.equal(lost.phase, 'UNKNOWN_OUTCOME');
+    assert.equal(lost.receipt, null);
+    assert.equal((await c.send(cmd)).phase, 'UNKNOWN_OUTCOME');
+    assert.deepEqual(dCounts(h.env), [1, 1, 1, 1, 1]);
+    assert.equal(trace.length, 1);
+    assert.equal(trace[0].httpStatus, null);
+    assert.equal(trace[0].errorCode, 'C_REPLY_DROPPED');
+    assert.equal(trace[0].transactionStage, 'ledger-finalized');
+    revision = h.env.runtime.repository.database.prepare('SELECT id FROM revisions').get()?.id;
+    assert.ok(revision);
+  } finally { await h.close(); }
+  const n = await eHost({ ledger, http: { diagnostics } });
+  try {
+    const fresh = n.client();
+    assert.equal((await fresh.reconcile(cmd)).phase, 'UNAVAILABLE');
+    assert.equal(n.env.runtime.admit(), true);
+    const known = await fresh.reconcile(cmd);
+    assert.equal(known.phase, 'COMMITTED');
+    assert.equal(known.receipt?.revision.id, revision);
+    assert.equal(known.receipt?.replayed, true);
+    assert.equal(trace[1].mode, 'reconcile');
+    assert.equal(trace[1].reconciliation, 'confirmed');
+    const replay = await fresh.send(cmd);
+    assert.equal(replay.receipt?.replayed, true);
+    assert.deepEqual(dCounts(n.env), [1, 1, 1, 1, 1]);
+  } finally {
+    await n.close();
+    t.diagnostic(JSON.stringify(trace));
+  }
+});
 test('E timeout after commit is UNKNOWN, not fake rollback/save; explicit same-key status resolves',async()=>{let enter=()=>{},release=()=>{},first=true;const entered=new Promise<void>(r=>enter=r),gate=new Promise<void>(r=>release=r);const h=await eHost({admit:true,http:{beforeDelivery:async()=>{if(first){first=false;enter();await gate;}}}});try{const c=h.client(h.env.token,1500),cmd=c.prepareCreate(createRequest().metadata,'e-timeout');const pending=c.send(cmd);await entered;const timed=await pending;assert.equal(timed.phase,'UNKNOWN_OUTCOME');assert.equal(timed.receipt,null);assert.deepEqual(dCounts(h.env),[1,1,1,1,1]);release();await sleep(20);const status=await c.reconcile(cmd);assert.equal(status.phase,'COMMITTED');assert.equal(status.receipt?.replayed,true);assert.deepEqual(dCounts(h.env),[1,1,1,1,1]);}finally{release();await h.close();}});
 test('E handle cannot cross store/account boundaries after a fresh session',async()=>{const h=await eHost({admit:true}),other=await eHost({admit:true});try{const a=h.client(),cmd=a.prepareCreate(createRequest().metadata,'e-bound');assert.equal((await a.send(cmd)).phase,'COMMITTED');const wrongStore=other.client();assert.equal((await wrongStore.reconcile(cmd)).phase,'FORBIDDEN');const foreign=h.client(h.env.otherToken);assert.equal((await foreign.reconcile(cmd)).phase,'FORBIDDEN');assert.deepEqual(dCounts(other.env),[0,0,0,0,0]);}finally{await h.close();await other.close();}});
 for(const stage of ['before-commit','after-main-commit'])test('E prepared metadata command reconciles after actual '+stage+' SIGKILL without new key',async()=>{const h=await eHost({admit:true}),client=h.client();const made=await client.send(client.prepareCreate(createRequest().metadata,'e-crash-seed'));assert.ok(made.receipt);const opened=await client.open(made.receipt.projectId);assert.ok(opened.project);const input={...createRequest().metadata,name:'E crash update'},key='e-crash-update',cmd=client.prepareUpdate(input,key),body={...header,projectId:opened.project.projectId,expectedRevision:opened.project.revision,idempotencyKey:key,metadata:input};const ledger=h.env.volume.directory;await h.close();const p=fork(new URL('./fixtures/d-test-worker.ts',import.meta.url),[ledger,'write',stage,Buffer.from(JSON.stringify(body)).toString('base64'),''],{execArgv:['--import','tsx'],stdio:['ignore','ignore','pipe','ipc']});const [ready]=await once(p,'message');assert.equal(ready,'ready');const exited=once(p,'exit');p.send('go');assert.equal((await exited)[1],'SIGKILL');const n=await eHost({ledger});try{const fresh=n.client();assert.equal((await fresh.reconcile(cmd)).phase,'UNAVAILABLE');assert.equal(n.env.runtime.admit(),stage==='after-main-commit');if(stage==='after-main-commit'){const result=await fresh.reconcile(cmd);assert.equal(result.phase,'COMMITTED');assert.equal(result.receipt?.replayed,true);}else assert.equal((await fresh.send(cmd)).phase,'UNAVAILABLE');assert.deepEqual(dCounts(n.env),[1,...Array(4).fill(stage==='after-main-commit'?2:1)]);}finally{await n.close();}});
