@@ -3,6 +3,279 @@
   "title": "WDeaf Screen Schema v3 (strict)",
   "description": "Runtime additionally checks nested IDs, slot/parent consistency and renderer capability.",
   "$defs": {
+    "button-icon": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "button-icon"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "type": "string",
+              "enum": [
+                "m"
+              ]
+            },
+            "variant": {
+              "type": "string",
+              "enum": [
+                "secondary"
+              ]
+            },
+            "colorScheme": {
+              "type": "string",
+              "enum": [
+                "neutral"
+              ]
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "default",
+                "hover",
+                "pressed",
+                "disabled"
+              ]
+            }
+          },
+          "required": [
+            "size",
+            "variant",
+            "colorScheme",
+            "state"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "colorScheme": {
+                  "const": "neutral"
+                },
+                "state": {
+                  "const": "default"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "colorScheme": {
+                  "const": "neutral"
+                },
+                "state": {
+                  "const": "hover"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "colorScheme": {
+                  "const": "neutral"
+                },
+                "state": {
+                  "const": "pressed"
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "variant": {
+                  "const": "secondary"
+                },
+                "colorScheme": {
+                  "const": "neutral"
+                },
+                "state": {
+                  "const": "disabled"
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "icon": {
+              "type": "string",
+              "enum": [
+                "dots-vertical"
+              ]
+            },
+            "labelText": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "icon",
+            "labelText"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
+    "textarea": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "component": {
+          "const": "textarea"
+        },
+        "variantProps": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "type": "string",
+              "enum": [
+                "m"
+              ]
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "default",
+                "error"
+              ]
+            },
+            "placeholder": {
+              "type": "boolean"
+            },
+            "label": {
+              "type": "boolean"
+            },
+            "hint": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "size",
+            "state",
+            "placeholder",
+            "label",
+            "hint"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "state": {
+                  "const": "default"
+                },
+                "placeholder": {
+                  "const": true
+                },
+                "label": {
+                  "const": true
+                },
+                "hint": {
+                  "const": true
+                }
+              }
+            },
+            {
+              "properties": {
+                "size": {
+                  "const": "m"
+                },
+                "state": {
+                  "const": "error"
+                },
+                "placeholder": {
+                  "const": true
+                },
+                "label": {
+                  "const": true
+                },
+                "hint": {
+                  "const": true
+                }
+              }
+            }
+          ]
+        },
+        "editorProps": {
+          "type": "object",
+          "properties": {
+            "labelText": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "placeholderText": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "hintText": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "errorText": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "value": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "labelText",
+            "placeholderText",
+            "hintText",
+            "errorText",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "variantProps",
+        "editorProps"
+      ],
+      "additionalProperties": false
+    },
     "tag-item": {
       "type": "object",
       "properties": {
@@ -3092,6 +3365,12 @@
       "maxItems": 500,
       "items": {
         "oneOf": [
+          {
+            "$ref": "#/$defs/button-icon"
+          },
+          {
+            "$ref": "#/$defs/textarea"
+          },
           {
             "$ref": "#/$defs/tag-item"
           },

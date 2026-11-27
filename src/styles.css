@@ -29,3 +29,7 @@ label { display: block; font-size: 11px; margin-bottom: 15px; }label code { colo
 @media(max-width:1100px) { .workspace { grid-template-columns: 210px minmax(300px, 1fr) 260px; }.panel { padding: 22px 16px; }.app-header { padding: 18px; }.brand > .badge { display: none; }.canvas-area { padding: 28px 18px; }.header-actions button { font-size: 10px; }}
 @media(max-width:800px) { .app-header { flex-wrap: wrap; }.header-actions { flex-wrap: wrap; }.workspace { grid-template-columns: 190px minmax(0, 1fr); }.properties { grid-column: 1 / -1; border-top: 1px solid #e2e7ef; }.catalog-sample { height: 65px; }.sample-input { width: 120px; }.canvas-area { padding: 25px 12px; }.canvas-meta { flex-wrap: wrap; }.canvas-paper { padding: 12px; }.empty-canvas p { font-size: 11px; }.empty-canvas .badge { white-space: normal; }.theme-editor { max-width: 480px; }.inspector-fields { max-width: 480px; }}
 @media(max-width:520px) { .workspace { display: block; }.catalog { padding: 20px; }.catalog-list { grid-template-columns: 1fr 1fr; margin: 15px 0; }.catalog-note,.ai-note { display: none; }.canvas-area { padding: 24px 16px; }.dialog-footer { flex-direction: column; align-items: stretch; }.brand strong { font-size: 17px; }.canvas-footnote { line-height: 1.8; }}
+
+@media (max-width: 360px) {
+  .workspace:not(.project-canvas) .canvas-heading { flex-wrap: wrap; gap: 6px 8px; }
+}

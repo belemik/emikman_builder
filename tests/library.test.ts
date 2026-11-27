@@ -17,7 +17,7 @@ import { importEditorDocument, acceptEditorDocument, strictDocument } from '../s
 import { parseDocument, loadDocument, saveDocument } from '../src/storage';
 import { generatePrompt, generateRendererPrompt } from '../src/prompt';
 const html=(screen:unknown)=>renderToStaticMarkup(reactElement(DSRenderer,{screen}));
-test('143 source samples retain provenance; internal Tag primitives are unit-only, lawful compositions render',()=>{
+test('149 source samples retain provenance; internal Tag primitives are unit-only, lawful compositions render',()=>{
  let count=0;
  for(const [component,rows] of Object.entries(matrix))for(const row of rows){
  const element={...createElement(component),variantProps:row.props};
@@ -31,7 +31,7 @@ test('143 source samples retain provenance; internal Tag primitives are unit-onl
  assert.equal(prepareRender(screen).valid,true,JSON.stringify(screen));
  assert.match(html(screen),new RegExp(`data-figma-node="${row.nodeId}"`));count++;
  }
- assert.equal(count,143);
+ assert.equal(count,149);
 });
 test('unverified combinations, internal roots, wrong slots and duplicate nested IDs fail closed',()=>{
  const bad:any[]=[];

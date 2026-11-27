@@ -11,6 +11,56 @@ import { generatePrompt, generateRendererPrompt } from '../src/prompt';
 import { validateScreen } from '../src/design-system';
 const render = (screen: unknown) => renderToStaticMarkup(createElement(DSRenderer, { screen }));
 
+test('ButtonIcon admits only the verified m/secondary/neutral states and the pinned icon', () => {
+  const button = { id: 'review-icon', component: 'button-icon',
+    variantProps: { size: 'm', variant: 'secondary', colorScheme: 'neutral', state: 'default' },
+    editorProps: { icon: 'dots-vertical', labelText: 'Открыть действия' },
+  };
+  for (const [state, node] of [['default', '109:7632'], ['hover', '109:7644'], ['pressed', '109:7659'], ['disabled', '109:7736']]) {
+    const screen = { ...fixture, elements: [{ ...button, variantProps: { ...button.variantProps, state } }] };
+    const result = prepareRender(screen);
+    assert.ok(result.valid);
+    assert.equal(sourceNode(result.value.elements[0]), node);
+    const markup = render(screen);
+    assert.match(markup, /aria-label="Открыть действия"/);
+    assert.match(markup, /data-figma-icon="15:18364"/);
+    assert.equal(markup.includes(' disabled=""'), state === 'disabled');
+  }
+  for (const [group, additions] of [
+    ['variantProps', { size: 'l' }], ['variantProps', { variant: 'primary' }],
+    ['variantProps', { colorScheme: 'danger' }], ['variantProps', { state: 'active' }],
+    ['editorProps', { icon: '<svg/>' }], ['editorProps', { onClick: 'run()' }],
+  ] as const) {
+    const screen = { ...fixture, elements: [{ ...button, [group]: { ...button[group], ...additions } }] };
+    assert.equal(prepareRender(screen).valid, false);
+  }
+});
+
+test('TextArea maps only the two verified m variants and binds a visible description', () => {
+  const textarea = {
+    id: 'review-textarea', component: 'textarea',
+    variantProps: { size: 'm', state: 'default', placeholder: true, label: true, hint: true },
+    editorProps: { labelText: 'Описание', placeholderText: 'Введите текст', hintText: 'Добавьте подробности',
+      errorText: 'Уточните описание.', value: 'Первая строка\nВторая строка' },
+  };
+  for (const [state, node] of [['default', '189:16397'], ['error', '189:16725']]) {
+    const screen = { ...fixture, elements: [{ ...textarea, variantProps: { ...textarea.variantProps, state } }] };
+    const result = prepareRender(screen);
+    assert.ok(result.valid);
+    assert.equal(sourceNode(result.value.elements[0]), node);
+    const markup = render(screen);
+    assert.match(markup, /<label for="([^"]+)">Описание<\/label><textarea id="\1" aria-describedby="([^"]+)"/);
+    assert.match(markup, /Первая строка\nВторая строка/);
+    assert.equal(markup.includes('aria-invalid="true"'), state === 'error');
+    if (state === 'error') assert.match(markup, /Ошибка: Уточните описание./);
+  }
+  for (const change of [{ size: 'l' }, { state: 'disabled' }, { label: false }, { placeholder: false }, { hint: false }]) {
+    const result = prepareRender({ ...fixture, elements: [{ ...textarea, variantProps: { ...textarea.variantProps, ...change } }] });
+    assert.equal(result.valid, false);
+    if (!result.valid) assert.ok(result.errors.some(error => error.code === 'UNVERIFIED_COMBINATION'));
+  }
+});
+
 test('29 reviewed Figma variants have schema + renderer coverage and real semantic controls', () => {
   const prepared = prepareRender(fixture); assert.equal(prepared.valid, true); if (!prepared.valid) return;
   assert.equal(prepared.value.elements.length, 29);

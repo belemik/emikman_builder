@@ -9,6 +9,7 @@ import { catalog, tokens } from '../src/design-system/catalog.generated';
 import { registry } from '../src/registry';
 import { createElement } from '../src/canvas/model';
 import { libraryNode } from '../src/renderer/library-capabilities';
+import matrix from '../design-system/library-matrix.json';
 import { verifiedTokens } from '../src/tokens';
 import librarySeed from '../tokens.sprint05.seed.json';
 import rendererSeed from '../tokens.renderer.seed.json';
@@ -20,7 +21,9 @@ function valid<T>(r: { valid: true; value: T } | { valid: false }): T { assert.e
 test('contract catalog exactly matches current Canvas registry and all verified tokens', () => {
   assert.deepEqual(catalog, registry); assert.deepEqual(tokens, { ...verifiedTokens, ...rendererSeed.tokens, ...librarySeed.tokens });
   assert.ok(Object.isFrozen(catalog)); assert.ok(Object.isFrozen(catalog[0].variantProps.size.values)); assert.ok(Object.isFrozen(tokens['surface/primary/default']));
-  assert.equal(catalog.length, 15); assert.equal(Object.keys(tokens).length, 57);
+  assert.equal(catalog.length, 17); assert.equal(Object.keys(tokens).length, 57);
+  assert.deepEqual(catalog.find(entry => entry.id === 'textarea')?.verifiedVariants, matrix.textarea);
+  assert.deepEqual(catalog.find(entry => entry.id === 'button-icon')?.verifiedVariants, matrix['button-icon']);
   valid(validateScreen(screen()));
 });
 test('all reviewed prop values pass component metadata validation', () => {
