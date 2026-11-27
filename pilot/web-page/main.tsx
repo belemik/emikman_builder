@@ -15,18 +15,21 @@ import '../../src/web-page/web-page.css';
 import './pilot.css';
 import {
   claimSession, confirmSave, createProject, dispatch, listDocuments, openPage, parseLocator, readPage, sameContext, savePage,
-  type Command, type Confirmed, type Locator,
+  type BrowserSession, type Command, type Confirmed, type Locator,
 } from './client';
 
 type DocumentList = { kind: 'idle' | 'loading' | 'error' } |
   { kind: 'ready'; documents: readonly WebPageDocumentSummary[]; truncated: boolean };
-type Status = 'opened' | 'idle' | 'dirty' | 'busy' | 'saved' | 'invalid' | 'conflict' | 'write-rejected' | 'unknown' | 'denied';
+type Status = 'opened' | 'idle' | 'dirty' | 'busy' | 'saved' | 'invalid' | 'conflict' | 'write-rejected'
+  | 'unknown' | 'denied' | 'auth-required' | 'not-admitted';
 const labels: Record<Status, string> = {
   opened: 'Открыта подтверждённая ревизия', idle: 'Синтетический режим', dirty: 'Изменено', busy: 'Выполняется запрос…',
   saved: 'Сохранено', invalid: 'Ошибка валидации', conflict: 'Конфликт ревизий',
   'write-rejected': 'Сохранение отклонено. Правки остались в редакторе.',
   unknown: 'Исход сохранения неизвестен. Проверьте исходный receipt.',
   denied: 'Не удалось открыть указанную ревизию.',
+  'auth-required': 'Сессия недействительна. Введите новый код, затем повторите действие.',
+  'not-admitted': 'Запрос не дошёл до хранилища. Повторите действие вручную.',
 };
 
 function AccessCodeForm({ label, action, disabled, className, onSubmit }: {
@@ -123,7 +126,8 @@ function StudioEditor({ initial, onBack, controls, onDraftChange, onApply }: {
 }
 
 function Pilot() {
-  const [token, setToken] = useState('');
+  const [session, setSession] = useState<BrowserSession | null>(null);
+  const token = session?.handle ?? '';
   const [loginState, setLoginState] = useState<'idle' | 'checking' | 'denied'>('idle');
   const [status, setStatus] = useState<Status>('idle');
   const [documentList, setDocumentList] = useState<DocumentList>({ kind: 'idle' });
@@ -138,6 +142,9 @@ function Pilot() {
   const [pending, setPending] = useState<Command | null>(null);
   const [recovered, setRecovered] = useState(false);
   const [reauth, setReauth] = useState<'idle' | 'checking' | 'accepted' | 'denied'>('idle');
+  const [needsReauth, setNeedsReauth] = useState(false);
+  const writing = useRef(false);
+  const listRequest = useRef(0);
 
   useEffect(() => {
     if (!draft && !changed && !pending) return;
@@ -150,38 +157,60 @@ function Pilot() {
     if (loginState === 'checking') return;
     setLoginState('checking');
     try {
-      const handle = await claimSession(code);
-      setToken(handle);
+      const candidate = await claimSession(code);
+      setSession(candidate);
+      setNeedsReauth(false);
       setLoginState('idle');
-      void refreshDocuments(handle);
+      void refreshDocuments(candidate.handle);
     } catch { setLoginState('denied'); }
   }
 
   async function replaceSession(code: string) {
-    if (!confirmed || status === 'busy' || reauth === 'checking') return;
+    if (!session || status === 'busy' || reauth === 'checking') return;
     setReauth('checking');
     try {
-      // A protected read of the already opened document proves the new lease
-      // owns the same resource. Keep the original CAS and pending command.
+      // For Workspace without an open document, use the account tag from the original claim.
       const candidate = await claimSession(code);
-      const response = await openPage(await dispatch(candidate, readPage(confirmed)), confirmed);
-      if (response.confirmed.revisionId !== confirmed.revisionId || response.confirmed.sha256 !== confirmed.sha256
-        || !sameContext(response.confirmed.context, confirmed.context)) {
-        throw Error('C_WEB_REAUTH');
+      if (candidate.accountTag !== session.accountTag) throw Error('C_WEB_REAUTH');
+      if (confirmed) {
+        // The new lease must read the exact open revision. Preserve CAS, drafts and any uncertain command.
+        const response = await openPage(await dispatch(candidate.handle, readPage(confirmed)), confirmed);
+        if (response.confirmed.revisionId !== confirmed.revisionId || response.confirmed.sha256 !== confirmed.sha256
+          || !sameContext(response.confirmed.context, confirmed.context)) throw Error('C_WEB_REAUTH');
       }
-      setToken(candidate);
+      setSession(candidate);
+      setNeedsReauth(false);
+      setStatus(previous => previous === 'auth-required' ? confirmed ? 'opened' : 'idle' : previous);
       setReauth('accepted');
+      if (!confirmed) void refreshDocuments(candidate.handle);
     } catch {
       setReauth('denied');
     }
   }
 
   async function write(command: Command, reconcile = false) {
+    if (writing.current || needsReauth || reauth === 'checking') return;
+    writing.current = true;
     setStatus('busy');
     setPending(command);
     setRecovered(false);
     try {
       const response = await dispatch(token, command, reconcile);
+      if (response.kind === 'session-expired') {
+        setNeedsReauth(true);
+        if (response.notAdmitted) {
+          setPending(null);
+          setStatus('auth-required');
+        } else {
+          setStatus('unknown');
+        }
+        return;
+      }
+      if (response.kind === 'not-admitted') {
+        setPending(null);
+        setStatus('not-admitted');
+        return;
+      }
       if (response.kind === 'conflict') {
         setPending(null);
         setStatus(response.reason === 'EXPECTED_REVISION_MISMATCH' ? 'conflict' : 'write-rejected');
@@ -201,19 +230,34 @@ function Pilot() {
       setRecovered(reconcile);
     } catch {
       setStatus('unknown');
+    } finally {
+      writing.current = false;
     }
   }
 
   async function refreshDocuments(currentToken: string) {
+    const request = ++listRequest.current;
     setDocumentList({ kind: 'loading' });
-    try { setDocumentList({ kind: 'ready', ...await listDocuments(currentToken) }); }
-    catch { setDocumentList({ kind: 'error' }); }
+    try {
+      const result = await listDocuments(currentToken);
+      if (request === listRequest.current) setDocumentList({ kind: 'ready', ...result });
+    } catch (error) {
+      if (request !== listRequest.current) return;
+      setDocumentList({ kind: 'error' });
+      if (error instanceof Error && error.message === 'C_WEB_SESSION') setNeedsReauth(true);
+    }
   }
 
   async function reopen(locator: Locator, listing?: WebPageDocumentSummary) {
     setStatus('busy');
     try {
-      const result = await openPage(await dispatch(token, readPage(locator)), locator);
+      const response = await dispatch(token, readPage(locator));
+      if (response.kind === 'session-expired') {
+        setNeedsReauth(true);
+        setStatus('auth-required');
+        return;
+      }
+      const result = await openPage(response, locator);
       if (listing && (result.confirmed.revisionId !== listing.revisionId || result.confirmed.sha256 !== listing.sha256)) {
         throw Error('C_WEB_LIST_REVISION');
       }
@@ -237,7 +281,7 @@ function Pilot() {
     if (confirmed) setLocatorText(JSON.stringify({ revision: confirmed.revision, documentId: confirmed.documentId }));
     setPending(null); setInitial(null); setAccepted(null); setConfirmed(null); setDraft(false); setSavedPayload(undefined);
     setRecovered(false); setReauth('idle'); setStatus('idle');
-    void refreshDocuments(token);
+    if (!needsReauth) void refreshDocuments(token);
   }
 
   const edited = draft || changed;
@@ -247,23 +291,33 @@ function Pilot() {
       : display === 'dirty' ? (draft ? 'Черновик' : 'Применено в сессии') : display === 'busy' && pending ? 'Сохранение…' : labels[display]}
   </p>;
   const reconciliation = pending && status === 'unknown'
-    ? <button type="button" className="z-button" disabled={reauth === 'checking'} onClick={() => void write(pending, true)}>Проверить receipt</button> : null;
+    ? <button type="button" className="z-button" disabled={reauth === 'checking' || needsReauth} onClick={() => void write(pending, true)}>Проверить receipt</button> : null;
+  const locked = status === 'busy' || Boolean(pending) || needsReauth || reauth === 'checking';
+  const reauthorization = <details>
+    <summary>Повторная авторизация</summary>
+    <AccessCodeForm label="Новый одноразовый код доступа" action="Проверить новую сессию"
+      disabled={status === 'busy' || reauth === 'checking'} onSubmit={replaceSession} />
+    <p aria-live="polite">{reauth === 'checking' ? 'Проверка владельца…'
+      : reauth === 'accepted' && !needsReauth ? confirmed ? 'Сессия обновлена для владельца этой ревизии.' : 'Сессия Workspace обновлена.'
+      : reauth === 'denied' ? confirmed ? 'Сессию для этой ревизии подтвердить не удалось.' : 'Сессию для этого Workspace подтвердить не удалось.' : ''}</p>
+  </details>;
+  const authNotice = needsReauth && status !== 'auth-required' && <p role="status">
+    Сессия недействительна. Введите новый код в разделе «Повторная авторизация».
+  </p>;
   if (!token) return <StudioDocumentWorkspace>
     <AccessCodeForm label="Одноразовый код доступа" action="Открыть Workspace" className="live-access"
       disabled={loginState === 'checking'} onSubmit={authorize} />
     {loginState === 'denied' && <p role="alert">Код недействителен или истёк. Выпустите новый код локально.</p>}
   </StudioDocumentWorkspace>;
   if (!initial) return <StudioDocumentWorkspace actions={<div className="zs-row live-actions">
-    <button className="z-button z-primary" type="button" disabled={status === 'busy' || Boolean(pending)}
+    <button className="z-button z-primary" type="button" disabled={locked}
       onClick={() => void write(createProject(JSON.stringify(event)))}><Glyph name="plus" />Создать страницу события</button>
-    {message}{reconciliation}
+    {message}{authNotice}{reconciliation}
   </div>}>
-    {documentList.kind === 'error' && !pending && <button className="z-button" type="button" onClick={() => {
-      setToken(''); setDocumentList({ kind: 'idle' }); setStatus('idle');
-    }}>Ввести новый код</button>}
+    {reauthorization}
     <section className="zs-work live-documents" aria-label="Мои документы" aria-busy={documentList.kind === 'loading'}>
       <header><h2>Мои документы</h2>
-      <button className="z-button" type="button" disabled={documentList.kind === 'loading' || status === 'busy' || Boolean(pending)}
+      <button className="z-button" type="button" disabled={documentList.kind === 'loading' || locked}
         onClick={() => void refreshDocuments(token)}>Обновить список</button></header>
       <div aria-live="polite">
         {documentList.kind === 'loading' && <p>Загружаем документы…</p>}
@@ -271,7 +325,7 @@ function Pilot() {
         {documentList.kind === 'ready' && (documentList.documents.length === 0
           ? <p>У вас пока нет документов.</p>
           : <ul className="live-document-cards">{documentList.documents.map(doc => <li key={doc.documentId}>
-            <button className="z-button" type="button" disabled={status === 'busy' || Boolean(pending)} onClick={() => void reopen(doc, doc)}>
+            <button className="z-button" type="button" disabled={locked} onClick={() => void reopen(doc, doc)}>
               <Glyph name="page" />{doc.title}
             </button>
           </li>)}</ul>)}
@@ -281,7 +335,7 @@ function Pilot() {
     <details className="live-reference"><summary>Открыть историческую ревизию</summary><form onSubmit={reopenReference}>
       <label htmlFor="pilot-reopen">Ссылка на ревизию</label>
       <textarea id="pilot-reopen" maxLength={1024} value={locatorText} onChange={e => setLocatorText(e.target.value)} />
-      <button type="submit" className="z-button" disabled={status === 'busy' || Boolean(pending)}>Открыть ревизию</button>
+      <button type="submit" className="z-button" disabled={locked}>Открыть ревизию</button>
     </form></details>
   </StudioDocumentWorkspace>;
 
@@ -289,22 +343,15 @@ function Pilot() {
     onDraftChange: setDraft,
     onApply: page => { setAccepted(page); setDraft(false); },
     controls: session => <div className="live-save">
-      {message}{reconciliation}
+      {message}{authNotice}{reconciliation}
       {status === 'conflict' && <ConflictRecovery heading={session.heading} body={session.body} onBack={back} />}
-      <button type="button" className="z-button z-primary" disabled={!accepted || !confirmed || draft || !changed || Boolean(pending)
-        || status === 'busy' || status === 'conflict' || status === 'write-rejected' || reauth === 'checking'}
+      <button type="button" className="z-button z-primary" disabled={!accepted || !confirmed || draft || !changed || locked
+        || status === 'conflict' || status === 'write-rejected'}
         onClick={() => { if (confirmed && appliedPayload) void write(savePage(confirmed.revision, confirmed.documentId, appliedPayload)); }}>
         Сохранить
       </button>
       {draft && <p>Подтвердите локальную правку перед сохранением.</p>}
-      {confirmed && <details>
-        <summary>Повторная авторизация</summary>
-        <AccessCodeForm label="Новый одноразовый код доступа" action="Проверить новую сессию"
-          disabled={status === 'busy' || reauth === 'checking'} onSubmit={replaceSession} />
-        <p aria-live="polite">{reauth === 'accepted' ? 'Сессия обновлена для владельца этой ревизии.'
-          : reauth === 'denied' ? 'Сессию для этой ревизии подтвердить не удалось.'
-            : reauth === 'checking' ? 'Проверка владельца…' : ''}</p>
-      </details>}
+      {confirmed && reauthorization}
       {confirmed && <details className="live-confirmation"><summary>Подтверждённая ревизия</summary><dl>
         <dt>DocumentRevision</dt><dd data-testid="pilot-revision">{confirmed.revisionId}</dd>
         <dt>SHA-256</dt><dd data-testid="pilot-digest">{confirmed.sha256}</dd>

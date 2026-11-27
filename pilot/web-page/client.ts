@@ -12,6 +12,7 @@ export type Locator = { readonly revision: ProjectRevisionReferenceDTO; readonly
 export type PinnedContext = { readonly contract: '0.1'; readonly validator: string; readonly renderer: string; readonly assetCatalog: string };
 export type Confirmed = Locator & { readonly revisionId: string; readonly sha256: string; readonly context: PinnedContext };
 export type Command = Readonly<{ op: CWebOperation; bytes: string }>;
+export type BrowserSession = Readonly<{ handle: string; accountTag: string }>;
 
 const record = (value: unknown): Record<string, unknown> | null =>
   value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
@@ -27,7 +28,7 @@ function reference(value: unknown): ProjectRevisionReferenceDTO | null {
     integrity: { algorithm: hash.algorithm, encoding: hash.encoding, value: hash.value, byteDomain: hash.byteDomain } };
 }
 
-export async function claimSession(code: string): Promise<string> {
+export async function claimSession(code: string): Promise<BrowserSession> {
   const response = await fetch(WEB_PAGE_WORKSPACE_HTTP_PATH + '/session/claim', {
     method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: code,
     credentials: 'omit', redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(6000),
@@ -35,8 +36,8 @@ export async function claimSession(code: string): Promise<string> {
   if (!response.ok) throw Error('C_CLAIM');
   const result = record(await response.json());
   if (result?.scope !== WEB_PAGE_WORKSPACE_HTTP_SCOPE || typeof result.handle !== 'string'
-    || !/^zb_[0-9a-f]{32}$/.test(result.handle)) throw Error('C_CLAIM_RESPONSE');
-  return result.handle;
+    || !/^zb_[0-9a-f]{32}$/.test(result.handle) || !hex(result.accountTag)) throw Error('C_CLAIM_RESPONSE');
+  return { handle: result.handle, accountTag: result.accountTag };
 }
 
 export function sameContext(a: PinnedContext, b: PinnedContext): boolean {
@@ -56,6 +57,11 @@ export async function dispatch(token: string, command: Command, status = false):
   const result = record(envelope.result);
   if (result && (response.ok || response.status === 409 || response.status === 422)) return result;
   if (response.status === 400 && envelope.error === 'C_COMMAND') return { kind: 'invalid' };
+  if (response.status === 401 && envelope.error === 'C_SESSION') {
+    return { kind: 'session-expired', notAdmitted: !status && envelope.outcome === 'NOT_ADMITTED' };
+  }
+  if (!status && response.status === 503 && envelope.outcome === 'NOT_ADMITTED'
+    && (envelope.error === 'C_CAPACITY' || envelope.error === 'C_QUEUE')) return { kind: 'not-admitted' };
   if ((response.status === 401 || response.status === 403) && (command.op === READ_WEB_PAGE || command.op === LIST_WEB_PAGE_DOCUMENTS)) return { kind: 'denied' };
   throw Error('C_RESULT_UNCONFIRMED');
 }
@@ -70,6 +76,7 @@ export async function listDocuments(token: string) {
   const result = await dispatch(token, {
     op: LIST_WEB_PAGE_DOCUMENTS, bytes: JSON.stringify({ dtoVersion: WEB_PAGE_WORKSPACE_COMMAND_VERSION }),
   });
+  if (result.kind === 'session-expired') throw Error('C_WEB_SESSION');
   if (result.kind !== 'web-page-list' || !Array.isArray(result.documents)
     || result.documents.length > WEB_PAGE_DOCUMENT_LIMIT || typeof result.truncated !== 'boolean') throw Error('C_WEB_LIST');
   const documents: WebPageDocumentSummary[] = result.documents.map(value => {

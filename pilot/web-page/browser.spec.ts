@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
 import { spawn, type ChildProcess } from 'node:child_process';
-import { readFileSync, rmSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test, type Locator, type Page, type TestInfo } from '@playwright/test';
 
@@ -9,8 +10,12 @@ type Info = { url: string; credentials: string; state: string; pid: number };
 type Instance = { info: Info; close: () => Promise<void> };
 const program = fileURLToPath(new URL('./start.ts', import.meta.url));
 
-async function start(children: Instance[], args: readonly string[] = []): Promise<Instance> {
-  const child: ChildProcess = spawn(process.execPath, ['--import', 'tsx', program, ...args], { stdio: ['ignore', 'pipe', 'pipe'] });
+async function start(children: Instance[], args: readonly string[] = [], clockFile?: string): Promise<Instance> {
+  // Advance only the pilot's clock so the real 60-second lease check can run without a one-minute sleep.
+  const clock = clockFile ? ['--import', 'data:text/javascript,' + encodeURIComponent(
+    `import { readFileSync } from 'node:fs'; const now = Date.now; Date.now = () => now() + Number(readFileSync(${JSON.stringify(clockFile)}, 'utf8'));`,
+  )] : [];
+  const child: ChildProcess = spawn(process.execPath, ['--import', 'tsx', ...clock, program, ...args], { stdio: ['ignore', 'pipe', 'pipe'] });
   let stdout = '', stderr = '';
   child.stderr!.setEncoding('utf8').on('data', value => { stderr += value; });
   const closed = new Promise<void>(resolve => { child.once('close', () => resolve()); });
@@ -72,6 +77,30 @@ async function reauthorize(page: Page, pilot: Instance, role: 'ownerCode' | 'for
   const credentials: Record<typeof role, string> = JSON.parse(readFileSync(pilot.info.credentials, 'utf8'));
   await enterSecret(page.getByLabel('Новый одноразовый код доступа'), credentials[role]);
   await page.getByRole('button', { name: 'Проверить новую сессию' }).click();
+}
+
+async function expiredPilot() {
+  const children: Instance[] = [];
+  const directory = mkdtempSync(join(realpathSync(tmpdir()), 'zarya-pilot-clock-'));
+  const file = join(directory, 'offset');
+  writeFileSync(file, '0');
+  try {
+    const instance = await start(children, [], file);
+    return {
+      instance,
+      advanceTo(offsetMs: number) { writeFileSync(file, String(offsetMs)); },
+      async expire() {
+        const first = readFileSync(instance.info.credentials, 'utf8');
+        writeFileSync(file, '61000');
+        process.kill(instance.info.pid, 'SIGUSR2');
+        await expect.poll(() => readFileSync(instance.info.credentials, 'utf8') !== first).toBe(true);
+      },
+      async close() { try { await cleanup(children); } finally { rmSync(directory, { recursive: true, force: true }); } },
+    };
+  } catch (error) {
+    rmSync(directory, { recursive: true, force: true });
+    throw error;
+  }
 }
 
 async function create(page: Page) {
@@ -361,6 +390,118 @@ test('an interrupted network request preserves the draft and never repeats Save 
     await expect(page.getByTestId('pilot-revision')).toHaveText(revision);
     expect(writes).toBe(1);
   } finally { await cleanup(children); }
+});
+
+test('expired editor session resumes without losing applied work or newer Inspector input', async ({ page }) => {
+  const pilot = await expiredPilot();
+  try {
+    await enter(page, pilot.instance);
+    await create(page);
+    await edit(page, 'Применено до истечения');
+    const revision = (await page.getByTestId('pilot-revision').textContent())!;
+    const save = page.getByRole('button', { name: 'Сохранить', exact: true });
+    const writes: string[] = [];
+    page.on('request', request => {
+      if (request.url().endsWith('/commands/save-web-page-v1')) writes.push(request.postData()!);
+    });
+    await pilot.expire();
+    const failed = page.waitForResponse(response => response.url().endsWith('/commands/save-web-page-v1'));
+    await save.click();
+    expect((await failed).status()).toBe(401);
+    await expect(save).toBeDisabled();
+    await expect(page.getByTestId('pilot-revision')).toHaveText(revision);
+    const title = page.getByLabel(/^Заголовок/), body = page.getByLabel(/^Основной текст/);
+    await body.fill('Невнесённый текст после окончания сессии');
+    await page.getByText('Повторная авторизация', { exact: true }).click();
+    await reauthorize(page, pilot.instance, 'foreignCode');
+    await expect(page.getByText('Сессию для этой ревизии подтвердить не удалось.')).toBeVisible();
+    await reauthorize(page, pilot.instance, 'ownerCode');
+    await expect(page.getByText('Сессия обновлена для владельца этой ревизии.')).toBeVisible();
+    await expect(title).toHaveValue('Применено до истечения');
+    await expect(body).toHaveValue('Невнесённый текст после окончания сессии');
+    expect(writes).toHaveLength(1);
+    await expect(save).toBeDisabled();
+    await page.getByRole('button', { name: 'Применить', exact: true }).press('Enter');
+    await expect(save).toBeEnabled();
+    await save.click();
+    await expect(page.getByTestId('storage-status')).toHaveText('Сохранено');
+    expect(writes).toHaveLength(2);
+    await expect(page.getByTestId('pilot-revision')).not.toHaveText(revision);
+  } finally { await pilot.close(); }
+});
+
+test('expired Workspace session can reauthorize and create a document explicitly', async ({ page }) => {
+  const pilot = await expiredPilot();
+  try {
+    await enter(page, pilot.instance);
+    const list = page.getByRole('region', { name: 'Мои документы' });
+    await expect(list.getByText('У вас пока нет документов.')).toBeVisible();
+    await pilot.expire();
+    const createButton = page.getByRole('button', { name: 'Создать страницу события' });
+    let writes = 0;
+    page.on('request', request => { if (request.url().endsWith('/commands/create-web-page-project-v1')) writes++; });
+    const failed = page.waitForResponse(response => response.url().endsWith('/commands/create-web-page-project-v1'));
+    await createButton.click();
+    expect((await failed).status()).toBe(401);
+    await expect(createButton).toBeDisabled();
+    await page.getByText('Повторная авторизация', { exact: true }).click();
+    await reauthorize(page, pilot.instance, 'foreignCode');
+    await expect(page.getByText('Сессию для этого Workspace подтвердить не удалось.')).toBeVisible();
+    await reauthorize(page, pilot.instance, 'ownerCode');
+    await expect(page.getByText('Сессия Workspace обновлена.')).toBeVisible();
+    await expect(list.getByText('У вас пока нет документов.')).toBeVisible();
+    expect(writes).toBe(1);
+    await createButton.click();
+    await expect(list.getByRole('button', { name: 'День открытых мастерских', exact: true })).toBeVisible();
+    expect(writes).toBe(2);
+  } finally { await pilot.close(); }
+});
+
+test('Workspace retains an uncertain Create command through session replacement', async ({ page }) => {
+  const pilot = await expiredPilot();
+  try {
+    await enter(page, pilot.instance);
+    const list = page.getByRole('region', { name: 'Мои документы' });
+    await expect(list.getByText('У вас пока нет документов.')).toBeVisible();
+    // Age the session before the write so its expiration leaves the receipt window open.
+    pilot.advanceTo(30_000);
+    const createButton = page.getByRole('button', { name: 'Создать страницу события' });
+    const commands: Array<string | null> = [], statusRequests: Array<string | null> = [];
+    page.on('request', request => {
+      if (request.url().endsWith('/commands/create-web-page-project-v1')) commands.push(request.postData());
+      if (request.url().endsWith('/status/create-web-page-project-v1')) statusRequests.push(request.postData());
+    });
+    let committed = 0;
+    await page.route('**/commands/create-web-page-project-v1', async route => {
+      committed = (await route.fetch({ maxRetries: 0 })).status();
+      await route.abort('failed');
+    }, { times: 1 });
+    await createButton.click();
+    await expect(page.getByTestId('storage-status')).toContainText('Исход сохранения неизвестен');
+    expect(committed).toBe(200);
+    await pilot.expire();
+    const receipt = page.getByRole('button', { name: 'Проверить receipt' });
+    const refused = page.waitForResponse(response => response.url().endsWith('/status/create-web-page-project-v1'));
+    await receipt.click();
+    expect((await refused).status()).toBe(401);
+    await expect(receipt).toBeDisabled();
+    await page.getByText('Повторная авторизация', { exact: true }).click();
+    await reauthorize(page, pilot.instance, 'ownerCode');
+    await expect(page.getByText('Сессия Workspace обновлена.')).toBeVisible();
+    await expect(createButton).toBeDisabled();
+    await expect(receipt).toBeEnabled();
+    const recovery = page.waitForResponse(response => response.url().endsWith('/status/create-web-page-project-v1'));
+    await receipt.click();
+    const recovered = await recovery;
+    const envelope = await recovered.json();
+    expect({ status: recovered.status(), kind: envelope.result?.kind, error: envelope.error }).toEqual({
+      status: 200, kind: 'committed', error: undefined,
+    });
+    await expect(page.getByTestId('storage-status')).toContainText('результат восстановлен по receipt');
+    await expect(list.getByRole('button', { name: 'День открытых мастерских', exact: true })).toHaveCount(1);
+    expect(commands).toHaveLength(1);
+    expect(statusRequests).toEqual([commands[0], commands[0]]);
+  } finally { await pilot.close(); }
 });
 
 

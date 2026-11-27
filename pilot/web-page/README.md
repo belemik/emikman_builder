@@ -26,8 +26,9 @@ node node_modules/playwright/cli.js test --config pilot/web-page/playwright.conf
 | Saving | One immutable command is in flight. Inspector edits can continue. |
 | Saved | The returned receipt matches the operation, idempotency key, project, parent revision, Document ID, pinned context and exact UTF-8 digest. A late receipt only advances the confirmed revision for its own command. |
 | Conflict | Inputs and applied content stay in the editor. Copy both current Hero fields with a single clipboard action, confirm leaving, then open the latest revision from My Documents. Transfer the changes by hand, apply, and save with the newly opened revision as the CAS precondition. If clipboard access fails, select and copy from the read-only text area. |
-| Unknown outcome | Keep the original command in memory and use the status endpoint. Recovery never sends another write. An owner-scoped read of the open revision can confirm a replacement session. |
-| Error | Show the error and retain current editor input. My Documents can retry its read or accept a new one-time code when no operation is pending. |
+| Session expired | Issue a fresh one-time code and use «Повторная авторизация» in the editor or Workspace. The new session must belong to the same synthetic account. The editor also checks access to the exact open revision. Applied work and Inspector input stay in the tab. If the server confirms refusal before storage, repeat the action manually after sign-in. |
+| Unknown outcome | Keep the original command in memory and use the status endpoint. Sign in again if needed, then click «Проверить receipt». Recovery never sends another write. |
+| Error | Show the error and retain current editor input. My Documents can retry its read. |
 
 The document locator consists of the ProjectRevision reference and Document ID. My Documents supplies the confirmed DocumentRevision ID and SHA-256. Read checks both against the response and hashes the returned UTF-8 bytes before initializing the editor.
 

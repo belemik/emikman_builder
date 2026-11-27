@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import {createServer,type IncomingMessage,type ServerResponse} from 'node:http';
 import {C_TEST_PROFILE as P,CFailure,cFail,cRecord,isCOperation,isCWrite,type CJob,type CStorageDiagnostic} from './c-test-policy';
 import {CTestSessions} from './c-test-sessions';import {readCQuery,CTestPages,type CQuery} from './c-test-query';import {runCTestWorker} from './c-test-worker-client';
@@ -65,7 +66,8 @@ export async function startCTestHttp(options:CTestOptions={}) {
  }
  async function wait(hook:(()=>Promise<void>)|undefined,signal:AbortSignal){if(signal.aborted)cFail(504,'C_TIMEOUT');if(!hook)return;let abort=()=>{};try{await Promise.race([hook(),new Promise<never>((_,reject)=>{abort=()=>reject(new CFailure(504,'C_TIMEOUT'));signal.addEventListener('abort',abort,{once:true});})]);}finally{signal.removeEventListener('abort',abort);}if(signal.aborted)cFail(504,'C_TIMEOUT');}
  const send=(res:ServerResponse,status:number,body:string)=>{if(res.destroyed||res.writableEnded)return;res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Connection':'close'});res.end(body);};
- const error=(res:ServerResponse,status:number,code:string)=>send(res,status,JSON.stringify({scope,error:code,outcome:'UNKNOWN_OUTCOME'}));
+ const error=(res:ServerResponse,status:number,code:string,outcome:'NOT_ADMITTED'|'UNKNOWN_OUTCOME'='UNKNOWN_OUTCOME')=>
+  send(res,status,JSON.stringify({scope,error:code,outcome}));
  async function readBody(req:IncomingMessage,controller:AbortController,limit:number){
   const chunks:Buffer[]=[];let size=0;
   const ingress=setTimeout(()=>{controller.abort();req.destroy();},P.ingressMs);
@@ -84,6 +86,7 @@ export async function startCTestHttp(options:CTestOptions={}) {
   let transactionStage:CRequestDiagnostic['transactionStage']='not-dispatched';
   let sqlite:CRequestDiagnostic['sqlite']=null,cas:CRequestDiagnostic['cas']='not-run';
   let reconciliation:CRequestDiagnostic['reconciliation']='not-requested';
+  let browserWrite=false;
   const controller=new AbortController(),signal=controller.signal;controllers.add(controller);const timer=setTimeout(()=>controller.abort(),P.totalMs);req.pause();req.once('aborted',()=>controller.abort());res.once('close',()=>{if(!res.writableFinished)controller.abort();});let leave:(()=>void)|undefined;
   try{
    const seen=new Set<string>();for(let i=0;i<req.rawHeaders.length;i+=2){const name=req.rawHeaders[i].toLowerCase();if(seen.has(name))cFail(400,'C_HEADER');seen.add(name);}
@@ -100,7 +103,11 @@ export async function startCTestHttp(options:CTestOptions={}) {
     if(!/^zc_[0-9a-f]{32}$/.test(code))cFail(401,'C_SESSION');
     const handle=browserAccess.claim(code);
     if(!handle)cFail(401,'C_SESSION');
-    send(res,200,JSON.stringify({scope,handle}));return;
+    const token=browserAccess.resolve(handle),lease=token&&sessions.get(token);
+    if(!lease)cFail(401,'C_SESSION');
+    // Stable only for the two synthetic accounts. The tag is never used for authorization.
+    const accountTag=createHash('sha256').update(scope+'\0'+lease.account).digest('hex');
+    send(res,200,JSON.stringify({scope,handle,accountTag}));return;
    }
    const asset=web&&req.method==='GET'?web.assets?.get(target):undefined;
    if(asset){
@@ -124,6 +131,7 @@ export async function startCTestHttp(options:CTestOptions={}) {
     if(web){
      if(!isCWebOperation(match[2],workspace))cFail(400,'C_TARGET');
      operation=match[2];if(mode==='reconcile'&&!isCWebWrite(operation))cFail(400,'C_OPERATION');
+     browserWrite=Boolean(browserAccess)&&mode==='command'&&isCWebWrite(operation);
      decoder=webDecoder(operation)??decoder;
     }else{
      if(!isCOperation(match[2]))cFail(400,'C_TARGET');
@@ -213,7 +221,9 @@ export async function startCTestHttp(options:CTestOptions={}) {
    const code=e instanceof CFailure?e.code:'C_INTERNAL';
    errorCode=diagnosticErrorCodes.has(code)?code:'C_INTERNAL';
    if(!res.destroyed&&!res.writableEnded)httpStatus=status;
-   error(res,status,code);
+   const rejectedBeforeStorage=browserWrite&&transactionStage==='not-dispatched'&&(
+    status===401&&code==='C_SESSION'||status===503&&(code==='C_CAPACITY'||code==='C_QUEUE'));
+   error(res,status,code,rejectedBeforeStorage?'NOT_ADMITTED':'UNKNOWN_OUTCOME');
   }finally{
    clearTimeout(timer);controller.abort();controllers.delete(controller);leave?.();if(!req.complete)req.destroy();
    if(diagnosticOperation){
