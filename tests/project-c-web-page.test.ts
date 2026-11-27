@@ -208,3 +208,117 @@ test('C Workspace v2 rechecks list ownership and session before delivery', async
   assert.doesNotMatch(await result.text(), new RegExp(receipt.projectId));
   assert.deepEqual(counts(h), [1, 1, 1, 1, 1, 1, 1]);
 });
+
+test('C Workspace browser claim is opt-in, one-time and cannot deliver a revoked lease', async t => {
+  const { createBrowserAccess } = await import('../pilot/web-page/browser-access');
+  const sessions = new CTestSessions();
+  const access = createBrowserAccess(sessions);
+  let token: string | null = null;
+  let revoke = false;
+  const h = await startCTestHttp({
+    sessions, webPageProfile: { workspace: true, browserAccess: access },
+    beforeDelivery: async () => { if (revoke && token) sessions.revoke(token); },
+  });
+  t.after(async () => {
+    await h.close();
+    for (const volume of [h.main, h.volume]) rmSync(volume.directory, { recursive: true });
+  });
+  const { h: plain } = await useHarness(t, undefined, true);
+  const code = access.issue('a'.repeat(32));
+  const claim = (url: string, origin: string) => fetch(url + WEB_PAGE_WORKSPACE_HTTP_PATH + '/session/claim', {
+    method: 'POST', body: code, headers: { Origin: origin, 'Content-Type': 'text/plain' },
+  });
+  assert.equal((await claim(plain.url, plain.url)).status, 400);
+  assert.equal((await claim(h.url, 'http://wrong.invalid')).status, 403);
+  const accepted = await claim(h.url, h.url);
+  assert.equal(accepted.status, 200);
+  const { handle } = await accepted.json();
+  assert.equal(typeof handle === 'string' && /^zb_[0-9a-f]{32}$/.test(handle), true);
+  assert.equal((await claim(h.url, h.url)).status, 401);
+  token = access.resolve(handle);
+  assert.ok(token);
+  const list = (bearer: string) => fetch(h.url + WEB_PAGE_WORKSPACE_HTTP_PATH + '/commands/' + LIST_WEB_PAGE_DOCUMENTS, {
+    method: 'POST', body: JSON.stringify(documentList),
+    headers: { Origin: h.url, Authorization: 'Bearer ' + bearer,
+      'Content-Type': 'application/json', 'x-test-decoder-profile': WEB_PAGE_WORKSPACE_COMMAND_VERSION },
+  });
+  assert.equal((await list(token)).status, 401);
+  assert.equal((await list(handle)).status, 200);
+  revoke = true;
+  const denial = await list(handle);
+  assert.equal(denial.status, 401);
+  assert.equal(Object.hasOwn(await denial.json(), 'result'), false);
+  assert.equal((await list(handle)).status, 401);
+});
+
+test('C Workspace session renewal recovers expired and revoked slots while keeping the live cap', t => {
+  t.mock.timers.enable({ apis: ['Date'] });
+  const sessions = new CTestSessions(), owner = 'a'.repeat(32);
+  const old = Array.from({ length: 64 }, () => sessions.issue(owner));
+  assert.throws(() => sessions.issue(owner), /C_FIXTURE_SESSION/);
+  sessions.revoke(old[0]);
+  const replacement = sessions.issue(owner);
+  assert.equal(sessions.get(old[0]), null);
+  assert.ok(sessions.get(replacement));
+  t.mock.timers.tick(60_001);
+  assert.equal(sessions.get(replacement), null);
+  assert.ok(sessions.get(sessions.issue(owner)));
+});
+
+test('C Workspace marks browser write refusal only before storage admission', async t => {
+  const { createBrowserAccess } = await import('../pilot/web-page/browser-access');
+  const sessions = new CTestSessions(), access = createBrowserAccess(sessions);
+  let token: string, revokeAt: 'dispatch' | 'delivery' | undefined;
+  const h = await startCTestHttp({
+    sessions, webPageProfile: { workspace: true, browserAccess: access },
+    beforeDispatch: async () => { if (revokeAt === 'dispatch') sessions.revoke(token); },
+    beforeDelivery: async () => { if (revokeAt === 'delivery') sessions.revoke(token); },
+  });
+  t.after(async () => {
+    await h.close();
+    for (const volume of [h.main, h.volume]) rmSync(volume.directory, { recursive: true });
+  });
+  const endpoint = h.url + WEB_PAGE_WORKSPACE_HTTP_PATH;
+  const origin = { Origin: h.url };
+  async function claim(account: 'a' | 'b' = 'a') {
+    const response = await fetch(endpoint + '/session/claim', { method: 'POST',
+      headers: { ...origin, 'Content-Type': 'text/plain' }, body: access.issue(account.repeat(32)) });
+    assert.equal(response.status, 200);
+    const { handle, accountTag } = await response.json();
+    assert.match(accountTag, /^[a-f0-9]{64}$/);
+    return { handle, accountTag };
+  }
+  const body = JSON.stringify({ dtoVersion: WEB_PAGE_WORKSPACE_COMMAND_VERSION, idempotencyKey: 'claim-fence', payload: event });
+  const request = (handle: string, mode = 'commands') => fetch(endpoint + '/' + mode + '/' + CREATE_WEB_PAGE_PROJECT, {
+    method: 'POST', body,
+    headers: { ...origin, Authorization: 'Bearer ' + handle, 'Content-Type': 'application/json', 'x-test-decoder-profile': WEB_PAGE_WORKSPACE_COMMAND_VERSION },
+  });
+  const first = await claim();
+  token = access.resolve(first.handle)!;
+  assert.ok(token);
+  revokeAt = 'dispatch';
+  const before = await request(first.handle);
+  assert.equal(before.status, 401);
+  assert.equal((await before.json()).outcome, 'NOT_ADMITTED');
+  assert.deepEqual(counts(h), [0, 0, 0, 0, 0, 0, 0]);
+  const next = await claim();
+  assert.equal(next.accountTag, first.accountTag);
+  assert.notEqual((await claim('b')).accountTag, first.accountTag);
+  token = access.resolve(next.handle)!;
+  assert.ok(token);
+  revokeAt = 'delivery';
+  const after = await request(next.handle);
+  assert.equal(after.status, 401);
+  const refused = await after.json();
+  assert.equal(refused.outcome, 'UNKNOWN_OUTCOME');
+  assert.equal(Object.hasOwn(refused, 'result'), false);
+  assert.deepEqual(counts(h), [1, 1, 1, 1, 1, 1, 1]);
+  const staleStatus = await request(next.handle, 'status');
+  assert.equal(staleStatus.status, 401);
+  assert.equal((await staleStatus.json()).outcome, 'UNKNOWN_OUTCOME');
+  revokeAt = undefined;
+  const recovered = await request((await claim()).handle, 'status');
+  assert.equal(recovered.status, 200);
+  assert.equal((await recovered.json()).result.receipt.idempotencyKey, 'claim-fence');
+  assert.deepEqual(counts(h), [1, 1, 1, 1, 1, 1, 1]);
+});

@@ -1,4 +1,5 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import type { WebPageV01 } from './contract';
 import eventTemplate from '../../tests/fixtures/web-page/event.valid.json';
 import { WebPageRenderer } from './WebPageRenderer';
 import { validateWebPage, type WebPageIssue } from './validate';
@@ -8,10 +9,13 @@ import { Modal } from '../workspace/Overlays';
 import { WebPageLayers, layers, type Layer } from './WebPageLayers';
 import { useNarrow } from '../workspace/Navigation';
 
-export function useEventSession() {
-  const [accepted, setAccepted] = useState(() => validateWebPage(JSON.stringify(eventTemplate)));
-  const [heading, setHeading] = useState(eventTemplate.hero.heading);
-  const [body, setBody] = useState(eventTemplate.hero.body.text);
+export function useEventSession(initial: WebPageV01 = eventTemplate as WebPageV01, storage?: {
+  onDraftChange: (dirty: boolean) => void;
+  onApply: (page: WebPageV01) => void;
+}) {
+  const [accepted, setAccepted] = useState(() => validateWebPage(JSON.stringify(initial)));
+  const [heading, setHeading] = useState(initial.hero.heading);
+  const [body, setBody] = useState(initial.hero.body.text);
   const [issue, setIssue] = useState<WebPageIssue>();
   const [feedback, setFeedback] = useState('Локальный шаблон');
   const dirty = accepted.valid && (heading !== accepted.value.hero.heading || body !== accepted.value.hero.body.text);
@@ -26,16 +30,24 @@ export function useEventSession() {
     if (!candidate.valid) { setIssue(candidate.issue); return false; }
     setAccepted(candidate); setHeading(candidate.value.hero.heading); setBody(candidate.value.hero.body.text);
     setIssue(undefined); setFeedback('Применено в сессии');
+    storage?.onApply(candidate.value);
     return true;
   }
   function cancel() {
     if (!accepted.valid) return;
     setHeading(accepted.value.hero.heading); setBody(accepted.value.hero.body.text); setIssue(undefined);
     setFeedback('Черновик отменён');
+    storage?.onDraftChange(false);
   }
   return { accepted, heading, body, issue, dirty, feedback, apply, cancel,
-    editHeading: (value: string) => { setIssue(undefined); setHeading(value); },
-    editBody: (value: string) => { setIssue(undefined); setBody(value); } };
+    editHeading: (value: string) => {
+      setIssue(undefined); setHeading(value);
+      if (accepted.valid) storage?.onDraftChange(value !== accepted.value.hero.heading || body !== accepted.value.hero.body.text);
+    },
+    editBody: (value: string) => {
+      setIssue(undefined); setBody(value);
+      if (accepted.valid) storage?.onDraftChange(heading !== accepted.value.hero.heading || value !== accepted.value.hero.body.text);
+    } };
 }
 
 type Session = ReturnType<typeof useEventSession>;
@@ -96,7 +108,7 @@ function Inspector({ layer, session, onPreview }: { layer: Layer | null; session
   </form>;
 }
 
-export function WebPageEditor({ session, onBack }: { session: Session; onBack: () => void }) {
+export function WebPageEditor({ session, onBack, storageControls }: { session: Session; onBack: () => void; storageControls?: ReactNode }) {
   const narrow = useNarrow();
   const [device, setDevice] = useState<Device>(() => window.innerWidth < 550 ? 'Mobile' : window.innerWidth <= 800 ? 'Tablet' : 'Desktop');
   const [preview, setPreview] = useState(false);
@@ -158,16 +170,17 @@ export function WebPageEditor({ session, onBack }: { session: Session; onBack: (
   const tree = <WebPageLayers selected={selected} onSelect={layer => select(layer, true)} />;
   return <main ref={shell} className="ze-shell" data-preview={preview}>
     <header className="ze-toolbar"><div className="ze-identity"><button onClick={onBack} className="ze-back" aria-label="К Workspace"><BrandMark /><Glyph name="back" /></button>
-      <div><small>Открытые мастерские · Шаблон</small><h1 ref={title} tabIndex={-1}>Страница события</h1></div></div>
+      <div><small>{storageControls ? 'Синтетический режим' : 'Открытые мастерские · Шаблон'}</small><h1 ref={title} tabIndex={-1}>Страница события</h1></div></div>
       <div className="zs-switch ze-devices" role="group" aria-label="Размер страницы">{(Object.keys(deviceIcons) as Device[]).map(value =>
         <button key={value} aria-label={value} title={value} aria-pressed={device === value} onClick={() => setDevice(value)}><Glyph name={deviceIcons[value]} /></button>)}</div>
-      <div className="ze-actions"><ThemeSelect /><Status tone={session.dirty ? 'draft' : session.feedback === 'Применено в сессии' ? 'ok' : 'neutral'}>{status}</Status>
+      <div className="ze-actions"><ThemeSelect />{!storageControls && <Status tone={session.dirty ? 'draft' : session.feedback === 'Применено в сессии' ? 'ok' : 'neutral'}>{status}</Status>}
         <button ref={previewTrigger} className="z-button" onClick={() => setPreview(!preview)} aria-label={preview ? 'В редактор' : 'Preview'}><Glyph name={preview ? 'back' : 'eye'} /><span>{preview ? 'В редактор' : 'Preview'}</span></button></div>
     </header>
+    {storageControls}
     {!accepted.valid ? <p role="alert">{accepted.issue.path} · {accepted.issue.message}</p> : <div className="ze-layout">
       {!preview && !narrow && <aside className="ze-side"><PanelHeading icon="layers">Слои</PanelHeading>{tree}</aside>}
       <section className="ze-stage" aria-label={preview ? 'Preview WebPage' : 'Canvas WebPage'}>
-        <div className="ze-stagebar"><span><Glyph name={preview ? 'eye' : 'window'} />{preview ? 'Preview' : 'Canvas'}{preview && session.dirty && <small>Подтверждённая версия</small>}</span>
+        <div className="ze-stagebar"><span><Glyph name={preview ? 'eye' : 'window'} />{preview ? 'Preview' : 'Canvas'}{preview && session.dirty && <small>{storageControls ? 'Применённая версия' : 'Подтверждённая версия'}</small>}</span>
           <label>Масштаб <select value={zoom} onChange={e => setZoom(e.target.value)} aria-label="Масштаб"><option value="fit">Вписать</option>{[0.5, 0.75, 1].map(z => <option key={z} value={z}>{z * 100}%</option>)}</select></label></div>
         {device === 'Custom' && <CustomWidth width={customWidth} onWidth={setCustomWidth} />}
         <div className="ze-scroll" ref={stage}><div className="ze-workarea" style={{ width: Math.max(available, width * scale) }}>

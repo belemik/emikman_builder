@@ -4,7 +4,9 @@ export interface CLease {readonly key:object;readonly identity:object;readonly a
 export class CTestSessions {
  #tokens=new Map<string,CLease>();
  issue(account:string,ttl=60000):string {
-  if(!/^[ab]{32}$/.test(account)||new Set(account).size!==1||!Number.isSafeInteger(ttl)||ttl<1||ttl>60000||this.#tokens.size>=64)throw Error('C_FIXTURE_SESSION');
+  if(!/^[ab]{32}$/.test(account)||new Set(account).size!==1||!Number.isSafeInteger(ttl)||ttl<1||ttl>60000)throw Error('C_FIXTURE_SESSION');
+  for(const token of this.#tokens.keys())if(!this.get(token))this.#tokens.delete(token);
+  if(this.#tokens.size>=64)throw Error('C_FIXTURE_SESSION');
   const token='ct_'+randomBytes(16).toString('hex');this.#tokens.set(token,this.make(account,ttl));return token;
  }
  private make(account:string,ttl:number):CLease {const state=new SharedArrayBuffer(4);Atomics.store(new Int32Array(state),0,1);return Object.freeze({key:Object.freeze({}),identity:Object.freeze({}),account,expires:Date.now()+ttl,state});}

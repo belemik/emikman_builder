@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import {createServer,type IncomingMessage,type ServerResponse} from 'node:http';
 import {C_TEST_PROFILE as P,CFailure,cFail,cRecord,isCOperation,isCWrite,type CJob,type CStorageDiagnostic} from './c-test-policy';
 import {CTestSessions} from './c-test-sessions';import {readCQuery,CTestPages,type CQuery} from './c-test-query';import {runCTestWorker} from './c-test-worker-client';
@@ -5,7 +6,7 @@ import {createBTestVolume,adoptBTestVolume} from './b-test-volume';import {BTest
 import {createTestPrincipalBoundary} from './verified-principal';import {inspectTestFoundationPolicy,FOUNDATION_TEST_PROFILE} from './server-foundation-policy';import {PROJECT_INGEST_TEST_PROFILE} from './ingest-profile';
 import { LIST_WEB_PAGE_DOCUMENTS, READ_WEB_PAGE, SAVE_WEB_PAGE, WEB_PAGE_DOCUMENT_LIMIT } from '../../src/projects/web-page-repository.dto';
 import {
- WEB_PAGE_HTTP_SCOPE, WEB_PAGE_WORKSPACE_HTTP_SCOPE, WEB_PAGE_WORKSPACE_OUTPUT_BYTES,
+ WEB_PAGE_HTTP_SCOPE, WEB_PAGE_WORKSPACE_HTTP_PATH, WEB_PAGE_WORKSPACE_HTTP_SCOPE, WEB_PAGE_WORKSPACE_OUTPUT_BYTES,
  isCWebOperation, isCWebWrite, webDecoder,
 } from './c-test-web-page-policy';
 
@@ -34,13 +35,14 @@ export interface CRequestDiagnostic {
 export interface CTestOptions {readonly main?:string;readonly ledger?:string;readonly sessions?:CTestSessions;readonly diagnostics?:{
   readonly onQueued?:()=>void;
   readonly record:(entry:CRequestDiagnostic)=>void;
- };readonly beforeDispatch?:()=>Promise<void>;readonly beforeDelivery?:()=>Promise<void>;readonly fault?:()=>CJob['fault'];readonly dropCommittedOnce?:boolean;readonly webPageProfile?:{readonly assets?:ReadonlyMap<string,CWebAsset>;readonly dropEditResponseOnce?:boolean;readonly port?:number;readonly workspace?:true};}
+ };readonly beforeDispatch?:()=>Promise<void>;readonly beforeDelivery?:()=>Promise<void>;readonly fault?:()=>CJob['fault'];readonly dropCommittedOnce?:boolean;readonly webPageProfile?:{readonly assets?:ReadonlyMap<string,CWebAsset>;readonly dropEditResponseOnce?:boolean;readonly port?:number;readonly workspace?:true;readonly browserAccess?:{readonly claim:(code:string)=>string|null;readonly resolve:(handle:string)=>string|null};};}
 /** No real auth, API routes or DATA_DIR: explicit disposable TEST bootstrap and loopback only. */
 export async function startCTestHttp(options:CTestOptions={}) {
  const web=options.webPageProfile;
  const port=web?.port??0;
  if(port!==0&&(!Number.isInteger(port)||port<1024||port>65535))throw Error('C_LOOPBACK_PORT');
  const workspace=web?.workspace===true;
+ const browserAccess=workspace?web?.browserAccess:undefined;
  const profile=workspace?'workspace-v1':web?true:undefined;
  const scope=workspace?WEB_PAGE_WORKSPACE_HTTP_SCOPE:web?WEB_PAGE_HTTP_SCOPE:'C_TEST_ONLY';
  const main=options.main?adoptBTestVolume(options.main):createBTestVolume('main'),volume=options.ledger?adoptBTestVolume(options.ledger):createBTestVolume('ledger'),ledger=new BTestLedger(volume),sessions=options.sessions??new CTestSessions();
@@ -64,7 +66,18 @@ export async function startCTestHttp(options:CTestOptions={}) {
  }
  async function wait(hook:(()=>Promise<void>)|undefined,signal:AbortSignal){if(signal.aborted)cFail(504,'C_TIMEOUT');if(!hook)return;let abort=()=>{};try{await Promise.race([hook(),new Promise<never>((_,reject)=>{abort=()=>reject(new CFailure(504,'C_TIMEOUT'));signal.addEventListener('abort',abort,{once:true});})]);}finally{signal.removeEventListener('abort',abort);}if(signal.aborted)cFail(504,'C_TIMEOUT');}
  const send=(res:ServerResponse,status:number,body:string)=>{if(res.destroyed||res.writableEnded)return;res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Connection':'close'});res.end(body);};
- const error=(res:ServerResponse,status:number,code:string)=>send(res,status,JSON.stringify({scope,error:code,outcome:'UNKNOWN_OUTCOME'}));
+ const error=(res:ServerResponse,status:number,code:string,outcome:'NOT_ADMITTED'|'UNKNOWN_OUTCOME'='UNKNOWN_OUTCOME')=>
+  send(res,status,JSON.stringify({scope,error:code,outcome}));
+ async function readBody(req:IncomingMessage,controller:AbortController,limit:number){
+  const chunks:Buffer[]=[];let size=0;
+  const ingress=setTimeout(()=>{controller.abort();req.destroy();},P.ingressMs);
+  try{
+   for await(const part of req){
+    const chunk=Buffer.from(part);size+=chunk.byteLength;if(size>limit)cFail(413,'C_BODY');chunks.push(chunk);
+   }
+   return Buffer.concat(chunks,size);
+  }finally{clearTimeout(ingress);}
+ }
  async function handle(req:IncomingMessage,res:ServerResponse){
   const started=performance.now();
   let diagnosticOperation:CRequestDiagnostic['operation']|undefined;
@@ -73,16 +86,35 @@ export async function startCTestHttp(options:CTestOptions={}) {
   let transactionStage:CRequestDiagnostic['transactionStage']='not-dispatched';
   let sqlite:CRequestDiagnostic['sqlite']=null,cas:CRequestDiagnostic['cas']='not-run';
   let reconciliation:CRequestDiagnostic['reconciliation']='not-requested';
+  let browserWrite=false;
   const controller=new AbortController(),signal=controller.signal;controllers.add(controller);const timer=setTimeout(()=>controller.abort(),P.totalMs);req.pause();req.once('aborted',()=>controller.abort());res.once('close',()=>{if(!res.writableFinished)controller.abort();});let leave:(()=>void)|undefined;
   try{
    const seen=new Set<string>();for(let i=0;i<req.rawHeaders.length;i+=2){const name=req.rawHeaders[i].toLowerCase();if(seen.has(name))cFail(400,'C_HEADER');seen.add(name);}
    if(req.headers.host!==origin.slice(7)||req.headers.forwarded||Object.keys(req.headers).some(k=>k.startsWith('x-forwarded-'))||req.headers.origin&&req.headers.origin!==origin)cFail(403,'C_ORIGIN');
    const target=req.url??'';let query:CQuery|null=null,mode:CJob['mode']='command',operation:CJob['operation'];
+   if(browserAccess&&target===WEB_PAGE_WORKSPACE_HTTP_PATH+'/session/claim'){
+    if(req.method!=='POST')cFail(405,'C_METHOD');
+    if(req.headers.origin!==origin)cFail(403,'C_ORIGIN');
+    if(req.headers['content-type']!=='text/plain'||req.headers['content-encoding']||req.headers['transfer-encoding'])cFail(415,'C_MEDIA');
+    if(req.headers['content-length']!=='35')cFail(400,'C_CLAIM_LENGTH');
+    leave=await acquire(signal);
+    const code=(await readBody(req,controller,35)).toString('latin1');
+    if(signal.aborted)cFail(504,'C_TIMEOUT');
+    if(!/^zc_[0-9a-f]{32}$/.test(code))cFail(401,'C_SESSION');
+    const handle=browserAccess.claim(code);
+    if(!handle)cFail(401,'C_SESSION');
+    const token=browserAccess.resolve(handle),lease=token&&sessions.get(token);
+    if(!lease)cFail(401,'C_SESSION');
+    // Stable only for the two synthetic accounts. The tag is never used for authorization.
+    const accountTag=createHash('sha256').update(scope+'\0'+lease.account).digest('hex');
+    send(res,200,JSON.stringify({scope,handle,accountTag}));return;
+   }
    const asset=web&&req.method==='GET'?web.assets?.get(target):undefined;
    if(asset){
     if(req.headers['transfer-encoding']||req.headers['content-length']&&req.headers['content-length']!=='0')cFail(400,'C_GET_BODY');
     res.writeHead(200,{'Content-Type':asset.mediaType,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',
-     'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+     'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; "
+      +(browserAccess?"font-src 'self'; ":"")+"connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
      'Referrer-Policy':'no-referrer','X-Frame-Options':'DENY','Cross-Origin-Resource-Policy':'same-origin','Connection':'close'});
     res.end(asset.body);return;
    }
@@ -99,6 +131,7 @@ export async function startCTestHttp(options:CTestOptions={}) {
     if(web){
      if(!isCWebOperation(match[2],workspace))cFail(400,'C_TARGET');
      operation=match[2];if(mode==='reconcile'&&!isCWebWrite(operation))cFail(400,'C_OPERATION');
+     browserWrite=Boolean(browserAccess)&&mode==='command'&&isCWebWrite(operation);
      decoder=webDecoder(operation)??decoder;
     }else{
      if(!isCOperation(match[2]))cFail(400,'C_TARGET');
@@ -113,7 +146,13 @@ export async function startCTestHttp(options:CTestOptions={}) {
     diagnosticMode=mode==='reconcile'?'reconcile':'command';
     if(diagnosticMode==='reconcile')reconciliation='not-confirmed';
    }
-   const bearer=req.headers.authorization;if(typeof bearer!=='string'||!/^Bearer ct_[0-9a-f]{32}$/.test(bearer))cFail(401,'C_SESSION');const token=bearer.slice(7),lease=sessions.get(token);if(!lease)cFail(401,'C_SESSION');const captured=boundary.capture(lease.key);if(captured.kind!=='test-principal-captured')cFail(401,'C_SESSION');
+   const bearer=req.headers.authorization;
+   const pattern=browserAccess?/^Bearer zb_[0-9a-f]{32}$/:/^Bearer ct_[0-9a-f]{32}$/;
+   if(typeof bearer!=='string'||!pattern.test(bearer))cFail(401,'C_SESSION');
+   const token=browserAccess?browserAccess.resolve(bearer.slice(7)):bearer.slice(7);
+   if(!token)cFail(401,'C_SESSION');
+   const lease=sessions.get(token);if(!lease)cFail(401,'C_SESSION');
+   const captured=boundary.capture(lease.key);if(captured.kind!=='test-principal-captured')cFail(401,'C_SESSION');
    try{
     leave=await acquire(signal,diagnosticOperation?()=>{
      queuedAt=performance.now();
@@ -121,8 +160,7 @@ export async function startCTestHttp(options:CTestOptions={}) {
     }:undefined);
    }finally{if(queuedAt!==undefined)queueMs=Math.round(performance.now()-queuedAt);}
    if(!sessions.current(token,lease))cFail(401,'C_SESSION');
-   let bytes=new Uint8Array(0);
-   if(mode!=='read'){const chunks:Buffer[]=[];let size=0;const ingress=setTimeout(()=>{controller.abort();req.destroy();},P.ingressMs);try{for await(const part of req){const chunk=Buffer.from(part);size+=chunk.byteLength;if(size>P.bodyBytes)cFail(413,'C_BODY');chunks.push(chunk);}bytes=Buffer.concat(chunks,size);}finally{clearTimeout(ingress);}}
+   const bytes=mode==='read'?new Uint8Array(0):await readBody(req,controller,P.bodyBytes);
    await wait(options.beforeDispatch,signal);if(!sessions.current(token,lease))cFail(401,'C_SESSION');if(signal.aborted)cFail(504,'C_TIMEOUT');
    if(web&&(!repository.current()||ledger.meta().mode!=='ACTIVE'))cFail(503,'C_RECOVERY');
    transactionStage='worker-dispatched';
@@ -183,7 +221,9 @@ export async function startCTestHttp(options:CTestOptions={}) {
    const code=e instanceof CFailure?e.code:'C_INTERNAL';
    errorCode=diagnosticErrorCodes.has(code)?code:'C_INTERNAL';
    if(!res.destroyed&&!res.writableEnded)httpStatus=status;
-   error(res,status,code);
+   const rejectedBeforeStorage=browserWrite&&transactionStage==='not-dispatched'&&(
+    status===401&&code==='C_SESSION'||status===503&&(code==='C_CAPACITY'||code==='C_QUEUE'));
+   error(res,status,code,rejectedBeforeStorage?'NOT_ADMITTED':'UNKNOWN_OUTCOME');
   }finally{
    clearTimeout(timer);controller.abort();controllers.delete(controller);leave?.();if(!req.complete)req.destroy();
    if(diagnosticOperation){
