@@ -3,6 +3,89 @@
 .wdr-host-slot { padding-block: 8px; }
 .wdeaf-renderer .wdr-input input::placeholder { color: var(--wdr-placeholder); opacity: 1; }
 .wdeaf-renderer .wdr-checkbox input:focus-visible + .wdr-check-container { outline: auto; }
+/* TextArea m: confirmed light/dark roles from the local 27.11.2026 export.
+   Caption replaces the low-contrast placeholder and outline. Focus stays separate from the error border. */
+.wdr-textarea {
+  --wdr-textarea-surface: var(--wdr-textarea-light-surface);
+  --wdr-textarea-body: var(--wdr-textarea-light-body);
+  --wdr-textarea-caption: var(--wdr-textarea-light-caption);
+  --wdr-textarea-error: var(--wdr-textarea-light-error);
+  --wdr-textarea-focus: var(--wdr-textarea-light-focus);
+  display: grid; gap: 11px; box-sizing: border-box; inline-size: min(280px, 100%);
+  color: var(--wdr-textarea-body); background: var(--wdr-textarea-surface);
+  color-scheme: light; font: 400 12px/14px Manrope, sans-serif; overflow-wrap: anywhere;
+}
+.wdr-textarea > label, .wdr-textarea > p { margin: 0; padding-inline: 12px; }
+.wdr-textarea > p { color: var(--wdr-textarea-caption); }
+.wdr-textarea[data-state=error] > p { color: var(--wdr-textarea-body); }
+.wdr-textarea > textarea {
+  box-sizing: border-box; display: block; inline-size: 100%; min-inline-size: 0;
+  min-block-size: 80px; block-size: 80px; padding: 7px 11px; margin: 0;
+  resize: vertical; border: 1px solid var(--wdr-textarea-caption); border-radius: 6px;
+  color: inherit; background: inherit; font: 400 14px/20px Manrope, sans-serif; overflow-wrap: anywhere;
+}
+.wdr-textarea > textarea::placeholder { color: var(--wdr-textarea-caption); opacity: 1; }
+.wdr-textarea[data-state=error] > textarea { border-color: var(--wdr-textarea-error); }
+.wdeaf-renderer .wdr-textarea > textarea:focus-visible { outline: 2px solid var(--wdr-textarea-focus); outline-offset: 2px; }
+:root[data-appearance=dark] .wdr-textarea {
+  --wdr-textarea-surface: #191f29;
+  --wdr-textarea-body: #fff;
+  --wdr-textarea-caption: #8f98aa;
+  --wdr-textarea-error: #f74569;
+  --wdr-textarea-focus: #3377ff;
+  color-scheme: dark;
+}
+/* ButtonIcon m/secondary/neutral. The button owns a separate 44 px target around the 35 px Figma surface. */
+.wdr-button-icon {
+  --wdr-icon-ink: var(--wdr-icon-light-ink);
+  --wdr-icon-hover-ink: #69758d;
+  --wdr-icon-pressed-ink: #39455f;
+  --wdr-icon-disabled-ink: #4453714d;
+  --wdr-icon-bg: var(--wdr-icon-light-bg);
+  --wdr-icon-hover-bg: var(--wdr-icon-light-hover-bg);
+  --wdr-icon-pressed-bg: var(--wdr-icon-light-pressed-bg);
+  --wdr-icon-disabled-bg: var(--wdr-icon-light-disabled-bg);
+  --wdr-icon-focus: var(--wdr-icon-light-focus);
+  --wdr-icon-canvas: #fff;
+  display: inline-grid; place-items: center; box-sizing: border-box; flex: none;
+  inline-size: 44px; block-size: 44px; padding: 0; margin: 0; border: 0; border-radius: 4px;
+  color: var(--wdr-icon-ink); background: transparent; cursor: pointer; box-shadow: none;
+}
+:root[data-appearance=dark] .wdr-button-icon {
+  --wdr-icon-ink: #69758d;
+  --wdr-icon-hover-ink: #8f98aa;
+  --wdr-icon-pressed-ink: #b4bac6;
+  --wdr-icon-disabled-ink: #8f98aa4d;
+  --wdr-icon-bg: #8f98aa0d;
+  --wdr-icon-hover-bg: #8f98aa1a;
+  --wdr-icon-pressed-bg: #8f98aa26;
+  --wdr-icon-disabled-bg: #8f98aa0d;
+  --wdr-icon-focus: #3377ff;
+  --wdr-icon-canvas: #191f29;
+}
+.wdr-button-icon:focus-visible { outline: 2px solid var(--wdr-icon-focus); outline-offset: 2px; }
+button.wdr-button-icon:hover:not(:disabled) { background: transparent; }
+.wdr-icon-surface {
+  --wdr-icon-fill: var(--wdr-icon-bg);
+  display: grid; place-items: center; inline-size: 35px; block-size: 35px; border-radius: 4px;
+  background: linear-gradient(var(--wdr-icon-fill), var(--wdr-icon-fill)), var(--wdr-icon-canvas);
+  pointer-events: none;
+}
+.wdr-button-icon:is([data-state=hover], [data-state=default]:hover) { color: var(--wdr-icon-hover-ink); }
+.wdr-button-icon:is([data-state=hover], [data-state=default]:hover) .wdr-icon-surface { --wdr-icon-fill: var(--wdr-icon-hover-bg); }
+.wdr-button-icon:is([data-state=pressed], [data-state=default]:active) { color: var(--wdr-icon-pressed-ink); }
+.wdr-button-icon:is([data-state=pressed], [data-state=default]:active) .wdr-icon-surface { --wdr-icon-fill: var(--wdr-icon-pressed-bg); }
+.wdr-button-icon:disabled { color: var(--wdr-icon-disabled-ink); cursor: not-allowed; opacity: 1; }
+.wdr-button-icon:disabled .wdr-icon-surface { --wdr-icon-fill: var(--wdr-icon-disabled-bg); }
+.wdr-icon-glyph, .wdr-icon-sample { display: inline-grid; place-items: center; inline-size: 20px; block-size: 20px; }
+/* dots-vertical (15:18364), scaled from 24 to 20 px. */
+.wdr-icon-glyph::before, .wdr-icon-sample::before {
+  content: ""; inline-size: 2.083px; block-size: 2.083px; border-radius: 50%;
+  background: currentColor; box-shadow: 0 -4.375px currentColor, 0 4.375px currentColor;
+}
+.wdr-icon-details { display: flex; gap: 8px; align-items: center; }
+.wdr-icon-details-list { display: grid; grid-template-columns: auto 1fr; gap: 4px 8px; margin: 0; }
+.wdr-icon-details-list dd { margin: 0; }
 .renderer-errors { color: var(--ui-text); background: var(--ui-panel); padding: 16px; }
 .renderer-errors ul { padding-left: 20px; }
 .renderer-errors code { font-size: 11px; }

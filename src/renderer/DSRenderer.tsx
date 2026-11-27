@@ -3,6 +3,8 @@ import { tokens } from '../design-system/catalog.generated';
 import type { ScreenElement } from '../design-system';
 import { prepareRender, sourceNode, type RenderElement } from './prepare';
 import { LibraryElement, Hint } from './library';
+import { TextArea } from './TextArea';
+import { ButtonIcon } from './ButtonIcon';
 import { validateComponent } from '../design-system';
 import { assetUrl } from '../runtime';
 const t = <K extends keyof typeof tokens>(key: K): typeof tokens[K]['value'] => tokens[key].value;
@@ -49,7 +51,9 @@ function Checkbox({ element, onChange }: { element: E<'checkbox'>; onChange?: (e
 function Element({ element, onChange, onRemove }: { element: RenderElement; onChange?: (e: ScreenElement) => void; onRemove?:()=>void }) {
   switch (element.component) {
     case 'button': return <Button element={element} />;
+    case 'button-icon': return <ButtonIcon label={element.editorProps.labelText} state={element.variantProps.state} figmaNode={sourceNode(element)!} />;
     case 'input': return <Input element={element} />;
+    case 'textarea': return <TextArea element={element} onChange={onChange} />;
     case 'checkbox': return <Checkbox element={element} onChange={onChange} />;
     default: return <LibraryElement element={element} onRemove={onRemove} onChange={updated => { const result=validateComponent(updated); if(result.valid) onChange?.(result.value); }} />;
   }
@@ -57,5 +61,5 @@ function Element({ element, onChange, onRemove }: { element: RenderElement; onCh
 export function DSRenderer({ screen, onSelect, onChange, onRemove }: { screen: unknown; onSelect?: (id: string) => void; onChange?: (e: ScreenElement) => void; onRemove?: (id: string)=>void }) {
   const result = prepareRender(screen);
   if (!result.valid) return <section className="renderer-errors" role="alert" data-renderer-valid="false"><strong>Строгий DS Renderer: отображение заблокировано</strong><ul>{result.errors.map((error, i) => <li key={i}><code>{error.code} {error.path}</code> — {error.message}</li>)}</ul><p>Исправьте документ или вернитесь в редакторский предпросмотр. Неподтверждённые элементы не подменяются.</p></section>;
-  return <div className="wdeaf-renderer" data-renderer-valid="true" data-renderer-theme="figma" style={{ fontFamily: font, color: t('text/default/body'), background: t('surface/on-color/default'), colorScheme: 'light' }}>{result.value.elements.map(element => <div className="wdr-host-slot" key={element.id} onClick={() => onSelect?.(element.id)}><Element key={JSON.stringify({...element,interactionState:undefined})} element={element} onChange={onChange} onRemove={onRemove ? ()=>onRemove(element.id) : undefined} /></div>)}</div>;
+  return <div className="wdeaf-renderer" data-renderer-valid="true" data-renderer-theme="figma" style={{ fontFamily: font, color: t('text/default/body'), background: t('surface/on-color/default'), colorScheme: 'light' }}>{result.value.elements.map(element => <div className="wdr-host-slot" key={element.id} onClick={() => onSelect?.(element.id)}><Element key={element.component === 'textarea' ? element.component : JSON.stringify({...element,interactionState:undefined})} element={element} onChange={onChange} onRemove={onRemove ? ()=>onRemove(element.id) : undefined} /></div>)}</div>;
 }

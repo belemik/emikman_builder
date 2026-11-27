@@ -1,4 +1,14 @@
 {
+  "button-icon": [
+    { "nodeId": "109:7632", "props": { "size": "m", "variant": "secondary", "colorScheme": "neutral", "state": "default" }, "width": 35, "height": 35 },
+    { "nodeId": "109:7644", "props": { "size": "m", "variant": "secondary", "colorScheme": "neutral", "state": "hover" }, "width": 35, "height": 35 },
+    { "nodeId": "109:7659", "props": { "size": "m", "variant": "secondary", "colorScheme": "neutral", "state": "pressed" }, "width": 35, "height": 35 },
+    { "nodeId": "109:7736", "props": { "size": "m", "variant": "secondary", "colorScheme": "neutral", "state": "disabled" }, "width": 35, "height": 35 }
+  ],
+  "textarea": [
+    { "nodeId": "189:16397", "props": { "size": "m", "state": "default", "placeholder": true, "label": true, "hint": true }, "width": 280, "height": 116 },
+    { "nodeId": "189:16725", "props": { "size": "m", "state": "error", "placeholder": true, "label": true, "hint": true }, "width": 280, "height": 116 }
+  ],
   "tag-item": [
     {
       "nodeId": "195:1080",

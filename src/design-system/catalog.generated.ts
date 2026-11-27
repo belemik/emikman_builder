@@ -2,6 +2,195 @@
 function freeze<T>(value: T): T { if (value && typeof value === "object") { for (const child of Object.values(value)) freeze(child); Object.freeze(value); } return value; }
 export const catalog = freeze([
   {
+    "id": "button-icon",
+    "label": "ButtonIcon",
+    "figma": {
+      "componentSetNodeId": "109:7542",
+      "exampleComponentNodeId": "109:7632",
+      "fileKey": "wiJYO9bWctpEiq2STFkNYU"
+    },
+    "variantProps": {
+      "size": {
+        "type": "enum",
+        "values": [
+          "m"
+        ],
+        "default": "m"
+      },
+      "variant": {
+        "type": "enum",
+        "values": [
+          "secondary"
+        ],
+        "default": "secondary"
+      },
+      "colorScheme": {
+        "type": "enum",
+        "values": [
+          "neutral"
+        ],
+        "default": "neutral"
+      },
+      "state": {
+        "type": "enum",
+        "values": [
+          "default",
+          "hover",
+          "pressed",
+          "disabled"
+        ],
+        "default": "default"
+      }
+    },
+    "editorProps": {
+      "icon": {
+        "type": "enum",
+        "values": [
+          "dots-vertical"
+        ],
+        "default": "dots-vertical"
+      },
+      "labelText": {
+        "type": "text",
+        "default": "Дополнительные действия",
+        "note": "Доступное название кнопки."
+      }
+    },
+    "verifiedVariants": [
+      {
+        "nodeId": "109:7632",
+        "props": {
+          "size": "m",
+          "variant": "secondary",
+          "colorScheme": "neutral",
+          "state": "default"
+        },
+        "width": 35,
+        "height": 35
+      },
+      {
+        "nodeId": "109:7644",
+        "props": {
+          "size": "m",
+          "variant": "secondary",
+          "colorScheme": "neutral",
+          "state": "hover"
+        },
+        "width": 35,
+        "height": 35
+      },
+      {
+        "nodeId": "109:7659",
+        "props": {
+          "size": "m",
+          "variant": "secondary",
+          "colorScheme": "neutral",
+          "state": "pressed"
+        },
+        "width": 35,
+        "height": 35
+      },
+      {
+        "nodeId": "109:7736",
+        "props": {
+          "size": "m",
+          "variant": "secondary",
+          "colorScheme": "neutral",
+          "state": "disabled"
+        },
+        "width": 35,
+        "height": 35
+      }
+    ]
+  },
+  {
+    "id": "textarea",
+    "label": "TextArea",
+    "figma": {
+      "componentSetNodeId": "189:15908",
+      "exampleComponentNodeId": "189:16397",
+      "fileKey": "wiJYO9bWctpEiq2STFkNYU"
+    },
+    "variantProps": {
+      "size": {
+        "type": "enum",
+        "values": [
+          "m"
+        ],
+        "default": "m"
+      },
+      "state": {
+        "type": "enum",
+        "values": [
+          "default",
+          "error"
+        ],
+        "default": "default"
+      },
+      "placeholder": {
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "type": "boolean",
+        "default": true
+      },
+      "hint": {
+        "type": "boolean",
+        "default": true
+      }
+    },
+    "editorProps": {
+      "labelText": {
+        "type": "text",
+        "default": "Описание"
+      },
+      "placeholderText": {
+        "type": "text",
+        "default": "Введите текст"
+      },
+      "hintText": {
+        "type": "text",
+        "default": "Добавьте подробности"
+      },
+      "errorText": {
+        "type": "text",
+        "default": "Проверьте введённый текст."
+      },
+      "value": {
+        "type": "text",
+        "default": "",
+        "note": "Многострочное содержимое документа лаборатории."
+      }
+    },
+    "verifiedVariants": [
+      {
+        "nodeId": "189:16397",
+        "props": {
+          "size": "m",
+          "state": "default",
+          "placeholder": true,
+          "label": true,
+          "hint": true
+        },
+        "width": 280,
+        "height": 116
+      },
+      {
+        "nodeId": "189:16725",
+        "props": {
+          "size": "m",
+          "state": "error",
+          "placeholder": true,
+          "label": true,
+          "hint": true
+        },
+        "width": 280,
+        "height": 116
+      }
+    ]
+  },
+  {
     "id": "tag-item",
     "label": "TagItem",
     "figma": {

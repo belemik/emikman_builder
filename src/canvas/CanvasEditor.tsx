@@ -37,10 +37,11 @@ export function CanvasEditor({
     setDocument(current => ({ ...current, elements: current.elements.map(item => item.id === updated.id ? updated : item) }));
   const validation = project && strict ? prepareRender(screen) : null;
   const validationMessage = validation?.valid ? 'Документ прошёл строгую проверку.' : 'Документ содержит ошибки. Проверьте диагностику на холсте.';
+  const entries = registry.filter(entry => !entry.internal && (!project || !['textarea', 'button-icon'].includes(entry.id)));
   return (
     <main className={project ? "workspace project-canvas" : "workspace"}>
-      <aside className="catalog panel"><div className="panel-heading"><h2>Компоненты</h2><span className="count">{registry.filter(entry=>!entry.internal).length}</span></div><p className="muted">Из библиотеки WDeaf PRO 2.0</p>
-        <div className="catalog-list">{registry.filter(entry=>!entry.internal).map(entry => <button className="catalog-card" key={entry.id} disabled={document.elements.length >= 500} onClick={() => { const element = createElement(entry.id); setDocument(current => ({ ...current, elements: [...current.elements, element] })); setSelected(element.id); }}>
+      <aside className="catalog panel"><div className="panel-heading"><h2>Компоненты</h2><span className="count">{entries.length}</span></div><p className="muted">Из библиотеки WDeaf PRO 2.0</p>
+        <div className="catalog-list">{entries.map(entry => <button className="catalog-card" key={entry.id} disabled={document.elements.length >= 500} onClick={() => { const element = createElement(entry.id); setDocument(current => ({ ...current, elements: [...current.elements, element] })); setSelected(element.id); }}>
           <span className="catalog-sample" aria-hidden="true"><CatalogSample component={entry.id} /></span>
           <span className="catalog-label"><strong>{entry.label}</strong><Icon name="plus" /></span><small>Добавить на холст</small>
         </button>)}</div>

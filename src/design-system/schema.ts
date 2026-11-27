@@ -6,10 +6,12 @@ export type TokenName = keyof typeof tokens;
 export type TokenType = typeof tokens[TokenName]['type'];
 type Value<P> = P extends { type: 'enum'; values: readonly (infer V)[] } ? V : P extends { type: 'boolean' } ? boolean : string;
 type Props<P> = keyof P extends never ? Record<string, never> : { -readonly [K in keyof P]: Value<P[K]> };
+type PinnedVariants = { [C in 'textarea' | 'button-icon']: Extract<CatalogEntry, { id: C }>['verifiedVariants'][number]['props'] };
 export type ScreenElement = { [C in ComponentId]: {
   id: string;
   component: C;
-  variantProps: Props<Extract<CatalogEntry, { id: C }>['variantProps']>;
+  variantProps: C extends keyof PinnedVariants ? PinnedVariants[C]
+    : Props<Extract<CatalogEntry, { id: C }>['variantProps']>;
   slots?: C extends 'input' ? { hint?: Extract<ScreenElement, {component:'hint'}>[]; label?: Extract<ScreenElement, {component:'field-label'}>[] }
     : C extends 'tag-group' ? { tags?: Extract<ScreenElement, {component:'tag-item'}>[] }
     : C extends 'items-list' ? { items?: Extract<ScreenElement, {component:'dropdown-item'}>[] }
